@@ -5,9 +5,19 @@
 const DATA_FILE = 'data/du-lieu.json';
 importScripts('page-setter.js'); // định nghĩa vbdlisPageSetter, vbdlisFireSelect2 (chạy trong trang)
 
+// Đọc file dữ liệu TB trong thư mục data của tiện ích (đọc thẳng từ đĩa – sửa file là lần mở bảng sau thấy ngay)
+async function loadDataText() {
+  let res;
+  try {
+    res = await fetch(chrome.runtime.getURL(DATA_FILE));
+  } catch (e) {
+    throw new Error(`không đọc được file ${DATA_FILE} (${e.message}) – kiểm tra file còn trong thư mục data của tiện ích rồi bấm ⟳ tiện ích`);
+  }
+  if (!res.ok) throw new Error(`không đọc được file ${DATA_FILE} (mã ${res.status}) – file có còn trong thư mục data không?`);
+  return (await res.text()).replace(/^\uFEFF/, ''); // bỏ BOM (file lưu từ Notepad / Excel)
+}
 async function loadSample() {
-  const res = await fetch(chrome.runtime.getURL(DATA_FILE) + '?t=' + Date.now(), { cache: 'no-store' });
-  return res.json();
+  return JSON.parse(await loadDataText());
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -114,7 +124,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     try {
       if (msg.type === 'vbdlis-sample') {
-        sendResponse({ ok: true, data: await loadSample() });
+        // gửi nguyên chữ của file: bảng điền tự đọc JSON (tự sửa lỗi nhỏ, báo rõ dòng sai)
+        sendResponse({ ok: true, text: await loadDataText() });
         return;
       }
       if (msg.type === 'vbdlis-fill' || msg.type === 'vbdlis-scan' || msg.type === 'vbdlis-act') {

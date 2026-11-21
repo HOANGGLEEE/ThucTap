@@ -17,7 +17,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.9.0'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.9.1'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   const old = document.getElementById(HOST_ID);
   if (old) {
     // Bảng đang mở cùng phiên bản và còn kết nối → bấm biểu tượng là ẩn/hiện; ngược lại thay bảng mới
@@ -1123,8 +1123,75 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
 
   // ---------- dữ liệu ----------
   // Đọc JSON dán vào; diện tích kiểu PDF "56,5" được đổi sang "56.5"
+  // JSON dán tay / sửa tay hay có lỗi nhỏ → tự sửa các lỗi thường gặp; vẫn sai thì chỉ rõ dòng, cột
+  function explainJsonError(e, src) {
+    const m = String((e && e.message) || e);
+    let line = 0;
+    let col = 0;
+    let mm = /line (\d+) column (\d+)/.exec(m);
+    if (mm) {
+      line = +mm[1];
+      col = +mm[2];
+    } else if ((mm = /position (\d+)/.exec(m))) {
+      const before = src.slice(0, +mm[1]);
+      line = before.split('\n').length;
+      col = before.length - before.lastIndexOf('\n');
+    } else if ((mm = /\.\.\."([\s\S]+?)"\.\.\./.exec(m) || /"([\s\S]{1,80}?)" is not valid JSON/.exec(m))) {
+      // Chrome chỉ trích một đoạn quanh chỗ sai (vd. …"ienNhan": KH 2959.07"…) → tìm đoạn đó trong dữ liệu
+      const k = src.indexOf(mm[1]);
+      if (k >= 0) {
+        const tok = /Unexpected token '(.)'/.exec(m);
+        const off = tok ? Math.max(0, mm[1].indexOf(tok[1])) : 0;
+        const before = src.slice(0, k + off);
+        line = before.split('\n').length;
+        col = before.length - before.lastIndexOf('\n');
+      }
+    } else if (/end of JSON input/i.test(m)) {
+      line = src.split('\n').length;
+      col = (src.split('\n').pop() || '').length;
+      return `JSON bị cụt ở cuối (dòng ${line}) – thiếu ngoặc đóng } hoặc ] (có thể chưa sao chép hết). Dán lại đủ nội dung rồi bấm lại.`;
+    }
+    if (!line) return 'JSON sai: ' + m;
+    const lines = src.split('\n');
+    const show = (n) => (lines[n - 1] || '').replace(/\s+/g, ' ').trim().slice(0, 90);
+    return (
+      `JSON sai ở dòng ${line}, cột ${col}: «${show(line)}»` +
+      (line > 1 ? ` (dòng trước: «${show(line - 1)}»)` : '') +
+      ' – thường do thiếu dấu phẩy cuối dòng trước, thiếu dấu ngoặc kép " hoặc thiếu ngoặc } ]. Sửa chỗ đó rồi bấm lại, hoặc kéo thả file .json do Claude gửi.'
+    );
+  }
+  function parseJsonLoose(txt) {
+    const src = String(txt ?? '').replace(/^\uFEFF/, '').trim();
+    if (!src) throw new Error('Chưa có dữ liệu.');
+    try {
+      return { j: JSON.parse(src), fixes: [] };
+    } catch (e0) {
+      const fixes = [];
+      let t = src;
+      const fix = (re, to, what) => {
+        const n = (t.match(re) || []).length;
+        if (n) {
+          t = t.replace(re, to);
+          fixes.push(`${what} (${n} chỗ)`);
+        }
+      };
+      fix(/,(\s*[}\]])/g, '$1', 'bỏ dấu phẩy thừa trước } ]');
+      fix(/("\s*:\s*)(\d+),(\d{1,3})(?=\s*[,}\r\n])/g, '$1"$2.$3"', 'số thập phân viết dấu phẩy 56,5 → "56.5"');
+      fix(/("|\d|true|false|null|[}\]])([ \t]*\r?\n\s*)(?=["{\[])/g, '$1,$2', 'thêm dấu phẩy còn thiếu cuối dòng');
+      try {
+        return { j: JSON.parse(t), fixes };
+      } catch (e1) {}
+      fix(/[“”„‟]/g, '"', 'đổi ngoặc kép kiểu Word “ ” thành "');
+      try {
+        return { j: JSON.parse(t), fixes };
+      } catch (e2) {
+        throw new Error(explainJsonError(e0, src));
+      }
+    }
+  }
   function parseData(txt) {
-    let j = JSON.parse(txt);
+    const pj = parseJsonLoose(txt);
+    let j = pj.j;
     if (!Array.isArray(j)) j = Array.isArray(j.tb) ? j.tb : Array.isArray(j.data) ? j.data : [j];
     let fixed = 0;
     const bad = [];
@@ -1144,6 +1211,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     });
     j.fixed = fixed;
     j.bad = bad;
+    j.autofix = pj.fixes;
     return j;
   }
   function adoptData(nv) {
@@ -1226,6 +1294,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
       text:
         `Đã nạp ${items.length} TB (${items.map((x) => x.tb).join(', ')}). Tổng cộng ${S.data.length} TB.` +
         (fixed ? ` Đã đổi ${fixed} diện tích từ dấu phẩy sang dấu chấm (56,5 → 56.5).` : '') +
+        (items.autofix && items.autofix.length ? ` Đã tự sửa JSON: ${items.autofix.join('; ')}.` : '') +
         (items.bad.length ? ` ⚠ Diện tích cần sửa: ${items.bad.join('; ')}` : ''),
       bad: items.bad.length > 0,
     };
@@ -1246,6 +1315,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         });
         all.fixed = (all.fixed || 0) + items.fixed;
         all.bad = (all.bad || []).concat(items.bad);
+        all.autofix = (all.autofix || []).concat(items.autofix.map((x) => `${f.name}: ${x}`));
       } catch (e) {
         errs.push(`${f.name}: ${e.message}`);
       }
@@ -1253,6 +1323,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     if (!all.length) return { text: 'Không đọc được file: ' + errs.join('; '), bad: true };
     all.fixed = all.fixed || 0;
     all.bad = all.bad || [];
+    all.autofix = all.autofix || [];
     const r = await applyItems(all, false);
     return { text: `${r.text} (từ ${list.length - errs.length} file)` + (errs.length ? ` ✗ Lỗi: ${errs.join('; ')}` : ''), bad: r.bad || errs.length > 0 };
   }
@@ -1261,12 +1332,13 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
   // TB bạn đã sửa trong bảng được giữ nguyên, TB bạn đã xóa không tự thêm lại
   async function syncFromFolder() {
     const s = await send({ type: 'vbdlis-sample' });
-    if (!s || !s.ok || !Array.isArray(s.data)) return null;
+    if (!s) return null;
+    if (!s.ok) return { err: 'Thư mục data: ' + friendly(s.error || 'không đọc được file data/du-lieu.json') };
     let file;
     try {
-      file = parseData(JSON.stringify(s.data));
+      file = parseData(s.text != null ? s.text : JSON.stringify(s.data));
     } catch (e) {
-      return { err: 'file data/du-lieu.json bị lỗi: ' + e.message };
+      return { err: 'File data/du-lieu.json bị lỗi – ' + e.message };
     }
     const st = await store.get(['tbData', 'tbFile', 'tbDeleted']);
     const first = st.tbData === undefined;
@@ -1318,7 +1390,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
       <textarea id="dlgTxt" spellcheck="false"></textarea>
       <div class="row"><button class="btn pri" id="dlgMerge">Gộp vào</button><button class="btn" id="dlgReplace">Thay toàn bộ</button><button class="btn" id="dlgCopy">Sao chép hiện có</button><button class="btn" id="dlgOpen" title="Chọn file .json dữ liệu TB (chọn được nhiều file)">Mở file…</button><button class="btn" id="dlgSample" title="Đưa nội dung file data/du-lieu.json của tiện ích vào ô để Gộp vào / Thay toàn bộ">Lấy từ thư mục data</button><button class="btn" id="dlgRec" title="Xuất lại file của lần ghi thao tác gần nhất">Xuất bản ghi</button><span class="sp"></span><button class="btn" id="dlgClose2">Đóng</button></div>
       <div class="row"><span class="muted">Xóa:</span><button class="btn del" id="dlgDelOne" title="Xóa TB đang chọn ở ô trên cùng của bảng điền">TB đang chọn</button><button class="btn del" id="dlgDelAll" title="Xóa mọi TB trong tiện ích">Tất cả TB</button><button class="btn del" id="dlgDelRec" title="Xóa bản ghi thao tác đã ghi">Bản ghi thao tác</button></div>
-      <div class="hint">Xóa chỉ xóa dữ liệu trong tiện ích (trên máy này), không đụng gì trên VBDLIS. Muốn có lại: dán JSON rồi “Gộp vào”, hoặc “Nạp mẫu”.</div>
+      <div class="hint">Xóa chỉ xóa dữ liệu trong tiện ích (trên máy này), không đụng gì trên VBDLIS. Muốn có lại: dán JSON rồi “Gộp vào”, hoặc “Lấy từ thư mục data” rồi “Gộp vào”.</div>
       <div id="dlgMsg" class="hint"></div>`;
     d.style.top = ($('.hd').offsetHeight || 37) + 'px'; // không che thanh tiêu đề (nút –, × vẫn bấm được)
     pn.classList.add('dlgopen');
@@ -1414,9 +1486,17 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
           msg('Đã xóa bản ghi thao tác.');
         } else if (id === 'dlgSample') {
           const r = await send({ type: 'vbdlis-sample' });
-          if (!r || !r.ok) return msg((r && r.error) || 'Không nạp được dữ liệu mẫu.', true);
-          d.querySelector('#dlgTxt').value = JSON.stringify(r.data, null, 2);
-          msg(`Đã đưa ${r.data.length} TB của file data/du-lieu.json vào ô. Bấm “Gộp vào” (hoặc “Thay toàn bộ”).`);
+          if (!r || !r.ok) return msg('Thư mục data: ' + friendly((r && r.error) || 'không đọc được file data/du-lieu.json'), true);
+          const raw = r.text != null ? r.text : JSON.stringify(r.data);
+          let items;
+          try {
+            items = parseData(raw);
+          } catch (e) {
+            d.querySelector('#dlgTxt').value = raw; // để bạn thấy chỗ sai
+            return msg('File data/du-lieu.json bị lỗi – ' + e.message, true);
+          }
+          d.querySelector('#dlgTxt').value = JSON.stringify(items, null, 2);
+          msg(`Đã đưa ${items.length} TB của file data/du-lieu.json vào ô. Bấm “Gộp vào” (hoặc “Thay toàn bộ”).`);
         }
       } catch (err) {
         msg('Lỗi: ' + friendly(err), true);

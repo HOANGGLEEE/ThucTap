@@ -3,7 +3,7 @@
 // Không bao giờ bấm nút Lưu. Chỉ bấm nút MỞ cửa sổ nhập: "+ Thêm thửa đất" (màn hình tiếp nhận) và
 // "Thêm → Cá nhân" / "Thêm → Thửa đất" (cửa sổ Nhập đơn đăng ký).
 (() => {
-  const VERSION = 14;
+  const VERSION = 15;
   if (window.__vbdlis && window.__vbdlis.v === VERSION) return;
   const TOKEN = Math.random().toString(36).slice(2, 8); // đánh dấu riêng cho lần nạp này (tránh nhầm dấu cũ)
   let lastFill = null; // kết quả lần điền gần nhất (cho bước kiểm tra lại)
@@ -65,7 +65,6 @@
         { key: 'namSinh', name: 'Năm sinh', labels: ['Năm sinh'], kind: 'text', force: true },
         { key: 'gioiTinhNam', name: 'Giới tính (ô Nam)', labels: ['Giới tính'], kind: 'checkbox', checkText: 'nam' },
         { key: 'soGiayTo', name: 'Số giấy tờ', labels: ['Số giấy tờ'], kind: 'text' },
-        { key: 'ngayHetHan', name: 'Ngày hết hạn', labels: ['Ngày hết hạn'], kind: 'text', force: true, widget: true },
         { key: 'noiCap', name: 'Nơi cấp', labels: ['Nơi cấp'], kind: 'any', exact: true },
         { key: 'diaChi', name: 'Địa chỉ chi tiết', labels: ['Địa chỉ chi tiết', 'Địa chỉ'], kind: 'text' },
       ],

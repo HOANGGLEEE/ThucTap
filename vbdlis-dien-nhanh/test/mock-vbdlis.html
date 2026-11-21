@@ -445,7 +445,7 @@
       getURL: (p) => '../' + p,
       sendMessage: async (msg) => {
         if (msg.type === 'vbdlis-rec-inject') return { ok: true };
-        if (msg.type === 'vbdlis-sample') return { ok: true, data: await (await fetch('../data/du-lieu.json')).json() };
+        if (msg.type === 'vbdlis-sample') return { ok: true, data: window.__sampleOverride ? JSON.parse(JSON.stringify(window.__sampleOverride)) : await (await fetch('../data/du-lieu.json?t=' + Date.now(), { cache: 'no-store' })).json() };
         if (msg.type === 'vbdlis-select2') {
           const m = await window.__vbdlis.run({ type: 'vbdlis-act', action: 'markSelect', label: msg.label });
           return { ok: true, frames: [m && m.ok ? window.vbdlisFireSelect2(m.id) : { ok: false }] };

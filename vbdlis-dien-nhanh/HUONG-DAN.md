@@ -48,7 +48,7 @@ Chủ / thửa đã có trong đơn thì được bỏ qua (chạy lại không 
 1. Mở cửa sổ **Nhập đơn đăng ký**, chọn đúng TB trong bảng điền.
 2. Tab **Chủ SD** → bấm **“Điền chủ 1 (tự bấm “Thêm → Cá nhân”)”**. Tiện ích:
    - chọn **Điều kiện cấp giấy** = “Chưa đủ điều kiện cấp giấy” và tích **Đăng ký lần đầu** (đổi được ở ô đầu tab Chủ SD; chọn “(không đổi)” để tiện ích không đụng vào);
-   - tự bấm **Thêm → Cá nhân** rồi điền Họ tên, Năm sinh, Giới tính, Dân tộc, Quốc tịch, Loại giấy tờ, Số giấy tờ, Ngày hết hạn (nếu có), Nơi cấp, Địa chỉ chi tiết. **Không điền Ngày cấp.**
+   - tự bấm **Thêm → Cá nhân** rồi điền Họ tên, Năm sinh, Giới tính, Dân tộc, Quốc tịch, Loại giấy tờ, Số giấy tờ, Nơi cấp, Địa chỉ chi tiết. **Không điền Ngày cấp, Ngày hết hạn.**
    Bạn kiểm tra rồi tự bấm **Lưu** (trang hỏi “Giấy tờ tùy thân đã tồn tại…” thì bạn tự chọn).
 3. Tab **Thửa đất** → bấm **Điền** từng thửa: tiện ích tự bấm **Thêm → Thửa đất** rồi điền Số thửa, Số tờ, Diện tích (cả 3 ô), Diện tích PL, MĐSD, Nguồn gốc, Thời hạn SD 50 năm, Địa chỉ chi tiết. Bạn kiểm tra rồi tự bấm **Lưu**, rồi Điền thửa tiếp theo.
 4. Chủ / thửa **đã có trong đơn** (đã hiện ở cây Chủ sử dụng / Thửa đất) thì bấm Điền lần nữa tiện ích chỉ báo “đã có trong đơn”, **không thêm trùng**.
@@ -76,7 +76,7 @@ Nếu bạn vừa tải lại / cập nhật tiện ích khi đang ghi, góc dư
 | Tab | Mở gì trên VBDLIS trước | Điền những ô |
 |---|---|---|
 | Biên nhận | Không mở cửa sổ con nào | Số biên nhận, Người nộp hồ sơ, Số giấy tờ, Địa chỉ |
-| Chủ SD | Cửa sổ “Nhập đơn đăng ký” (tiện ích tự bấm “Thêm → Cá nhân”) hoặc cửa sổ “Thông tin cá nhân” | Họ tên, Năm sinh (không điền Ngày sinh, Ngày cấp), Giới tính, Dân tộc, Quốc tịch, Loại giấy tờ, Số giấy tờ, Ngày hết hạn, Nơi cấp, Địa chỉ chi tiết |
+| Chủ SD | Cửa sổ “Nhập đơn đăng ký” (tiện ích tự bấm “Thêm → Cá nhân”) hoặc cửa sổ “Thông tin cá nhân” | Họ tên, Năm sinh (không điền Ngày sinh, Ngày cấp, Ngày hết hạn), Giới tính, Dân tộc, Quốc tịch, Loại giấy tờ, Số giấy tờ, Nơi cấp, Địa chỉ chi tiết |
 | Thửa đất | Màn hình tiếp nhận (tự bấm “+ Thêm thửa đất”), cửa sổ “Nhập đơn đăng ký” (tự bấm “Thêm → Thửa đất”) hoặc cửa sổ thửa đất đang mở | Số thửa, Số tờ, Diện tích, Địa chỉ; ở cửa sổ đầy đủ thêm MĐSD, Nguồn gốc, Thời hạn SD |
 | Giấy tờ | Cửa sổ “Thông tin hồ sơ quét” | Loại giấy tờ, Mô tả, Tên giấy tờ |
 
@@ -89,7 +89,7 @@ Có thể sửa trực tiếp giá trị trong bảng trước khi bấm Điền
 
 **Giấy tờ** mặc định có 2 loại: “Đơn đăng ký” và “Thông báo xác nhận kết quả đăng ký” (đúng 2 file quét DDK và TBXN).
 
-Ô ngày (Ngày hết hạn), ô số (Năm sinh, Số thửa, Số tờ) và ô diện tích (“56.5 m²”) được điền **một lần** qua lịch chọn ngày / mặt nạ nhập / ô định dạng số của chính trang VBDLIS, nên trang nhận đúng giá trị (không còn cảnh hiện “2” rồi mới thành “22”).
+Ô số (Năm sinh, Số thửa, Số tờ) và ô diện tích (“56.5 m²”) được điền **một lần** qua mặt nạ nhập / ô định dạng số của chính trang VBDLIS, nên trang nhận đúng giá trị (không còn cảnh hiện “2” rồi mới thành “22”).
 
 **Không tự điền:** Tổ dân phố/Đường (ô chọn có tìm kiếm), Nguồn gốc. Những ô này bạn chọn tay như cũ.
 
@@ -97,7 +97,9 @@ Có thể sửa trực tiếp giá trị trong bảng trước khi bấm Điền
 Mở đúng màn hình hoặc cửa sổ đó rồi bấm **Quét trường**. Bảng sẽ liệt kê “nhãn → ô nhập” mà tiện ích nhìn thấy. Bấm **Sao chép kết quả** và gửi lại cho Claude để chỉnh cho khớp với trang thật.
 
 ## Thêm dữ liệu TB mới
-Bấm **Dữ liệu**, dán JSON vào, rồi bấm **Gộp vào**. TB trùng số sẽ được thay, các TB khác giữ nguyên. Đóng hộp này bằng nút **✕ Đóng** ở góc trên (hoặc phím Esc). Cách nhanh nhất là gửi thư mục scan cho Claude và nhờ “xuất JSON cho tiện ích VBDLIS”. Mẫu một TB:
+**Cách 1 – thư mục `data`:** tiện ích tự đọc file **`data/du-lieu.json`** mỗi lần mở bảng (Alt+Q): TB mới được thêm, TB bạn chưa sửa được cập nhật, TB bạn đã sửa trong bảng được giữ nguyên, TB bạn đã xóa không tự thêm lại. Khi nhờ Claude làm dữ liệu TB mới, file này luôn được cập nhật kèm theo.
+**Cách 2 – file .json lẻ** (vd `tb-1896.json`): **kéo thả file vào bảng điền**, hoặc bấm **Dữ liệu → Mở file…** (chọn được nhiều file). Lưu ý: trình duyệt không cho tiện ích tự xem các file lẻ trong thư mục `data`, nên file lẻ phải kéo thả / Mở file (hoặc gộp vào `du-lieu.json`).
+**Cách 3 – dán:** bấm **Dữ liệu**, dán JSON vào, rồi bấm **Gộp vào**. TB trùng số sẽ được thay, các TB khác giữ nguyên. Đóng hộp này bằng nút **✕ Đóng** ở góc trên (hoặc phím Esc). Cách nhanh nhất là gửi thư mục scan cho Claude và nhờ “xuất JSON cho tiện ích VBDLIS”. Mẫu một TB:
 
 ```json
 {
@@ -118,6 +120,9 @@ Bấm **Dữ liệu**, dán JSON vào, rồi bấm **Gộp vào**. TB trùng s�
 ```
 
 Dữ liệu TB 1810–1817 đã có sẵn trong `data/du-lieu.json` và được nạp khi cài.
+
+## Phóng to / thu nhỏ bảng điền
+Kéo **góc dưới bên trái (◣)** hoặc **góc dưới bên phải (◢)** của bảng để đổi chiều rộng, chiều cao. Kéo thanh tiêu đề để di chuyển. Tiện ích nhớ cỡ và vị trí cho lần mở sau. Bấm đúp vào góc để về cỡ mặc định.
 
 ## Xóa dữ liệu
 Bấm **Dữ liệu** → hàng **Xóa:**

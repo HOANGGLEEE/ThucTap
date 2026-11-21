@@ -6,7 +6,7 @@ const DATA_FILE = 'data/du-lieu.json';
 importScripts('page-setter.js'); // định nghĩa vbdlisPageSetter, vbdlisFireSelect2 (chạy trong trang)
 
 async function loadSample() {
-  const res = await fetch(chrome.runtime.getURL(DATA_FILE));
+  const res = await fetch(chrome.runtime.getURL(DATA_FILE) + '?t=' + Date.now(), { cache: 'no-store' });
   return res.json();
 }
 

@@ -17,7 +17,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.8.1'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.9.0'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   const old = document.getElementById(HOST_ID);
   if (old) {
     // Bảng đang mở cùng phiên bản và còn kết nối → bấm biểu tượng là ẩn/hiện; ngược lại thay bảng mới
@@ -111,7 +111,7 @@
   const CSS = `
 :host{all:initial}
 *{box-sizing:border-box;font-family:"Segoe UI",system-ui,Arial,sans-serif}
-.pn{position:relative;width:420px;max-height:calc(100vh - 90px);display:flex;flex-direction:column;background:#fff;color:#1f2937;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.28);font-size:12.5px;line-height:1.35;overflow:hidden}
+.pn{position:relative;width:var(--w,420px);height:var(--h,auto);max-height:var(--mh,calc(100vh - 90px));display:flex;flex-direction:column;background:#fff;color:#1f2937;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.28);font-size:12.5px;line-height:1.35;overflow:hidden}
 .hd{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#0f766e;color:#fff;cursor:move;user-select:none}
 .hd b{font-size:13px;flex:1}
 .hd button{background:rgba(255,255,255,.18);border:0;color:#fff;width:24px;height:22px;border-radius:5px;cursor:pointer;font-size:14px;line-height:1}
@@ -119,7 +119,7 @@
 .hd button:disabled{opacity:.5;cursor:wait}.hd button#rec{color:#fecaca}.hd button#rec.on{background:#dc2626;color:#fff;animation:blink 1s infinite}@keyframes blink{50%{opacity:.45}}
 .bd{padding:8px 10px;overflow:auto;flex:1}
 .pn.min .bd{display:none}
-.pn.min{width:220px}
+.pn.min{width:220px !important;height:auto !important}
 .row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
 .sp{flex:1}
 select,input{font:inherit;border:1px solid #cbd5e1;border-radius:6px;padding:4px 6px;background:#fff;color:#111827;min-width:0;width:100%}
@@ -163,6 +163,10 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
 .dlg .row{flex-wrap:wrap}
 .dh{display:flex;align-items:center;gap:6px}.dh b{font-size:13px}
 .btn.x{color:#b91c1c;border-color:#fecaca;background:#fff5f5;font-weight:600}
+.rz{position:absolute;bottom:0;width:18px;height:18px;z-index:5;color:#94a3b8;font-size:13px;line-height:18px;text-align:center;user-select:none}
+.rz:hover{color:#0f766e}.rz.l{left:0;cursor:nesw-resize}.rz.r{right:0;cursor:nwse-resize}
+.pn.min .rz{display:none}
+.pn.drop{outline:3px dashed #0f766e;outline-offset:-3px}
 .btn.del{color:#b91c1c;border-color:#fecaca}.btn.del:hover{background:#fff1f2}
 .pn.dlgopen{min-height:min(460px,calc(100vh - 90px))}
 .pn.min .dlg{display:none}.pn.min.dlgopen{min-height:0}
@@ -192,6 +196,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
   </div>
   <div id="status" class="status"></div>
   <div id="result" class="result"></div>
+  <div class="rz l" title="Kéo để phóng to / thu nhỏ bảng (bấm đúp: về cỡ mặc định)">◣</div><div class="rz r" title="Kéo để phóng to / thu nhỏ bảng (bấm đúp: về cỡ mặc định)">◢</div>
 </div>`;
   const $ = (s) => root.querySelector(s);
   const pn = $('.pn');
@@ -246,7 +251,6 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         ${fld('Năm sinh', `chu.${i}.namSinh`, tb)}
         ${fld('Giới tính', `chu.${i}.gioiTinh`, tb, { options: ['Nam', 'Nữ'] })}
         ${fld('Số CCCD', `chu.${i}.soGiayTo`, tb)}
-        ${fld('Ngày hết hạn', `chu.${i}.ngayHetHan`, tb, { ph: 'trống = không thời hạn' })}
         ${fld('Nơi cấp', `chu.${i}.noiCap`, tb)}
         ${fld('Địa chỉ', `chu.${i}.diaChi`, tb)}
         <button class="btn pri full" data-fill="chu" data-i="${i}">Điền chủ ${i + 1} (tự bấm “Thêm → Cá nhân”)</button>
@@ -382,8 +386,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         quocTich: p.quocTich || 'Việt Nam',
         loaiGiayTo: p.loaiGiayTo || 'Căn cước công dân',
         soGiayTo: p.soGiayTo,
-        // Ngày cấp: không điền (không cần)
-        ngayHetHan: p.ngayHetHan,
+        // Ngày cấp, Ngày hết hạn: không điền (không cần)
         noiCap: p.noiCap,
         diaChi: p.diaChi,
       };
@@ -1182,10 +1185,123 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
       const next = S.data[Math.min(Math.max(k0, 0), S.data.length - 1)];
       S.cur = next ? next.tb : null;
     }
-    await store.set({ tbData: S.data });
+    const del = (await store.get('tbDeleted')).tbDeleted || {};
+    gone.forEach((id) => (del[id] = Date.now()));
+    await store.set({ tbData: S.data, tbDeleted: del });
     saveUi();
     setResult('');
     render();
+  }
+
+  // Gộp / thay dữ liệu TB (từ ô dán, file chọn hoặc file kéo thả). Trả về câu báo kết quả.
+  async function applyItems(items, replace) {
+    const fixed = items.fixed;
+    let arr;
+    const st = await store.get(['tbData', 'tbDeleted']);
+    const del = st.tbDeleted || {};
+    if (replace) {
+      arr = items.slice();
+      (st.tbData || S.data).forEach((x) => {
+        if (!items.some((y) => String(y.tb) === String(x.tb))) del[String(x.tb)] = Date.now(); // TB bị thay mất → coi như đã xóa
+      });
+    } else {
+      arr = (st.tbData || S.data).slice(); // gộp vào bản mới nhất
+      items.forEach((x) => {
+        const k = arr.findIndex((y) => String(y.tb) === x.tb);
+        if (k >= 0) arr[k] = x;
+        else arr.push(x);
+      });
+    }
+    arr.sort(byTb);
+    items.forEach((x) => {
+      deletedTbs.delete(String(x.tb)); // nạp lại TB đã xóa → cho lưu bình thường
+      delete del[String(x.tb)];
+    });
+    S.data = arr;
+    S.cur = items[0].tb;
+    await store.set({ tbData: S.data, tbDeleted: del });
+    saveUi();
+    render();
+    return {
+      text:
+        `Đã nạp ${items.length} TB (${items.map((x) => x.tb).join(', ')}). Tổng cộng ${S.data.length} TB.` +
+        (fixed ? ` Đã đổi ${fixed} diện tích từ dấu phẩy sang dấu chấm (56,5 → 56.5).` : '') +
+        (items.bad.length ? ` ⚠ Diện tích cần sửa: ${items.bad.join('; ')}` : ''),
+      bad: items.bad.length > 0,
+    };
+  }
+  // đọc các file .json (chọn bằng nút “Mở file…” hoặc kéo thả) → gộp vào
+  async function importFiles(files) {
+    const list = [...(files || [])].filter((f) => /\.json$/i.test(f.name) || /json/.test(f.type));
+    if (!list.length) return { text: 'Không có file .json nào (chỉ nhận file dữ liệu TB dạng .json).', bad: true };
+    const all = [];
+    const errs = [];
+    for (const f of list) {
+      try {
+        const items = parseData(await f.text());
+        items.forEach((x) => {
+          const k = all.findIndex((y) => y.tb === x.tb);
+          if (k >= 0) all[k] = x;
+          else all.push(x);
+        });
+        all.fixed = (all.fixed || 0) + items.fixed;
+        all.bad = (all.bad || []).concat(items.bad);
+      } catch (e) {
+        errs.push(`${f.name}: ${e.message}`);
+      }
+    }
+    if (!all.length) return { text: 'Không đọc được file: ' + errs.join('; '), bad: true };
+    all.fixed = all.fixed || 0;
+    all.bad = all.bad || [];
+    const r = await applyItems(all, false);
+    return { text: `${r.text} (từ ${list.length - errs.length} file)` + (errs.length ? ` ✗ Lỗi: ${errs.join('; ')}` : ''), bad: r.bad || errs.length > 0 };
+  }
+
+  // Thư mục data: mỗi lần mở bảng tự đọc data/du-lieu.json – TB mới được thêm, TB bạn chưa sửa được cập nhật,
+  // TB bạn đã sửa trong bảng được giữ nguyên, TB bạn đã xóa không tự thêm lại
+  async function syncFromFolder() {
+    const s = await send({ type: 'vbdlis-sample' });
+    if (!s || !s.ok || !Array.isArray(s.data)) return null;
+    let file;
+    try {
+      file = parseData(JSON.stringify(s.data));
+    } catch (e) {
+      return { err: 'file data/du-lieu.json bị lỗi: ' + e.message };
+    }
+    const st = await store.get(['tbData', 'tbFile', 'tbDeleted']);
+    const first = st.tbData === undefined;
+    const arr = (st.tbData || []).slice();
+    const snap = { ...(st.tbFile || {}) }; // TB → bản đã đọc từ file lần trước
+    const del = st.tbDeleted || {};
+    const res = { added: [], updated: [], kept: [] };
+    for (const x of file) {
+      const id = String(x.tb);
+      const js = JSON.stringify(x);
+      if (!first && snap[id] === js) continue; // file không đổi so với lần trước
+      const k = arr.findIndex((y) => String(y.tb) === id);
+      if (k < 0) {
+        if (!del[id]) {
+          arr.push(x);
+          res.added.push(id);
+        }
+      } else {
+        const mine = JSON.stringify(arr[k]);
+        if (mine !== js) {
+          if (snap[id] !== undefined && mine === snap[id]) {
+            arr[k] = x; // bạn chưa sửa TB này trong bảng → lấy bản mới của file
+            res.updated.push(id);
+          } else res.kept.push(id); // bạn đã sửa trong bảng → giữ bản của bạn
+        }
+      }
+      snap[id] = js;
+    }
+    const set = { tbFile: snap };
+    if (first || res.added.length || res.updated.length) {
+      arr.sort(byTb);
+      set.tbData = arr;
+    }
+    await store.set(set);
+    return { ...res, data: arr };
   }
 
   function openData() {
@@ -1197,19 +1313,43 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     const d = document.createElement('div');
     d.className = 'dlg';
     d.innerHTML = `<div class="dh"><b>Dữ liệu TB (JSON)</b><span class="sp"></span><button class="btn x" id="dlgClose" title="Đóng hộp này (phím Esc)">✕ Đóng</button></div>
-      <div class="hint">Dán dữ liệu một TB hoặc danh sách TB. “Gộp vào” thay TB trùng số và giữ các TB khác.</div>
+      <div class="hint">Dán dữ liệu một TB hoặc danh sách TB rồi bấm “Gộp vào” (thay TB trùng số, giữ các TB khác). Có file .json thì <b>kéo thả file vào bảng này</b> hoặc bấm “Mở file…”. File <b>data/du-lieu.json</b> của tiện ích được tự đọc mỗi lần mở bảng.</div>
+      <input type="file" id="dlgFile" accept=".json,application/json" multiple style="display:none">
       <textarea id="dlgTxt" spellcheck="false"></textarea>
-      <div class="row"><button class="btn pri" id="dlgMerge">Gộp vào</button><button class="btn" id="dlgReplace">Thay toàn bộ</button><button class="btn" id="dlgCopy">Sao chép hiện có</button><button class="btn" id="dlgSample">Nạp mẫu</button><button class="btn" id="dlgRec" title="Xuất lại file của lần ghi thao tác gần nhất">Xuất bản ghi</button><span class="sp"></span><button class="btn" id="dlgClose2">Đóng</button></div>
+      <div class="row"><button class="btn pri" id="dlgMerge">Gộp vào</button><button class="btn" id="dlgReplace">Thay toàn bộ</button><button class="btn" id="dlgCopy">Sao chép hiện có</button><button class="btn" id="dlgOpen" title="Chọn file .json dữ liệu TB (chọn được nhiều file)">Mở file…</button><button class="btn" id="dlgSample" title="Đưa nội dung file data/du-lieu.json của tiện ích vào ô để Gộp vào / Thay toàn bộ">Lấy từ thư mục data</button><button class="btn" id="dlgRec" title="Xuất lại file của lần ghi thao tác gần nhất">Xuất bản ghi</button><span class="sp"></span><button class="btn" id="dlgClose2">Đóng</button></div>
       <div class="row"><span class="muted">Xóa:</span><button class="btn del" id="dlgDelOne" title="Xóa TB đang chọn ở ô trên cùng của bảng điền">TB đang chọn</button><button class="btn del" id="dlgDelAll" title="Xóa mọi TB trong tiện ích">Tất cả TB</button><button class="btn del" id="dlgDelRec" title="Xóa bản ghi thao tác đã ghi">Bản ghi thao tác</button></div>
       <div class="hint">Xóa chỉ xóa dữ liệu trong tiện ích (trên máy này), không đụng gì trên VBDLIS. Muốn có lại: dán JSON rồi “Gộp vào”, hoặc “Nạp mẫu”.</div>
       <div id="dlgMsg" class="hint"></div>`;
     d.style.top = ($('.hd').offsetHeight || 37) + 'px'; // không che thanh tiêu đề (nút –, × vẫn bấm được)
     pn.classList.add('dlgopen');
     pn.appendChild(d);
+    // đang mở hộp này mà thả file lệch ra ngoài bảng → không để trình duyệt mở file (mất trang VBDLIS)
+    const guard = (e) => {
+      if (e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files')) e.preventDefault();
+    };
+    document.addEventListener('dragover', guard, true);
+    document.addEventListener('drop', guard, true);
     const closeDlg = () => {
       d.remove();
       pn.classList.remove('dlgopen');
+      document.removeEventListener('dragover', guard, true);
+      document.removeEventListener('drop', guard, true);
     };
+    const fileInp = d.querySelector('#dlgFile');
+    fileInp.addEventListener('change', async () => {
+      if (S.running) {
+        fileInp.value = '';
+        return msg('Đang “Chạy cả TB” – bấm “■ Dừng” trước khi nạp dữ liệu.', true);
+      }
+      try {
+        const r = await importFiles(fileInp.files);
+        msg(r.text, r.bad);
+      } catch (err) {
+        msg('Lỗi: ' + friendly(err), true);
+      } finally {
+        fileInp.value = ''; // chọn lại cùng file vẫn nạp được
+      }
+    });
     d.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -1239,32 +1379,11 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         else if (id === 'dlgMerge' || id === 'dlgReplace') {
           if (!txt) return msg('Chưa dán dữ liệu.', true);
           const items = parseData(txt);
-          const fixed = items.fixed;
-          let arr;
-          if (id === 'dlgReplace') {
-            if (!confirm(`Xóa toàn bộ ${S.data.length} TB hiện có và thay bằng ${items.length} TB vừa dán?`)) return;
-            arr = items.slice();
-          } else {
-            arr = ((await store.get('tbData')).tbData || S.data).slice(); // gộp vào bản mới nhất
-            items.forEach((x) => {
-              const k = arr.findIndex((y) => String(y.tb) === x.tb);
-              if (k >= 0) arr[k] = x;
-              else arr.push(x);
-            });
-          }
-          arr.sort(byTb);
-          items.forEach((x) => deletedTbs.delete(String(x.tb))); // nạp lại TB đã xóa → cho lưu bình thường
-          S.data = arr;
-          S.cur = items[0].tb;
-          await store.set({ tbData: S.data });
-          saveUi();
-          render();
-          msg(
-            `Đã nạp ${items.length} TB. Tổng cộng ${S.data.length} TB.` +
-              (fixed ? ` Đã đổi ${fixed} diện tích từ dấu phẩy sang dấu chấm (56,5 → 56.5).` : '') +
-              (items.bad.length ? ` ⚠ Diện tích cần sửa: ${items.bad.join('; ')}` : ''),
-            items.bad.length > 0
-          );
+          if (id === 'dlgReplace' && !confirm(`Xóa toàn bộ ${S.data.length} TB hiện có và thay bằng ${items.length} TB vừa dán?`)) return;
+          const r = await applyItems(items, id === 'dlgReplace');
+          msg(r.text, r.bad);
+        } else if (id === 'dlgOpen') {
+          d.querySelector('#dlgFile').click();
         } else if (id === 'dlgRec') {
           const R = await recorder();
           if (!R) return msg('Không bật được bộ ghi thao tác trên trang này.', true);
@@ -1297,7 +1416,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
           const r = await send({ type: 'vbdlis-sample' });
           if (!r || !r.ok) return msg((r && r.error) || 'Không nạp được dữ liệu mẫu.', true);
           d.querySelector('#dlgTxt').value = JSON.stringify(r.data, null, 2);
-          msg('Đã đưa dữ liệu mẫu vào ô. Bấm “Gộp vào” hoặc “Thay toàn bộ”.');
+          msg(`Đã đưa ${r.data.length} TB của file data/du-lieu.json vào ô. Bấm “Gộp vào” (hoặc “Thay toàn bộ”).`);
         }
       } catch (err) {
         msg('Lỗi: ' + friendly(err), true);
@@ -1488,29 +1607,128 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     const up = () => {
       removeEventListener('mousemove', mv, true);
       removeEventListener('mouseup', up, true);
+      saveBox();
     };
     addEventListener('mousemove', mv, true);
     addEventListener('mouseup', up, true);
     e.preventDefault();
   });
 
+  // ---------- kéo góc dưới để phóng to / thu nhỏ bảng (nhớ cỡ và vị trí) ----------
+  function applyBox(b) {
+    if (!b) return;
+    if (b.w) pn.style.setProperty('--w', b.w + 'px');
+    if (b.h) {
+      pn.style.setProperty('--h', b.h + 'px');
+      pn.style.setProperty('--mh', 'calc(100vh - 8px)');
+    }
+    if (b.left != null && b.top != null) {
+      host.style.left = Math.max(0, Math.min(innerWidth - 120, b.left)) + 'px';
+      host.style.top = Math.max(0, Math.min(innerHeight - 40, b.top)) + 'px';
+      host.style.right = 'auto';
+    }
+  }
+  function saveBox() {
+    const r = host.getBoundingClientRect();
+    const b = { left: Math.round(r.left), top: Math.round(r.top) };
+    const w = parseInt(pn.style.getPropertyValue('--w'), 10);
+    const h = parseInt(pn.style.getPropertyValue('--h'), 10);
+    if (w) b.w = w;
+    if (h) b.h = h;
+    safeSet({ tbBox: b });
+  }
+  root.querySelectorAll('.rz').forEach((g) => {
+    g.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const fromLeft = g.classList.contains('l');
+      const r0 = host.getBoundingClientRect();
+      const p0 = pn.getBoundingClientRect();
+      host.style.left = r0.left + 'px';
+      host.style.top = r0.top + 'px';
+      host.style.right = 'auto';
+      const x0 = e.clientX;
+      const y0 = e.clientY;
+      const mv = (ev) => {
+        const dx = ev.clientX - x0;
+        const dy = ev.clientY - y0;
+        const maxW = fromLeft ? r0.left + p0.width - 4 : innerWidth - r0.left - 4;
+        const w = Math.round(Math.max(300, Math.min(maxW, fromLeft ? p0.width - dx : p0.width + dx)));
+        const h = Math.round(Math.max(200, Math.min(innerHeight - r0.top - 4, p0.height + dy)));
+        pn.style.setProperty('--w', w + 'px');
+        pn.style.setProperty('--h', h + 'px');
+        pn.style.setProperty('--mh', 'calc(100vh - 8px)');
+        if (fromLeft) host.style.left = Math.max(0, r0.left + (p0.width - w)) + 'px';
+      };
+      const up = () => {
+        removeEventListener('mousemove', mv, true);
+        removeEventListener('mouseup', up, true);
+        saveBox();
+      };
+      addEventListener('mousemove', mv, true);
+      addEventListener('mouseup', up, true);
+    });
+    // bấm đúp → về cỡ mặc định
+    g.addEventListener('dblclick', () => {
+      ['--w', '--h', '--mh'].forEach((p) => pn.style.removeProperty(p));
+      saveBox();
+    });
+  });
+
+  // ---------- thả file .json vào bảng → nạp dữ liệu TB ----------
+  const hasFiles = (e) => !!e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');
+  pn.addEventListener('dragover', (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+    pn.classList.add('drop');
+  });
+  pn.addEventListener('dragleave', (e) => {
+    if (!pn.contains(e.relatedTarget)) pn.classList.remove('drop');
+  });
+  pn.addEventListener('drop', async (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    pn.classList.remove('drop');
+    if (S.running) return setStatus('Đang “Chạy cả TB” – bấm “■ Dừng” trước khi nạp dữ liệu.', true);
+    if (!isAlive()) return setResult(`<div class="bad">✗ ${esc(DEAD_MSG)}</div>`);
+    try {
+      const r = await importFiles(e.dataTransfer.files);
+      setResult(`<div class="${r.bad ? 'bad' : 'ok'}">${r.bad ? '✗' : '✓'} ${esc(r.text)}</div>`);
+    } catch (err) {
+      setResult(`<div class="bad">✗ ${esc(friendly(err))}</div>`);
+    }
+  });
+
   // ---------- khởi động ----------
   (async () => {
-    const r = await store.get(['tbData', 'tbDone', 'tbCur', 'tbTab', 'tbOpts']);
+    const r = await store.get(['tbData', 'tbDone', 'tbCur', 'tbTab', 'tbOpts', 'tbBox']);
     S.opts = r.tbOpts || {};
+    applyBox(r.tbBox);
     S.data = (r.tbData || []).sort(byTb);
     S.done = r.tbDone || {};
     S.cur = r.tbCur;
     S.tab = TABS[r.tbTab] ? r.tbTab : 'bn';
-    if (r.tbData === undefined) {
-      const s = await send({ type: 'vbdlis-sample' });
-      if (s && s.ok) {
-        S.data = s.data.sort(byTb);
-        store.set({ tbData: S.data });
-      }
-    }
+    let sync = null;
+    try {
+      sync = await syncFromFolder();
+    } catch (e) {}
+    if (sync && sync.data) S.data = sync.data.slice().sort(byTb);
     if (!S.data.some((x) => String(x.tb) === String(S.cur)) && S.data.length) S.cur = S.data[S.data.length - 1].tb;
     render();
+    if (sync && sync.err) setResult(`<div class="bad">✗ ${esc(sync.err)}</div>`);
+    else if (sync && r.tbData !== undefined && (sync.added.length || sync.updated.length || sync.kept.length)) {
+      setResult(
+        '<div class="sum">Thư mục data (du-lieu.json)</div>' +
+          (sync.added.length ? `<div class="ok">✓ Thêm mới: TB ${esc(sync.added.join(', '))}</div>` : '') +
+          (sync.updated.length ? `<div class="ok">✓ Cập nhật: TB ${esc(sync.updated.join(', '))}</div>` : '') +
+          (sync.kept.length
+            ? `<div class="warn">• Giữ bản bạn đã sửa trong bảng: TB ${esc(sync.kept.join(', '))} (muốn lấy bản của file: Dữ liệu → Lấy từ thư mục data → Gộp vào)</div>`
+            : '')
+      );
+    }
     try {
       if (window.__vbdlisRec) updateRecBtn((await window.__vbdlisRec.info()).on);
     } catch (e) {}

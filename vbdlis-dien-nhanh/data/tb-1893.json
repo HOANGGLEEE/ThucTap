@@ -1,0 +1,58 @@
+{
+  "tb": "1893",
+  "soBienNhan": "KH 2959.07777.240.169-240.249-241.79",
+  "diaChiTaiSan": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "NGUYỄN THỊ LOAN",
+    "soGiayTo": "027157007800",
+    "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "NGUYỄN THỊ LOAN",
+      "ngaySinh": "01/01/1957",
+      "namSinh": "1957",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "027157007800",
+      "ngayCap": "01/09/2021",
+      "ngayHetHan": "",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "169",
+      "soTo": "240",
+      "dienTich": "446.8",
+      "mdsd": "LUC",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "249",
+      "soTo": "240",
+      "dienTich": "78.4",
+      "mdsd": "BHK",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "79",
+      "soTo": "241",
+      "dienTich": "86.9",
+      "mdsd": "LUC",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Đơn in tên HOÀNG MINH YÊN, ghi tay sửa thành Nguyễn Thị Loan (mẹ); TBXN, Mẫu 15a, CCCD và chữ ký đều là NGUYỄN THỊ LOAN. Danh sách thửa trong đơn ghi tờ cũ 10/11 – đã dùng tờ mới 240/241 theo TBXN. Cùng chủ, cùng CCCD với TB 1892 (hai hồ sơ riêng, không trùng thửa) – trên VBDLIS chọn lại chủ đã có, không tạo trùng. Ngày cấp CCCD mờ: đọc 01/09/2021 (có thể 01/08/2021)."
+}

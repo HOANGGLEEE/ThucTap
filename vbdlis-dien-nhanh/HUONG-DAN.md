@@ -1,0 +1,114 @@
+# VBDLIS Điền Nhanh – hướng dẫn
+
+Tiện ích cho Chrome / Edge / Cốc Cốc. Nó điền sẵn các ô trên VBDLIS từ dữ liệu TBXN.
+**Tiện ích không bao giờ tự bấm “Lưu”**: bạn kiểm tra lại rồi tự bấm.
+
+## Cài đặt (một lần)
+1. Mở trình duyệt, gõ vào thanh địa chỉ: `chrome://extensions` (Edge: `edge://extensions`, Cốc Cốc: `coccoc://extensions`).
+2. Bật **Chế độ dành cho nhà phát triển** (Developer mode), ở góc trên bên phải.
+3. Bấm **Tải tiện ích đã giải nén** (Load unpacked) rồi chọn thư mục `vbdlis-dien-nhanh` này.
+4. Bấm biểu tượng 🧩 rồi ghim “VBDLIS Điền Nhanh” lên thanh công cụ.
+
+## Cách nhanh nhất: nút “▶ Chạy cả TB”
+Mở màn hình **Tiếp nhận hồ sơ** mới, bấm Alt+Q, chọn TB, bấm **▶ Chạy cả TB**. Tiện ích làm lần lượt:
+1. Chọn Phường/Xã “Phường Việt Yên (Phường Bích Động - Thị xã Việt Yên cũ)”.
+2. Chọn quy trình “XA_KH2959…”.
+3. Điền Số biên nhận.
+4. Thửa đầu tiên: tự bấm “+ Thêm thửa đất”, điền Số thứ tự thửa, Số hiệu tờ bản đồ, Diện tích, Địa chỉ → **dừng chờ bạn kiểm tra và tự bấm “Lưu”**. Trang hỏi “Cập nhật địa chỉ tài sản” thì **bạn bấm “Đồng ý”** – tiện ích chờ bạn trả lời rồi mới làm tiếp.
+   Mặc định chỉ thêm **thửa đầu** (đủ để lưu hồ sơ; các thửa nhập đầy đủ ở bước Nhập đơn đăng ký). Muốn thêm tất cả các thửa ở bước này: tab Biên nhận → ô “Chạy cả TB thêm thửa nào…” → “Tất cả các thửa của TB”.
+5. Điền Người nộp hồ sơ, Số giấy tờ, Địa chỉ (theo mục 1c của TBXN), Địa chỉ tài sản.
+6. Đối chiếu bảng thửa trên trang với dữ liệu (thiếu / thừa / trùng / sai diện tích).
+7. Tô vàng nút **“Lưu hồ sơ”** – bạn kiểm tra toàn bộ rồi tự bấm.
+
+Tiện ích **không bấm nút Lưu nào**. Bấm “■ Dừng” để thôi giữa chừng; bấm “▶ Chạy cả TB” lại thì bước nào/thửa nào đã xong sẽ được bỏ qua. Phường/Xã và quy trình có thể đổi trong tab Biên nhận.
+
+**Tiện ích tự dừng (không ghi gì lên trang) khi:**
+- dữ liệu TB thiếu (Số biên nhận, người nộp, thửa…) hoặc diện tích viết không rõ;
+- trang đang còn hồ sơ khác (bảng thửa có thửa không thuộc TB này, hoặc Số biên nhận / Người nộp đang là của TB khác) → mở màn hình Tiếp nhận hồ sơ mới;
+- đang mở một cửa sổ khác (vd. Thông tin cá nhân) hoặc một hộp hỏi của trang → đóng / trả lời nó trước;
+- cuối cùng bảng thửa trên trang **không khớp** dữ liệu (thiếu / thừa / trùng / sai diện tích) → **không** tô nút Lưu hồ sơ, sửa trên trang trước.
+
+Nếu bấm Hủy bỏ ở một thửa rồi chạy lại, tiện ích sẽ hỏi lại một lần (bấm “▶ Chạy cả TB” thêm lần nữa) trước khi mở lại thửa đó – để tránh nhập trùng.
+
+**Diện tích:** PDF ghi “56,5” thì VBDLIS nhập “56.5”. Gõ/dán “56,5” hay “1.712,6” vào bảng điền sẽ tự đổi thành 56.5 / 1712.6; giá trị không rõ (vd “1.225”) sẽ bị báo ✗ để bạn sửa.
+
+## Bước Nhập đơn đăng ký (Xử lý hồ sơ → Xử lý tác vụ)
+1. Mở cửa sổ **Nhập đơn đăng ký**, chọn đúng TB trong bảng điền.
+2. Tab **Chủ SD** → bấm **“Điền chủ 1 (tự bấm “Thêm → Cá nhân”)”**. Tiện ích:
+   - chọn **Điều kiện cấp giấy** = “Chưa đủ điều kiện cấp giấy” và tích **Đăng ký lần đầu** (đổi được ở ô đầu tab Chủ SD; chọn “(không đổi)” để tiện ích không đụng vào);
+   - tự bấm **Thêm → Cá nhân** rồi điền Họ tên, Năm sinh, Giới tính, Dân tộc, Quốc tịch, Loại giấy tờ, Số giấy tờ, Ngày hết hạn (nếu có), Nơi cấp, Địa chỉ chi tiết. **Không điền Ngày cấp.**
+   Bạn kiểm tra rồi tự bấm **Lưu** (trang hỏi “Giấy tờ tùy thân đã tồn tại…” thì bạn tự chọn).
+3. Tab **Thửa đất** → bấm **Điền** từng thửa: tiện ích tự bấm **Thêm → Thửa đất** rồi điền Số thửa, Số tờ, Diện tích (cả 3 ô), Diện tích PL, MĐSD, Nguồn gốc, Thời hạn SD 50 năm, Địa chỉ chi tiết. Bạn kiểm tra rồi tự bấm **Lưu**, rồi Điền thửa tiếp theo.
+4. Chủ / thửa **đã có trong đơn** (đã hiện ở cây Chủ sử dụng / Thửa đất) thì bấm Điền lần nữa tiện ích chỉ báo “đã có trong đơn”, **không thêm trùng**.
+5. Cuối cùng bạn tự bấm **Lưu thông tin đăng ký** / **Hoàn tất** (bấm một lần là đủ – thấy “Lưu đơn đăng ký thành công” là xong).
+
+## Ghi thao tác (để gửi cho người hỗ trợ chỉnh tiện ích)
+Khi tiện ích điền sai/thiếu trên VBDLIS thật, ghi lại thao tác rồi gửi file:
+1. Bấm nút **●** trên thanh tiêu đề bảng điền → góc dưới trái hiện “● Đang ghi thao tác”.
+2. Làm việc bình thường trên VBDLIS (tự làm tay hoặc dùng nút của bảng điền). Trang tải lại giữa chừng vẫn ghi tiếp; mở thêm tab VBDLIS thì tab đó cũng ghi chung vào bản ghi này (góc dưới trái mỗi tab đều hiện “● Đang ghi”).
+3. Thấy chỗ sai thì bấm **“+ Ghi chú”** (góc dưới trái) và gõ vài chữ mô tả.
+4. Xong bấm **“■ Dừng & xuất file”** (hoặc bấm lại nút ●) ở **bất kỳ tab nào** → mọi tab cùng dừng, file `vbdlis-ghi-thao-tac-….json` vào thư mục **Tải xuống**. Gửi file đó.
+   Cần xuất lại: bảng điền → **Dữ liệu** → **Xuất bản ghi**.
+
+File ghi: nút bạn bấm, ô nào được nhập/chọn gì (kèm nhãn ô, tên cửa sổ), cửa sổ nào mở/đóng (kèm cấu trúc các ô), trang báo lỗi gì, và đánh dấu “(tiện ích)” cho những gì tiện ích tự điền.
+Không ghi: thông báo “Bạn đã nhận được … yêu cầu xử lý hồ sơ …” (của hồ sơ khác), đồng hồ Ngày tiếp nhận tự chạy, các lần bấm lặp lại vào cùng một ô.
+**Không bao giờ ghi mật khẩu** (kể cả khi trang đăng nhập / đổi mật khẩu hiện ra lúc đang ghi). Số từ 9 chữ số trở lên (CCCD, điện thoại, kể cả viết cách như “0912 345 678”) được che bớt (vd 024•••••••25); số biên nhận, ngày, diện tích giữ nguyên. File vẫn có tên, địa chỉ – chỉ gửi cho người hỗ trợ. Dữ liệu ghi chỉ nằm trong trình duyệt của bạn cho tới khi bạn xuất file.
+Nếu bạn vừa tải lại / cập nhật tiện ích khi đang ghi, góc dưới trái báo “Tiện ích vừa được tải lại…” → bấm F5; phần đã ghi vẫn còn và xuất được ở **Dữ liệu → Xuất bản ghi**.
+
+## Điền từng phần
+1. Mở VBDLIS, vào màn hình tiếp nhận hồ sơ.
+2. Bấm biểu tượng tiện ích (hoặc **Alt+Q**). Bảng điền hiện ở góc phải. Kéo thanh tiêu đề để di chuyển bảng.
+3. Chọn TB ở ô trên cùng (dùng ‹ › để chuyển TB trước/sau).
+4. Điền theo từng tab:
+
+| Tab | Mở gì trên VBDLIS trước | Điền những ô |
+|---|---|---|
+| Biên nhận | Không mở cửa sổ con nào | Số biên nhận, Người nộp hồ sơ, Số giấy tờ, Địa chỉ |
+| Chủ SD | Cửa sổ “Nhập đơn đăng ký” (tiện ích tự bấm “Thêm → Cá nhân”) hoặc cửa sổ “Thông tin cá nhân” | Họ tên, Năm sinh (không điền Ngày sinh, Ngày cấp), Giới tính, Dân tộc, Quốc tịch, Loại giấy tờ, Số giấy tờ, Ngày hết hạn, Nơi cấp, Địa chỉ chi tiết |
+| Thửa đất | Màn hình tiếp nhận (tự bấm “+ Thêm thửa đất”), cửa sổ “Nhập đơn đăng ký” (tự bấm “Thêm → Thửa đất”) hoặc cửa sổ thửa đất đang mở | Số thửa, Số tờ, Diện tích, Địa chỉ; ở cửa sổ đầy đủ thêm MĐSD, Nguồn gốc, Thời hạn SD |
+| Giấy tờ | Cửa sổ “Thông tin hồ sơ quét” | Loại giấy tờ, Mô tả, Tên giấy tờ |
+
+5. Xem kết quả ở chân bảng. ✓ là đã điền, ✗ là chưa điền được. Ô ✗ thì bấm ⧉ cạnh giá trị để sao chép rồi dán tay. Ô vừa điền trên trang được viền xanh trong 2 giây.
+6. Mục nào đã điền sẽ có dấu ✓, để biết thửa nào làm rồi. Nút “Xóa dấu ✓” xóa các dấu này.
+
+Có thể sửa trực tiếp giá trị trong bảng trước khi bấm Điền, bảng sẽ tự lưu lại. Ô “Địa chỉ chung” rồi “Áp dụng” trong tab Thửa đất đổi địa chỉ cho mọi thửa của TB, ví dụ khi cần ghi “Tổ dân phố Thiết Nham…”.
+
+**Thời hạn SD** tự điền “50 năm”, **Nguồn gốc đất** tự chọn “Công nhận QSDĐ như giao đất không thu tiền sử dụng đất”. Muốn khác thì sửa ở ô của từng thửa, hoặc dùng các ô chung + “Áp dụng” cho cả TB.
+
+**Giấy tờ** mặc định có 2 loại: “Đơn đăng ký” và “Thông báo xác nhận kết quả đăng ký” (đúng 2 file quét DDK và TBXN).
+
+Ô ngày (Ngày hết hạn), ô số (Năm sinh, Số thửa, Số tờ) và ô diện tích (“56.5 m²”) được điền **một lần** qua lịch chọn ngày / mặt nạ nhập / ô định dạng số của chính trang VBDLIS, nên trang nhận đúng giá trị (không còn cảnh hiện “2” rồi mới thành “22”).
+
+**Không tự điền:** Tổ dân phố/Đường (ô chọn có tìm kiếm), Nguồn gốc. Những ô này bạn chọn tay như cũ.
+
+## Nếu có ô không điền được
+Mở đúng màn hình hoặc cửa sổ đó rồi bấm **Quét trường**. Bảng sẽ liệt kê “nhãn → ô nhập” mà tiện ích nhìn thấy. Bấm **Sao chép kết quả** và gửi lại cho Claude để chỉnh cho khớp với trang thật.
+
+## Thêm dữ liệu TB mới
+Bấm **Dữ liệu**, dán JSON vào, rồi bấm **Gộp vào**. TB trùng số sẽ được thay, các TB khác giữ nguyên. Đóng hộp này bằng nút **✕ Đóng** ở góc trên (hoặc phím Esc). Cách nhanh nhất là gửi thư mục scan cho Claude và nhờ “xuất JSON cho tiện ích VBDLIS”. Mẫu một TB:
+
+```json
+{
+  "tb": "1817",
+  "soBienNhan": "KH 2959.07777.270.90-270.119",
+  "nguoiNop": { "hoTen": "THÂN VĂN BÁT", "soGiayTo": "024054005425", "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh" },
+  "chu": [
+    { "hoTen": "THÂN VĂN BÁT", "ngaySinh": "01/01/1954", "namSinh": "1954", "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước công dân", "soGiayTo": "024054005425", "ngayCap": "04/06/2023", "ngayHetHan": "",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH", "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh" }
+  ],
+  "thua": [
+    { "soThua": "90", "soTo": "270", "dienTich": "1712.6", "mdsd": "LUC", "diaChi": "Tổ dân phố Bình Minh, phường Việt Yên, TP Bắc Ninh" }
+  ],
+  "giayTo": ["Đơn đăng ký", "Căn cước công dân"],
+  "ghiChu": "Ghi chú hiện ở khung vàng (không bắt buộc)"
+}
+```
+
+Dữ liệu TB 1810–1817 đã có sẵn trong `data/du-lieu.json` và được nạp khi cài.
+
+## Lưu ý
+- Dữ liệu chỉ nằm trong trình duyệt của máy này, không gửi đi đâu.
+- Tiện ích chỉ chạy trên tab khi bạn bấm biểu tượng hoặc Alt+Q. Nếu trang VBDLIS tải lại mà bảng biến mất, bấm biểu tượng lần nữa.
+- Sau khi sửa file của tiện ích, vào trang tiện ích bấm ⟳ (Tải lại), rồi bấm F5 trang VBDLIS.
+- Thư mục `test/` chỉ dùng để thử trên trang giả lập, không ảnh hưởng tiện ích.

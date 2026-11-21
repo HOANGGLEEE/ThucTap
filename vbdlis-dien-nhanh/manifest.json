@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "VBDLIS Điền Nhanh",
+  "version": "1.7.0",
+  "description": "Điền nhanh biên nhận, chủ sử dụng, thửa đất và giấy tờ vào VBDLIS từ dữ liệu TBXN. Không tự bấm Lưu.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "unlimitedStorage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "VBDLIS Điền Nhanh (Alt+Q) – bấm để mở/ẩn bảng điền",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Q"
+      },
+      "description": "Mở/ẩn bảng điền"
+    }
+  },
+  "host_permissions": [
+    "https://bgi.mplis.gov.vn/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://bgi.mplis.gov.vn/*"
+      ],
+      "js": [
+        "recorder.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

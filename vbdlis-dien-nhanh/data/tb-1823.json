@@ -1,0 +1,40 @@
+{
+  "tb": "1823",
+  "soBienNhan": "KH 2959.07777.259.104",
+  "diaChiTaiSan": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "THÂN VĂN TÂM",
+    "soGiayTo": "024062004523",
+    "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "THÂN VĂN TÂM",
+      "ngaySinh": "08/10/1962",
+      "namSinh": "1962",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "024062004523",
+      "ngayCap": "16/09/2022",
+      "ngayHetHan": "",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "104",
+      "soTo": "259",
+      "dienTich": "56.5",
+      "mdsd": "BHK",
+      "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "MĐSD BHK lấy theo đơn (TBXN 1 thửa không ghi mục đích). TBXN ghi sử dụng chung 56.5 m², Mẫu 15a để trống, hồ sơ chỉ có CCCD ông Tâm."
+}

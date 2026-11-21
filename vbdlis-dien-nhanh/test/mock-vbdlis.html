@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Trang giả lập VBDLIS (chỉ để thử tiện ích)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+<style>
+  body{font:12px Arial,sans-serif;background:#f3f4f6;margin:0;padding:12px;color:#222}
+  fieldset{background:#fff;border:1px solid #ddd;margin:0 0 10px;padding:8px 12px}
+  legend{font-weight:bold;font-size:13px;padding:0 6px}
+  .row{display:flex;gap:12px;margin-bottom:6px;align-items:center}
+  .col{flex:1;display:flex;align-items:center;gap:6px;min-width:0}
+  .col > label{width:110px;flex:none;font-style:italic;color:#444;text-align:right}
+  .ctl{flex:1;display:flex;gap:4px;align-items:center;min-width:0}
+  input[type=text],select,textarea{width:100%;padding:4px;border:1px solid #ccc;border-radius:3px}
+  .req{color:red}
+  table{border-collapse:collapse;width:100%;background:#fff}
+  th{background:#3c4b5c;color:#fff;padding:5px}
+  td{border:1px solid #ddd;padding:5px;text-align:center}
+  .modal{display:none;position:fixed;inset:0;z-index:1050;overflow:auto}
+  .modal.show{display:block}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1040;display:none}
+  .modal-backdrop.show{display:block}
+  .modal-dialog{background:#fafafa;margin:40px auto;width:1100px;max-width:94vw;border-radius:4px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  .modal-header{padding:10px 14px;background:#fff;border-bottom:1px solid #ddd}
+  .modal-title{margin:0;font-size:14px}
+  .modal-body{padding:10px 14px}
+  .modal-footer{padding:8px 14px;text-align:right;border-top:1px solid #ddd}
+  #log{background:#111;color:#9f9;font:11px Consolas,monospace;height:150px;overflow:auto;padding:6px;white-space:pre-wrap}
+  button{cursor:pointer}
+  .dropdown{position:relative;display:inline-block}
+  .dropdown-menu{display:none;position:absolute;z-index:1100;background:#fff;border:1px solid #ccc;list-style:none;margin:0;padding:4px 0;min-width:140px}
+  .open > .dropdown-menu{display:block}
+  .dropdown-menu a{display:block;padding:3px 12px;cursor:pointer}
+  .jstree{border:1px solid #ddd;min-height:40px;margin-top:6px;background:#fff;padding:4px}
+  a.btn{display:inline-block;padding:3px 8px;border:1px solid #bbb;border-radius:3px;background:#f8f8f8;cursor:pointer}
+  .checkbox{display:flex;gap:4px;align-items:center}
+</style>
+</head>
+<body>
+<h3>Trang giả lập VBDLIS – tiếp nhận hồ sơ</h3>
+<p>
+  <button onclick="window.__fromDon=false;openM('mCaNhan')">Mở: Thông tin cá nhân</button>
+  <button onclick="window.__fromDon=false;openM('mThua')">Mở: Thông tin thửa đất</button>
+  <button onclick="openDon()">Mở: Nhập đơn đăng ký</button>
+  <button onclick="openM('mQuet')">Mở: Thông tin hồ sơ quét</button>
+  <button onclick="openM('mThemThua')">Mở: Thêm thửa đất (VBDLIS thật)</button>
+</p>
+
+<fieldset><legend>Đơn vị hành chính</legend>
+  <div class="row">
+    <div class="col"><label>Tỉnh/Thành<span class="req">*</span></label><div class="ctl"><select disabled><option>Thành phố Bắc Ninh</option></select></div></div>
+    <div class="col"><label>Quận/Huyện</label><div class="ctl"><select disabled><option>Thị xã Việt Yên</option></select></div></div>
+    <div class="col"><label>Phường/Xã<span class="req">*</span></label><div class="ctl"><select id="dvPhuong" style="width:100%">
+      <option value="">--- Chọn Phường/Xã ---</option>
+      <option value="10">Phường Việt Yên (Phường Bích Động - Thị xã Việt Yên cũ)</option>
+      <option value="11">Phường Hồng Thái (Thị xã Việt Yên cũ)</option>
+      <option value="12">xã Minh Đức (Thị xã Việt Yên cũ)</option>
+      <option value="13">xã Nghĩa Trung (Thị xã Việt Yên cũ)</option>
+    </select></div></div>
+  </div>
+</fieldset>
+
+<fieldset><legend>Thông tin biên nhận</legend>
+  <div class="form-group" style="margin-bottom:6px"><label class="control-label">Quy trình/Thủ tục<span class="req">*</span></label><a class="info-number help-button" title="Trợ giúp"><i class="fa fa-question-circle">?</i></a><a id="btnBindInfoLastBienNhan" title="Lấy lại thông tin của biên nhận vừa tiếp nhận" style="float:right;cursor:pointer"><i class="fa fa-clock-o"></i> Lấy lại thông tin biên nhận: KH 2959.07777.240.353-240.319-240.366</a><select id="qtSelect" style="width:100%"><option value="">--Chọn quy trình---</option></select></div>
+  <table id="qtTable"><thead><tr><th>STT</th><th>Tên quy trình</th><th>Khởi tạo quy trình</th><th></th></tr></thead>
+  <tbody><tr><td colspan="4">Vui lòng chọn ít nhất một quy trình</td></tr></tbody></table>
+  <div class="row">
+    <div class="col"><label>Số biên nhận</label><div class="ctl"><input type="text" id="txtSoBienNhan"></div></div>
+    <div class="col"><label>Ngày tiếp nhận</label><div class="ctl"><input type="text" id="txtNgayTN" readonly value="20/11/2026 20:54"></div></div>
+  </div>
+</fieldset>
+
+<fieldset><legend>Thông tin tài sản</legend>
+  <p><button type="button" class="btn" onclick="setTimeout(openThemThua, 400)"><i class="fa fa-plus"></i> Thêm thửa đất</button> <button type="button" class="btn">Tìm thửa đất</button></p>
+  <table id="thuaTable"><thead><tr><th>STT</th><th>Số thửa</th><th>Số tờ</th><th>Diện tích</th><th>Địa chỉ</th><th></th></tr></thead>
+  <tbody><tr class="empty"><td colspan="6">Vui lòng chọn ít nhất một thửa đất</td></tr></tbody></table>
+  <div class="row" style="margin-top:6px"><div class="col"><label>Địa chỉ tài sản</label><div class="ctl"><input type="text" id="txtDiaChiTaiSan" value="Phường Việt Yên, Thành phố Bắc Ninh"></div></div></div>
+</fieldset>
+
+<fieldset><legend>Thông tin người nộp hồ sơ</legend>
+  <div class="row"><div class="col"><label>Người nộp hồ sơ<span class="req">*</span></label><div class="ctl"><input type="text" id="txtNguoiNop"><button type="button">🔍</button></div></div></div>
+  <div class="row">
+    <div class="col"><label>Số giấy tờ</label><div class="ctl"><input type="text" id="txtSoGiayToNN"></div></div>
+    <div class="col"><label>Số điện thoại</label><div class="ctl"><input type="text"></div></div>
+    <div class="col"><label>Email</label><div class="ctl"><input type="text"></div></div>
+  </div>
+  <div class="row"><div class="col"><label>Địa chỉ</label><div class="ctl"><input type="text" id="txtDiaChiNN"></div></div></div>
+</fieldset>
+
+<fieldset><legend>Giấy tờ đính kèm</legend>
+  <div class="row"><div class="col"><div class="ctl"><input type="text" id="txtTenTL" placeholder="Tên tài liệu muốn thêm"><button type="button">+</button></div></div></div>
+</fieldset>
+
+<p style="text-align:right"><button type="button" class="btn" id="btnLuuHoSo" onclick="log('!!! NÚT LƯU HỒ SƠ ĐÃ BỊ BẤM !!!')">💾 Lưu hồ sơ</button></p>
+
+<div id="log"></div>
+
+<!-- ============ THÊM THỬA ĐẤT (giống VBDLIS thật) ============ -->
+<div class="modal" id="mThemThua"><div class="modal-dialog">
+  <div class="modal-header"><h4 class="modal-title">Thêm thửa đất</h4></div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col" style="display:block"><label style="display:block;text-align:left;width:auto">Số thứ tự thửa<span class="req">*</span></label><input type="text" id="ttSoThua"></div>
+      <div class="col" style="display:block"><label style="display:block;text-align:left;width:auto">Số hiệu tờ bản đồ<span class="req">*</span></label><input type="text" id="ttSoTo"></div>
+    </div>
+    <div class="row">
+      <div class="col" style="display:block"><label style="display:block;text-align:left;width:auto">Số thứ tự thửa cũ</label><input type="text" id="ttSoThuaCu"></div>
+      <div class="col" style="display:block"><label style="display:block;text-align:left;width:auto">Số hiệu tờ bản đồ cũ</label><input type="text" id="ttSoToCu"></div>
+    </div>
+    <div class="row">
+      <div class="col" style="display:block"><label style="display:block;text-align:left;width:auto">Diện tích<span class="req">*</span></label><input type="text" id="ttDienTich" class="area"></div>
+      <div class="col" style="display:block"><label style="display:block;text-align:left;width:auto">Địa chỉ<span class="req">*</span></label><input type="text" id="ttDiaChi"></div>
+    </div>
+  </div>
+  <div class="modal-footer"><span id="ttErr" style="color:red"></span> <button id="ttLuu" onclick="luuThua()">✔ Lưu</button> <button onclick="closeM()">⊘ Hủy bỏ</button></div>
+</div></div>
+
+<!-- ============ THÔNG TIN CÁ NHÂN ============ -->
+<div class="modal" id="mCaNhan"><div class="modal-dialog">
+  <div class="modal-header"><h4 class="modal-title">THÔNG TIN CÁ NHÂN</h4></div>
+  <div class="modal-body">
+    <fieldset><legend>Thông tin cơ bản</legend>
+      <div class="row">
+        <div class="col"><label>Loại đối tượng<span class="req">*</span>:</label><div class="ctl"><select id="cnLoaiDT"><option>Cá nhân trong nước</option><option>Cá nhân nước ngoài</option><option>Tổ chức</option></select></div></div>
+        <div class="col"><label>Họ tên chủ<span class="req">*</span>:</label><div class="ctl"><input type="text" id="cnHoTen"></div></div>
+        <div class="col"><label>Ngày sinh:</label><div class="ctl"><input type="text" id="cnNgaySinh" class="datepicker" placeholder="dd/mm/yyyy"></div></div>
+        <div class="col"><label>Năm sinh:</label><div class="ctl"><input type="text" id="cnNamSinh" class="number" maxlength="4"></div></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Dân tộc:</label><div class="ctl"><select id="cnDanToc"><option value="">--Chọn--</option><option value="1">Kinh</option><option value="2">Tày</option></select></div></div>
+        <div class="col"><label>Giới tính:</label><div class="ctl"><span>Nam</span><input type="checkbox" id="cnNam"></div></div>
+        <div class="col"><label>Mã số định danh:</label><div class="ctl"><input type="text"></div></div>
+        <div class="col"><label>Năm mất:</label><div class="ctl"><input type="text"></div></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Quốc tịch 1<span class="req">*</span>:</label><div class="ctl"><select id="cnQT1"><option>Viet Nam</option><option>Lao</option></select></div></div>
+        <div class="col"><label>Quốc tịch 2:</label><div class="ctl"><select><option>Viet Nam</option><option>Lao</option></select></div></div>
+        <div class="col"><label>Email:</label><div class="ctl"><input type="text"></div></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Giấy tờ tùy thân</legend>
+      <div class="row">
+        <div class="col"><label>Loại giấy tờ<span class="req">*</span>:</label><div class="ctl"><select id="cnLoaiGT"><option value="">--Chọn--</option><option value="1">Chứng minh nhân dân</option><option value="2">Căn cước công dân</option><option value="3">Căn cước</option><option value="4">Hộ chiếu</option></select></div></div>
+        <div class="col"><label>Hình thức xác thực:</label><div class="ctl"><select><option>Xác thực qua giấy tờ tùy thân</option></select></div></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Số giấy tờ:</label><div class="ctl"><input type="text" id="cnSoGT"></div></div>
+        <div class="col"><label>Ngày cấp:</label><div class="ctl"><input type="text" id="cnNgayCap" class="datepicker"></div></div>
+        <div class="col"><label>Ngày hết hạn:</label><div class="ctl"><input type="text" id="cnNgayHH" class="datepicker"></div></div>
+        <div class="col"><label>Là thông tin chính:</label><div class="ctl"><input type="checkbox"></div></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Nơi cấp:</label><div class="ctl"><input type="text" id="cnNoiCap"></div></div>
+        <div class="col"><label>Ghi chú:</label><div class="ctl"><input type="text"></div></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Địa chỉ</legend>
+      <div class="row">
+        <div class="col"><label>Tỉnh/Thành<span class="req">*</span>:</label><div class="ctl"><select><option>Thành phố Bắc Ninh</option></select></div></div>
+        <div class="col"><label>Đường:</label><div class="ctl"><select><option>--Chọn đường--</option></select></div></div>
+        <div class="col"><label>Ngõ phố:</label><div class="ctl"><input type="text"></div></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Tổ dân phố:</label><div class="ctl"><select><option>--Chọn tổ dân phố--</option></select></div></div>
+        <div class="col"><label>Địa chỉ chi tiết<span class="req">*</span>:</label><div class="ctl"><input type="text" id="cnDiaChi"><button type="button">➜</button></div></div>
+      </div>
+    </fieldset>
+  </div>
+  <div class="modal-footer"><button id="cnLuu" onclick="luuCaNhanDon()">Lưu</button> <button onclick="closeM()">Đóng</button></div>
+</div></div>
+
+<!-- ============ THÔNG TIN THỬA ĐẤT ============ -->
+<div class="modal" id="mThua"><div class="modal-dialog">
+  <div class="modal-header"><h4 class="modal-title">THÔNG TIN THỬA ĐẤT</h4></div>
+  <div class="modal-body">
+    <fieldset><legend>Thông tin thửa đất</legend>
+      <div class="row">
+        <div class="col"><label>Số thửa<span class="req">*</span>:</label><div class="ctl"><input type="text" id="tSoThua" class="number"></div></div>
+        <div class="col"><label>Số tờ<span class="req">*</span>:</label><div class="ctl"><input type="text" id="tSoTo" class="number"></div></div>
+        <div class="col"><label>Diện tích<span class="req">*</span>:</label><div class="ctl"><input type="text" id="tDienTich" class="area"></div></div>
+        <div class="col"><label>Diện tích PL:</label><div class="ctl"><input type="text" id="tDienTichPL"></div></div>
+        <div class="col"><label>Số thửa cũ:</label><div class="ctl"><input type="text" id="tSoThuaCu"></div></div>
+        <div class="col"><label>Số tờ cũ:</label><div class="ctl"><input type="text" id="tSoToCu"></div></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Mục đích sử dụng</legend>
+      <div class="row">
+        <div class="col"><label>MĐSD cấp giấy<span class="req">*</span>:</label><div class="ctl"><select id="tMDSD" style="width:100%">
+          <option value="">-- Chọn loại mục đích sử dụng đất --</option>
+          <option value="CQP">CQP (Đất quốc phòng)</option>
+          <option value="LUC">LUC (Đất chuyên trồng lúa)</option>
+          <option value="LUK">LUK (Đất trồng lúa còn lại)</option>
+          <option value="BHK">BHK (Đất bằng trồng cây hàng năm khác)</option>
+          <option value="NTS">NTS (Đất nuôi trồng thủy sản)</option>
+          <option value="ONT">ONT (Đất ở tại nông thôn)</option>
+        </select></div></div>
+        <div class="col"><label>Diện tích<span class="req">*</span>:</label><div class="ctl"><input type="text" id="tDienTich2" class="area"></div></div>
+        <div class="col"><label>Số thứ tự:</label><div class="ctl"><input type="text" value="1"></div></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>MĐSD chi tiết:</label><div class="ctl"><input type="text"></div></div>
+        <div class="col"><label>Thời hạn SD:</label><div class="ctl"><input type="text" id="tThoiHan" value="" readonly></div></div>
+      </div>
+      <fieldset><legend>Nguồn gốc sử dụng</legend>
+        <div class="row">
+          <div class="col"><label>Nguồn gốc đất:</label><div class="ctl"><select id="tNguonGoc"><option value="">--- Chọn loại nguồn gốc ---</option><option value="1">Nhà nước giao đất không thu tiền sử dụng đất</option><option value="2">Công nhận QSDĐ như giao đất không thu tiền sử dụng đất</option><option value="3">Công nhận QSDĐ như giao đất có thu tiền sử dụng đất</option></select></div></div>
+          <div class="col"><label>Nguồn gốc chuyển quyền:</label><div class="ctl"><select><option>--- Chọn nguồn gốc chuyển quyền ---</option></select></div></div>
+          <div class="col"><label>Diện tích:</label><div class="ctl"><input type="text" id="tDienTich3" class="area"></div></div>
+        </div>
+      </fieldset>
+    </fieldset>
+    <fieldset><legend>Địa chỉ</legend>
+      <div class="row">
+        <div class="col"><label>Tổ dân phố:</label><div class="ctl"><select><option>--Chọn tổ dân phố--</option></select></div></div>
+        <div class="col"><label>Địa chỉ chi tiết<span class="req">*</span>:</label><div class="ctl"><input type="text" id="tDiaChi"></div></div>
+      </div>
+    </fieldset>
+  </div>
+  <div class="modal-footer"><button id="tLuu" onclick="luuThuaDon()">Lưu</button> <button onclick="closeM()">Đóng</button></div>
+</div></div>
+
+<!-- ============ HỒ SƠ QUÉT ============ -->
+<div class="modal" id="mQuet"><div class="modal-dialog" style="width:800px">
+  <div class="modal-header"><h4 class="modal-title">Thông tin hồ sơ quét</h4></div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col"><label>Loại giấy tờ</label><div class="ctl"><select id="qLoai"><option value="">--Chọn--</option><option>Đơn đăng ký</option><option>Thông báo xác nhận kết quả đăng ký</option><option>Căn cước công dân</option><option>Giấy chứng nhận</option><option>Khác</option></select></div></div>
+      <div class="col"><label><input type="checkbox"> Là giấy tờ nguồn gốc</label></div>
+    </div>
+    <div class="row">
+      <div class="col"><label>Mô tả</label><div class="ctl"><input type="text" id="qMoTa"></div></div>
+      <div class="col"><label>Tên giấy tờ</label><div class="ctl"><input type="text" id="qTen"></div></div>
+    </div>
+    <div class="row"><div class="col"><label>Trích yếu</label><div class="ctl"><textarea></textarea></div></div></div>
+  </div>
+  <div class="modal-footer"><button>Lưu</button> <button onclick="closeM()">Đóng</button></div>
+</div></div>
+<!-- ============ HỘP HỎI SAU KHI LƯU THỬA (giống thật, không có ô nhập) ============ -->
+<div class="modal" id="mXacNhanDC"><div class="modal-dialog" style="width:420px">
+  <div class="modal-header"><button type="button" class="close" onclick="dongDC(false)">×</button><h4 class="modal-title">Cập nhật địa chỉ tài sản</h4></div>
+  <div class="modal-body">Bạn có muốn cập nhật lại địa chỉ tài sản hay không?</div>
+  <div class="modal-footer"><button class="btn btn-orange" id="dcDongY" onclick="dongDC(true)">Đồng ý</button> <button class="btn" onclick="dongDC(false)">Không</button></div>
+</div></div>
+
+<!-- ============ NHẬP ĐƠN ĐĂNG KÝ (giống VBDLIS thật) ============ -->
+<div class="modal" id="mDon"><div class="modal-dialog">
+  <div class="modal-header"><h4 class="modal-title">Nhập đơn đăng ký</h4></div>
+  <div class="modal-body">
+    <fieldset><legend>Thông tin đơn đăng ký</legend>
+      <div class="row">
+        <div class="col"><label>Mã đơn</label><div class="ctl"><input type="text" id="dMaDon" name="maDon"></div></div>
+        <div class="col"><label>Điều kiện cấp giấy</label><div class="ctl"><select id="dDieuKien" name="dieuKienCapGiay" style="width:100%"><option value="0">Đủ điều kiện cấp giấy</option><option value="1">Không đủ điều kiện cấp giấy</option><option value="2">Không có nhu cầu cấp giấy</option><option value="3">Chưa đủ điều kiện cấp giấy</option></select></div></div>
+      </div>
+      <div class="row">
+        <div class="checkbox"><input type="checkbox" id="chkdongSuDung"><label for="chkdongSuDung">Đồng sử dụng</label></div>
+        <div class="checkbox"><input type="checkbox" id="chkdangKyLanDau"><label for="chkdangKyLanDau"><b>Đăng ký lần đầu</b></label></div>
+      </div>
+    </fieldset>
+    <fieldset><legend>Chủ sử dụng</legend>
+      <div class="dropdown btn-group"><a id="btnChonChuSuDung" title="Tìm chủ sử dụng" class="btn dropdown-toggle" data-toggle="dropdown">Tìm</a><ul class="dropdown-menu"><li><a data-value="0">Cá nhân</a></li><li><a data-value="1">Vợ chồng</a></li></ul></div>
+      <div class="dropdown btn-group"><a id="btnThemChuSuDung" title="Thêm chủ sử dụng" class="btn dropdown-toggle" data-toggle="dropdown">⊕ Thêm</a><ul class="dropdown-menu"><li><a data-value="0">Cá nhân</a></li><li><a data-value="1">Vợ chồng</a></li><li><a data-value="2">Hộ gia đình</a></li><li><a data-value="3">Tổ chức</a></li></ul></div>
+      <a id="btnSuaChuSuDung" class="btn">Sửa</a>
+      <div id="treeChuSuDung" class="jstree"><ul></ul></div>
+    </fieldset>
+    <fieldset><legend>Thửa đất và tài sản gắn liền với đất</legend>
+      <div class="dropdown btn-group"><a id="btnThemTaiSan" title="Thêm tài sản" class="btn dropdown-toggle" data-toggle="dropdown">⊕ Thêm</a><ul class="dropdown-menu"><li><a data-value="6">Thửa đất</a></li><li><a data-value="7">Nhà riêng lẻ</a></li><li><a data-value="8">Căn hộ</a></li></ul></div>
+      <a id="btnSuaTaiSan" class="btn">Sửa</a>
+      <div class="dropdown btn-group"><a id="btnChonTaiSan" title="Tìm tài sản" class="btn dropdown-toggle" data-toggle="dropdown">Tìm</a><ul class="dropdown-menu"><li><a data-value="6">Thửa đất</a></li></ul></div>
+      <div id="treeTaiSan" class="jstree"><ul></ul></div>
+    </fieldset>
+  </div>
+  <div class="modal-footer"><button id="btnLuuDangKy" onclick="log('!!! NÚT LƯU THÔNG TIN ĐĂNG KÝ ĐÃ BỊ BẤM !!!')">Lưu thông tin đăng ký</button> <a class="btn" id="btnHoanTat" onclick="log('!!! NÚT HOÀN TẤT ĐÃ BỊ BẤM !!!')">Hoàn tất</a> <a class="btn" onclick="closeM()">Đóng</a></div>
+</div></div>
+<div class="modal-backdrop" id="bd"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/autonumeric/4.6.0/autoNumeric.min.js"></script>
+<script>
+  const log = (t) => { const l = document.getElementById('log'); l.textContent += t + '\n'; l.scrollTop = 1e9; };
+  function openThemThua(){
+    ['ttSoThua','ttSoTo','ttSoThuaCu','ttSoToCu','ttDienTich'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('ttDiaChi').value = 'Phường Việt Yên, Thành phố Bắc Ninh';
+    document.getElementById('ttErr').textContent = '';
+    openM('mThemThua');
+  }
+  function luuThua(){
+    const v = id => document.getElementById(id).value.trim();
+    if (!v('ttSoThua') || !v('ttSoTo') || !v('ttDienTich') || !v('ttDiaChi')) { document.getElementById('ttErr').textContent = 'Nhập đủ các ô bắt buộc'; return; }
+    const tb = document.querySelector('#thuaTable tbody');
+    tb.querySelector('tr.empty')?.remove();
+    const n = tb.children.length + 1;
+    const dt = parseFloat(v('ttDienTich').replace(/[^\d.]/g, ''));
+    tb.insertAdjacentHTML('beforeend', `<tr><td>${n}</td><td>${v('ttSoThua')}</td><td>${v('ttSoTo')}</td><td>${dt} m²</td><td>${v('ttDiaChi')}</td><td><button>Xóa</button></td></tr>`);
+    log('(người dùng bấm Lưu – thêm thửa ' + v('ttSoThua') + '/' + v('ttSoTo') + ')');
+    closeM();
+    // giống thật: ~0,7 giây sau trang hỏi "Cập nhật địa chỉ tài sản"
+    window.__dcPending = v('ttDiaChi');
+    setTimeout(() => openM('mXacNhanDC'), 700);
+  }
+  function dongDC(ok){
+    if (ok) { document.getElementById('txtDiaChiTaiSan').value = window.__dcPending || ''; log('(người dùng bấm Đồng ý – cập nhật địa chỉ tài sản)'); }
+    else log('(người dùng bấm Không)');
+    closeM();
+  }
+  // Giả lập Inputmask của VBDLIS: gán/gõ cả chuỗi một lúc → trang làm sai (chỉ còn ký tự cuối, vd "22" → "2");
+  // chỉ inputmask.setValue() (thư viện của trang) mới điền đúng
+  window.__garble = [];
+  function fakeMask(el, fmt){
+    el.inputmask = { setValue(v){ el.__imSet = true; el.value = fmt(String(v)); el.__imSet = false; } };
+    el.addEventListener('input', (e) => {
+      if (el.__imSet) return;
+      if (e.data && e.data.length > 1) { el.value = fmt(e.data.slice(-1)); window.__garble.push(el.id + '=' + el.value); log('(mặt nạ làm sai ô ' + el.id + ' → “' + el.value + '”)'); }
+    });
+  }
+  const fmtNum = (v) => String(v).replace(/[^\d]/g, '');
+  const fmtArea = (v) => { const n = parseFloat(String(v).replace(/[^\d.]/g, '')); return isNaN(n) ? ' m²' : n.toLocaleString('en-US') + ' m²'; };
+  // Nhập đơn đăng ký
+  function openDon(){ window.__fromDon = false; openM('mDon'); }
+  function resetThua(){
+    ['tSoThua','tSoTo','tDienTichPL','tSoThuaCu','tSoToCu','tDiaChi','tDienTich3','tThoiHan'].forEach(id => document.getElementById(id).value = '');
+    ['#tDienTich','#tDienTich2'].forEach(s => { const a = AutoNumeric.getAutoNumericElement(s); if (a) a.clear(); });
+    $('#tMDSD').val('').trigger('change'); $('#tNguonGoc').val('');
+  }
+  function resetCaNhan(){
+    ['cnHoTen','cnNgaySinh','cnNamSinh','cnSoGT','cnNgayCap','cnNgayHH','cnNoiCap','cnDiaChi'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('cnNam').checked = false;
+  }
+  function luuThuaDon(){
+    if (!window.__fromDon) { log('(người dùng bấm Lưu – Thông tin thửa đất)'); closeM(); return; }
+    const v = (id) => document.getElementById(id).value.trim();
+    const dt = AutoNumeric.getAutoNumericElement('#tDienTich').getNumber();
+    $('#treeTaiSan ul').append(`<li>Thửa đất lịch sử</li><li>${v('tSoThua')} (${v('tSoTo')}) - Diện tích: ${dt} m² - Địa chỉ: ${v('tDiaChi')}</li>`);
+    log('(người dùng bấm Lưu – thêm thửa ' + v('tSoThua') + '/' + v('tSoTo') + ' vào đơn)');
+    window.__fromDon = false; openM('mDon');
+  }
+  function luuCaNhanDon(){
+    if (!window.__fromDon) { log('(người dùng bấm Lưu – Thông tin cá nhân)'); closeM(); return; }
+    const v = (id) => document.getElementById(id).value.trim();
+    $('#treeChuSuDung ul').append(`<li>Bà: ${v('cnHoTen')} - Năm sinh:${v('cnNamSinh')} - Địa chỉ: ${v('cnDiaChi')} - Số CCCD:${v('cnSoGT')}</li>`);
+    log('(người dùng bấm Lưu – thêm chủ ' + v('cnHoTen') + ' vào đơn)');
+    window.__fromDon = false; openM('mDon');
+  }
+  function openM(id){ closeM(); document.getElementById(id).classList.add('show'); document.getElementById('bd').classList.add('show'); }
+  function closeM(){ document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show')); document.getElementById('bd').classList.remove('show'); }
+  // Bẫy tiêu điểm giống Bootstrap: tiêu điểm ra ngoài cửa sổ con thì bị kéo về
+  document.addEventListener('focusin', (e) => {
+    const m = document.querySelector('.modal.show');
+    if (m && !m.contains(e.target)) { log('!! BẪY TIÊU ĐIỂM kéo về cửa sổ (target=' + (e.target.id || e.target.tagName) + ')'); m.querySelector('input,select')?.focus(); }
+  });
+  // Ghi lại sự kiện change mà trang nhận được
+  document.addEventListener('change', (e) => { const t = e.target; if (t.closest && t.closest('#vbdlis-dien-nhanh-host')) return; log(`change ${t.id || t.tagName}: ${t.type === 'checkbox' ? t.checked : t.type === 'password' ? '(mật khẩu)' : t.value}`); });
+  $(function(){
+    $('#tMDSD').select2({ dropdownParent: $('#mThua') });
+    // Phường/Xã: chọn xong trang mới nạp danh sách quy trình + đặt địa chỉ mặc định (giống thật)
+    $('#dvPhuong').select2();
+    $('#dvPhuong').on('change', function(){
+      log('(trang nhận Phường/Xã = ' + $(this).find(':selected').text() + ')');
+      setTimeout(() => {
+        $('#qtSelect').html('<option value="">--Chọn quy trình---</option><option value="2959">XA_KH2959. Đăng ký đất đai, tài sản gắn liền với đất, cấp Giấy chứng nhận lần đầu (Thực hiện KH 2959)</option><option value="9">Quy trình cập nhật dữ liệu (Chỉnh sửa, bổ sung dữ liệu bị sai)</option>');
+        $('#txtDiaChiTaiSan, #txtDiaChiNN').val('Phường Việt Yên, Thành phố Bắc Ninh');
+      }, 500);
+    });
+    // Quy trình: trang CHỈ nghe sự kiện select2:select (khó hơn "change") → thêm dòng vào bảng quy trình
+    $('#qtSelect').select2();
+    $('#qtSelect').on('select2:select', function(e){
+      const t = e.params.data.text;
+      $('#qtTable tbody').html('<tr><td>1</td><td>' + t + '</td><td><input type="radio" checked></td><td><button>Xóa</button></td></tr>');
+      log('(trang thêm quy trình vào bảng)');
+    });
+    $('#cnLoaiGT').on('change', function(){ log('jQuery thấy đổi Loại giấy tờ → ' + $(this).find(':selected').text()); setTimeout(()=>{ $('#cnSoGT').val(''); log('(trang tự xóa Số giấy tờ sau khi đổi loại)'); }, 200); });
+    // ô diện tích tự định dạng kiểu "1,225 m²" khi rời ô (giống VBDLIS thật)
+    $('#ttDienTich').on('blur change', function(){ const n = parseFloat(String(this.value).replace(/[^\d.]/g,'')); if (!isNaN(n)) this.value = n.toLocaleString('en-US') + ' m²'; });
+    // Ô ngày có lịch chọn (bootstrap-datepicker) – giống VBDLIS: gán thẳng giá trị thì lịch không nhận, rời ô là bị xóa
+    $('#cnNgaySinh, #cnNgayCap, #cnNgayHH').datepicker({ format: 'dd/mm/yyyy', autoclose: true, forceParse: false })
+      .on('blur', function(){ const el = this; setTimeout(() => { if (!$(el).datepicker('getDate')) { if (el.value) log('(lịch xóa ô ' + el.id + ' vì chưa nhận ngày)'); el.value = ''; } }, 30); });
+    // Năm sinh tự tính theo Ngày sinh (khi lịch nhận ngày)
+    $('#cnNgaySinh').on('changeDate', function(e){ if (e.date) { $('#cnNamSinh').val(e.date.getFullYear()); log('(trang tự tính Năm sinh = ' + e.date.getFullYear() + ')'); } });
+    // Ô diện tích kiểu "56.5 m²" (AutoNumeric)
+    ['#tDienTich', '#tDienTich2'].forEach(s => new AutoNumeric(s, { currencySymbol: ' m²', currencySymbolPlacement: 's', decimalPlaces: 2, allowDecimalPadding: false }));
+    // Chọn nguồn gốc → trang tự đặt thời hạn
+    $('#tNguonGoc').on('change', function(){ if (this.value) { $('#tThoiHan').val('50 năm'); log('(trang tự đặt Thời hạn 50 năm)'); } });
+    $('#qLoai').on('change', function(){ const t = $(this).find(':selected').text(); $('#qMoTa').val(t); $('#qTen').val(t); });
+    // ô có mặt nạ nhập (giống thật)
+    fakeMask(document.getElementById('ttDienTich'), fmtArea);
+    fakeMask(document.getElementById('tDienTich3'), fmtArea);
+    ['tSoThua', 'tSoTo', 'cnNamSinh'].forEach(id => fakeMask(document.getElementById(id), fmtNum));
+    // Nhập đơn đăng ký: danh sách thả xuống kiểu Bootstrap
+    $(document).on('click', '[data-toggle="dropdown"]', function(e){ e.preventDefault(); const g = $(this).parent(); const was = g.hasClass('open'); $('.dropdown.open').removeClass('open'); if (!was) g.addClass('open'); return false; });
+    $(document).on('click', function(){ $('.dropdown.open').removeClass('open'); });
+    $('#btnThemChuSuDung').next('ul').on('click', 'a', function(){ const t = $(this).text().trim(); log('(trang: Thêm chủ → ' + t + ')'); if (t === 'Cá nhân') { resetCaNhan(); openM('mCaNhan'); window.__fromDon = true; } });
+    $('#btnThemTaiSan').next('ul').on('click', 'a', function(){ const t = $(this).text().trim(); log('(trang: Thêm tài sản → ' + t + ')'); if (t === 'Thửa đất') { resetThua(); openM('mThua'); window.__fromDon = true; } });
+    $('#chkdangKyLanDau').on('change', function(){ if (this.checked) { $('#dMaDon').val($('#txtSoBienNhan').val() || 'KH (giả lập)'); log('(trang tự điền Mã đơn)'); } });
+    $('#dDieuKien').select2({ dropdownParent: $('#mDon') });
+  });
+</script>
+
+<!-- Giả lập API của Chrome để chạy bảng điền ngay trong trang thử -->
+<script>
+  (function(){
+    const mem = {};
+    const c = window.chrome || (window.chrome = {});
+    const clone = (v) => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+    const listeners = [];
+    // giống Chrome: báo thay đổi bất đồng bộ cho mọi nơi đang nghe (các "tab")
+    const fire = (ch) => { if (Object.keys(ch).length) setTimeout(() => listeners.forEach(f => { try { f(clone(ch), 'local'); } catch (e) { console.error(e); } }), 0); };
+    c.storage = { local: {
+      get: async (keys) => { const o = {}; const ks = keys == null ? Object.keys(mem) : (Array.isArray(keys) ? keys : [keys]); ks.forEach(k => { if (k in mem) o[k] = clone(mem[k]); }); return o; },
+      getKeys: async () => Object.keys(mem),
+      set: async (obj) => { if (window.__failSet) throw new Error('QUOTA_BYTES quota exceeded'); const ch = {}; for (const k in obj) { ch[k] = { oldValue: clone(mem[k]), newValue: clone(obj[k]) }; mem[k] = clone(obj[k]); } fire(ch); },
+      remove: async (keys) => { const ch = {}; (Array.isArray(keys) ? keys : [keys]).forEach(k => { if (k in mem) { ch[k] = { oldValue: clone(mem[k]) }; delete mem[k]; } }); fire(ch); }
+    }, onChanged: { addListener: (f) => listeners.push(f) } };
+    c.runtime = {
+      id: 'thu-nghiem',
+      getURL: (p) => '../' + p,
+      sendMessage: async (msg) => {
+        if (msg.type === 'vbdlis-rec-inject') return { ok: true };
+        if (msg.type === 'vbdlis-sample') return { ok: true, data: await (await fetch('../data/du-lieu.json')).json() };
+        if (msg.type === 'vbdlis-select2') {
+          const m = await window.__vbdlis.run({ type: 'vbdlis-act', action: 'markSelect', label: msg.label });
+          return { ok: true, frames: [m && m.ok ? window.vbdlisFireSelect2(m.id) : { ok: false }] };
+        }
+        let r = await window.__vbdlis.run(msg);
+        // giống background: bước 2 chạy trong trang rồi kiểm tra lại
+        if (msg.type === 'vbdlis-fill' && r && r.retry && r.retry.length) {
+          const m = await window.vbdlisPageSetter(r.retry);
+          r = await window.__vbdlis.verify(r.token, m);
+        }
+        return { ok: true, frames: [r] };
+      }
+    };
+    window.__mem = mem;
+  })();
+</script>
+<script>
+  // nạp bản mới nhất (tránh trình duyệt dùng bản cũ trong bộ nhớ đệm)
+  (async () => {
+    for (const f of ['../page-setter.js', '../filler.js', '../recorder.js', '../panel.js']) {
+      await new Promise((ok) => { const s = document.createElement('script'); s.src = f + '?t=' + Date.now(); s.onload = ok; document.body.appendChild(s); });
+    }
+  })();
+</script>
+</body>
+</html>

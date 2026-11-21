@@ -1,0 +1,53 @@
+{
+  "tb": "1819",
+  "soBienNhan": "KH 2959.07777.259.77",
+  "diaChiTaiSan": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "NGUYỄN THỊ MÙI",
+    "soGiayTo": "024165003032",
+    "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "NGUYỄN THỊ MÙI",
+      "ngaySinh": "26/12/1965",
+      "namSinh": "1965",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước",
+      "soGiayTo": "024165003032",
+      "ngayCap": "06/01/2026",
+      "ngayHetHan": "",
+      "noiCap": "Bộ Công an",
+      "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh"
+    },
+    {
+      "hoTen": "NGUYỄN VĂN DIU",
+      "ngaySinh": "23/05/1961",
+      "namSinh": "1961",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "024061006314",
+      "ngayCap": "01/04/2022",
+      "ngayHetHan": "",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh",
+      "tuyChon": true
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "77",
+      "soTo": "259",
+      "dienTich": "569.4",
+      "mdsd": "LUC",
+      "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Bà Mùi dùng thẻ CĂN CƯỚC mẫu mới (không phải CCCD): Loại giấy tờ = Căn cước, nơi cấp Bộ Công an. MĐSD LUC lấy theo đơn. TBXN ghi sử dụng chung 569.4 m²; đơn và Mẫu 15a do ông Nguyễn Văn Diu ký, có kèm CCCD ông Diu nhưng Mẫu 15a để trống – cân nhắc có nhập người thứ 2 hay không."
+}

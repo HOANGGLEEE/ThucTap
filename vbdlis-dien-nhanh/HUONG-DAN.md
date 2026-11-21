@@ -42,7 +42,7 @@ Nếu bấm Hủy bỏ ở một thửa rồi chạy lại, tiện ích sẽ h�
 2. Với từng chủ: tự bấm **Thêm → Cá nhân**, điền → **dừng chờ bạn kiểm tra và tự bấm Lưu** (trang hỏi “Giấy tờ tùy thân đã tồn tại…” thì bạn tự trả lời) → thấy chủ đã vào đơn thì làm tiếp.
 3. Với từng thửa: tự bấm **Thêm → Thửa đất**, điền → **chờ bạn tự bấm Lưu** → thấy thửa đã vào đơn thì sang thửa sau.
 4. Đối chiếu: mọi chủ, mọi thửa đã có trong đơn → tô vàng nút **Lưu thông tin đăng ký**. Bạn tự bấm nút đó rồi **Hoàn tất** (1 lần).
-Chủ / thửa đã có trong đơn thì được bỏ qua (chạy lại không thêm trùng). Chủ “tùy chọn” không tự thêm – cần thì bấm Điền ở tab Chủ SD. Nếu bấm Đóng thay vì Lưu, tiện ích dừng và hỏi lại trước khi mở lại mục đó.
+Chủ / thửa đã có trong đơn thì được bỏ qua (chạy lại không thêm trùng). TB có nhiều chủ (kể cả người dùng chung, vợ/chồng) thì tiện ích thêm **lần lượt tất cả** các chủ: mở Thêm → Cá nhân, điền, chờ bạn bấm Lưu rồi mới sang chủ tiếp theo. Nếu bấm Đóng thay vì Lưu, tiện ích dừng và hỏi lại trước khi mở lại mục đó.
 
 **Từng phần (bấm tay từng mục):**
 1. Mở cửa sổ **Nhập đơn đăng ký**, chọn đúng TB trong bảng điền.

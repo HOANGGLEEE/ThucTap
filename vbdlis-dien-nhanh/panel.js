@@ -17,7 +17,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.9.3'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.9.4'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   const old = document.getElementById(HOST_ID);
   if (old) {
     // Bảng đang mở cùng phiên bản và còn kết nối → bấm biểu tượng là ẩn/hiện; ngược lại thay bảng mới
@@ -246,7 +246,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         .map(
           (p, i) => `
       <div class="card ${isDone(tb, 'chu' + i) ? 'done' : ''}">
-        <div class="ct">Chủ ${i + 1}: ${esc(p.hoTen)} ${p.tuyChon ? '<span class="tag">tùy chọn</span>' : ''}<span class="sp"></span>${isDone(tb, 'chu' + i) ? '<span class="chk">✓</span>' : ''}</div>
+        <div class="ct">Chủ ${i + 1}: ${esc(p.hoTen)} ${p.tuyChon ? '<span class="tag">người dùng chung</span>' : ''}<span class="sp"></span>${isDone(tb, 'chu' + i) ? '<span class="chk">✓</span>' : ''}</div>
         ${fld('Họ tên', `chu.${i}.hoTen`, tb)}
         ${fld('Năm sinh', `chu.${i}.namSinh`, tb)}
         ${fld('Giới tính', `chu.${i}.gioiTinh`, tb, { options: ['Nam', 'Nữ'] })}
@@ -701,8 +701,8 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     const runDon = async () => {
       title = `${title} · Nhập đơn đăng ký`;
       cur = step('Kiểm tra dữ liệu (bước Nhập đơn đăng ký)');
-      const chuList = (tb.chu || []).map((p, i) => ({ p, i })).filter((x) => !x.p.tuyChon);
-      const optional = (tb.chu || []).filter((p) => p.tuyChon);
+      const chuList = (tb.chu || []).map((p, i) => ({ p, i })); // điền TẤT CẢ chủ (kể cả người dùng chung)
+      const optional = [];
       const errs = [];
       if (!chuList.length) errs.push('chưa có chủ sử dụng');
       chuList.forEach(({ p, i }) => {

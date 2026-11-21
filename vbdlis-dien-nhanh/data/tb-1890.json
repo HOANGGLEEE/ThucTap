@@ -1,0 +1,58 @@
+{
+  "tb": "1890",
+  "soBienNhan": "KH 2959.07777.231.6-240.12-241.15",
+  "diaChiTaiSan": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "HOÀNG THỊ NĂM",
+    "soGiayTo": "024142002809",
+    "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "HOÀNG THỊ NĂM",
+      "ngaySinh": "01/01/1942",
+      "namSinh": "1942",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "024142002809",
+      "ngayCap": "01/08/2021",
+      "ngayHetHan": "",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "6",
+      "soTo": "231",
+      "dienTich": "136.4",
+      "mdsd": "LUC",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "12",
+      "soTo": "240",
+      "dienTich": "370",
+      "mdsd": "LUC",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "15",
+      "soTo": "241",
+      "dienTich": "74.2",
+      "mdsd": "LUC",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Đơn ghi tờ cũ 1/10/11 – đã dùng tờ mới 231/240/241 theo TBXN. Ngày cấp CCCD mờ: đọc 01/08/2021 (có thể 01/09/2021) – đối chiếu CCCD gốc. Mẫu 15a dòng 1 ghi nhầm số CCCD rồi gạch bỏ, dòng 2 là thông tin đúng. Thường trú trên CCCD: Trại Đồi, Minh Đức (địa danh cũ) – dùng địa chỉ TBXN."
+}

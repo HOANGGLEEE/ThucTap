@@ -753,6 +753,225 @@
     "ghiChu": "Hồ sơ kèm thêm CCCD ông Lê Văn Đạt nhưng Mẫu 15a để trống, TBXN chỉ ghi bà Phạm Thị Nhung – cân nhắc có nhập người thứ 2 hay không. CCCD bà Nhung đầu 033 (quê Hưng Yên) – đúng, không phải lỗi."
   },
   {
+    "tb": "1890",
+    "soBienNhan": "KH 2959.07777.231.6-240.12-241.15",
+    "diaChiTaiSan": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+    "nguoiNop": {
+      "hoTen": "HOÀNG THỊ NĂM",
+      "soGiayTo": "024142002809",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+    },
+    "chu": [
+      {
+        "hoTen": "HOÀNG THỊ NĂM",
+        "ngaySinh": "01/01/1942",
+        "namSinh": "1942",
+        "gioiTinh": "Nữ",
+        "loaiGiayTo": "Căn cước công dân",
+        "soGiayTo": "024142002809",
+        "ngayCap": "01/08/2021",
+        "ngayHetHan": "",
+        "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+      }
+    ],
+    "thua": [
+      {
+        "soThua": "6",
+        "soTo": "231",
+        "dienTich": "136.4",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "12",
+        "soTo": "240",
+        "dienTich": "370",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "15",
+        "soTo": "241",
+        "dienTich": "74.2",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      }
+    ],
+    "giayTo": [
+      "Đơn đăng ký",
+      "Thông báo xác nhận kết quả đăng ký"
+    ],
+    "ghiChu": "Đơn ghi tờ cũ 1/10/11 – đã dùng tờ mới 231/240/241 theo TBXN. Ngày cấp CCCD mờ: đọc 01/08/2021 (có thể 01/09/2021) – đối chiếu CCCD gốc. Mẫu 15a dòng 1 ghi nhầm số CCCD rồi gạch bỏ, dòng 2 là thông tin đúng. Thường trú trên CCCD: Trại Đồi, Minh Đức (địa danh cũ) – dùng địa chỉ TBXN."
+  },
+  {
+    "tb": "1891-1",
+    "soBienNhan": "KH 2959.07777.241.159-241.263-250.172-250.242-250.186-250.117",
+    "diaChiTaiSan": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+    "nguoiNop": {
+      "hoTen": "ĐỖ THỊ KIỆM",
+      "soGiayTo": "024162004023",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+    },
+    "chu": [
+      {
+        "hoTen": "ĐỖ THỊ KIỆM",
+        "ngaySinh": "01/01/1962",
+        "namSinh": "1962",
+        "gioiTinh": "Nữ",
+        "loaiGiayTo": "Căn cước công dân",
+        "soGiayTo": "024162004023",
+        "ngayCap": "14/02/2022",
+        "ngayHetHan": "",
+        "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+      }
+    ],
+    "thua": [
+      {
+        "soThua": "159",
+        "soTo": "241",
+        "dienTich": "224.6",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "263",
+        "soTo": "241",
+        "dienTich": "342.3",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "172",
+        "soTo": "250",
+        "dienTich": "267.9",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "242",
+        "soTo": "250",
+        "dienTich": "265.4",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "186",
+        "soTo": "250",
+        "dienTich": "376.3",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "117",
+        "soTo": "250",
+        "dienTich": "590.9",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      }
+    ],
+    "giayTo": [
+      "Đơn đăng ký",
+      "Thông báo xác nhận kết quả đăng ký"
+    ],
+    "ghiChu": "TBXN 1891 có 11 thửa, tách 2 số biên nhận: mục này 6 thửa (STT 1–6 trên TBXN), 5 thửa còn lại ở mục 1891-2. Đơn ghi tờ cũ 11/20 – đã dùng tờ mới 241/250 theo TBXN. Thường trú trên CCCD: Trại Đồi, Minh Đức (địa danh cũ) – dùng địa chỉ TBXN."
+  },
+  {
+    "tb": "1891-2",
+    "soBienNhan": "KH 2959.07777.250.218-250.11-250.178-250.12-250.35",
+    "diaChiTaiSan": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+    "nguoiNop": {
+      "hoTen": "ĐỖ THỊ KIỆM",
+      "soGiayTo": "024162004023",
+      "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+    },
+    "chu": [
+      {
+        "hoTen": "ĐỖ THỊ KIỆM",
+        "ngaySinh": "01/01/1962",
+        "namSinh": "1962",
+        "gioiTinh": "Nữ",
+        "loaiGiayTo": "Căn cước công dân",
+        "soGiayTo": "024162004023",
+        "ngayCap": "14/02/2022",
+        "ngayHetHan": "",
+        "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh"
+      }
+    ],
+    "thua": [
+      {
+        "soThua": "218",
+        "soTo": "250",
+        "dienTich": "441.2",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "11",
+        "soTo": "250",
+        "dienTich": "470.8",
+        "mdsd": "BHK",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "178",
+        "soTo": "250",
+        "dienTich": "422.7",
+        "mdsd": "LUC",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "12",
+        "soTo": "250",
+        "dienTich": "267.4",
+        "mdsd": "BHK",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      },
+      {
+        "soThua": "35",
+        "soTo": "250",
+        "dienTich": "101.7",
+        "mdsd": "BHK",
+        "diaChi": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",
+        "thoiHan": "50 năm",
+        "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+      }
+    ],
+    "giayTo": [
+      "Đơn đăng ký",
+      "Thông báo xác nhận kết quả đăng ký"
+    ],
+    "ghiChu": "TBXN 1891 có 11 thửa, tách 2 số biên nhận: mục này 5 thửa (STT 7–11 trên TBXN), 6 thửa đầu ở mục 1891-1. Cùng chủ với 1891-1 – trên VBDLIS chọn lại chủ đã có, không tạo trùng. Đơn ghi tờ cũ 20 – đã dùng tờ mới 250 theo TBXN."
+  },
+  {
     "tb": "1892",
     "soBienNhan": "KH 2959.07777.231.22-240.80-240.217-240.181-240.365",
     "diaChiTaiSan": "TDP Lý Nhân, phường Việt Yên, TP Bắc Ninh",

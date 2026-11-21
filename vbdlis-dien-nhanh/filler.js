@@ -3,7 +3,7 @@
 // Không bao giờ bấm nút Lưu. Chỉ bấm nút MỞ cửa sổ nhập: "+ Thêm thửa đất" (màn hình tiếp nhận) và
 // "Thêm → Cá nhân" / "Thêm → Thửa đất" (cửa sổ Nhập đơn đăng ký).
 (() => {
-  const VERSION = 13;
+  const VERSION = 14;
   if (window.__vbdlis && window.__vbdlis.v === VERSION) return;
   const TOKEN = Math.random().toString(36).slice(2, 8); // đánh dấu riêng cho lần nạp này (tránh nhầm dấu cũ)
   let lastFill = null; // kết quả lần điền gần nhất (cho bước kiểm tra lại)
@@ -212,16 +212,47 @@
   };
 
   function openModals() {
-    const ms = [...document.querySelectorAll(MODAL_SEL)].filter((m) => isVisible(m) && m.querySelector(CTRL));
+    const ms = [...document.querySelectorAll(MODAL_SEL)].filter(
+      (m) => isVisible(m) && !m.closest('#' + PANEL_HOST) && [...m.querySelectorAll(CTRL)].some(usable)
+    );
     return ms.filter((m) => !ms.some((o) => o !== m && o.contains(m))); // giữ lớp ngoài cùng
+  }
+
+  // Cửa sổ m có đang lộ ra (không bị cửa sổ khác che) không: thử vài điểm trong khung cửa sổ.
+  // true / false; null = không thử được (khung ngoài màn hình hoặc bị bảng điền che hết)
+  const z0 = (el) => {
+    const v = parseInt(getComputedStyle(el).zIndex, 10);
+    return isNaN(v) ? 0 : v;
+  };
+  function exposed(m) {
+    const box = m.querySelector('.modal-dialog, .modal-content, .ui-dialog-content, .k-window-content') || m;
+    const r = box.getBoundingClientRect();
+    if (r.width < 4 || r.height < 4) return null;
+    const pts = [[0.5, 0.5], [0.25, 0.25], [0.75, 0.25], [0.5, 0.08], [0.25, 0.75], [0.75, 0.75], [0.1, 0.5]];
+    for (const [fx, fy] of pts) {
+      const x = r.left + r.width * fx;
+      const y = r.top + r.height * fy;
+      if (x < 1 || y < 1 || x > innerWidth - 2 || y > innerHeight - 2) continue;
+      const hit = document.elementFromPoint(x, y);
+      if (!hit || hit.closest('#' + PANEL_HOST + ', #vbdlis-rec-host')) continue; // bảng điền / huy hiệu ghi che → thử điểm khác
+      return m.contains(hit);
+    }
+    return null;
   }
 
   function topModal() {
     const ms = openModals();
     if (!ms.length) return null;
+    if (ms.length > 1) {
+      // nhiều cửa sổ cùng hiện (vd. "Quy trình xử lý" nằm dưới "Nhập đơn đăng ký"): lấy cái thật sự nằm trên cùng
+      const vis = ms.filter((m) => exposed(m) === true);
+      if (vis.length === 1) return vis[0];
+    }
     ms.sort(
       (a, b) =>
-        zIndexOf(a) - zIndexOf(b) || (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1)
+        z0(a) - z0(b) ||
+        zIndexOf(a) - zIndexOf(b) ||
+        (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1)
     );
     return ms[ms.length - 1];
   }
@@ -605,6 +636,14 @@
       }
       case 'readThuaTable':
         return { ...base, ...readThuaTable() };
+      case 'donHas': {
+        const m = topModal();
+        if (!m || !/^nhap don dang ky\b/.test(titleKey(modalTitle(m)))) return { ...base, ok: false };
+        const sec = SECTIONS[msg.kind];
+        if (!sec || !sec.menu || !sec.menu.dup) return { ...base, ok: false };
+        const tree = treeText(m, msg.kind === 'chu' ? 'treeChuSuDung' : 'treeTaiSan');
+        return { ...base, ok: true, tree: tree !== null, has: !!sec.menu.dup(m, msg.values || {}) };
+      }
       case 'dialogState': {
         // hộp hỏi / thông báo của trang chỉ có nút, không có ô nhập (vd. “Cập nhật địa chỉ tài sản: Đồng ý / Không”)
         const ds = [...document.querySelectorAll(MODAL_SEL)].filter(
@@ -643,7 +682,9 @@
         return { ...base, ok: true, id };
       }
       case 'highlight': {
-        const b = buttonsByText(msg.texts || [], document.body, openModals())[0];
+        const tm = msg.inModal ? topModal() : null;
+        if (msg.inModal && !tm) return { ...base, ok: false };
+        const b = (tm ? buttonsByText(msg.texts || [], tm, []) : buttonsByText(msg.texts || [], document.body, openModals()))[0];
         if (!b) return { ...base, ok: false };
         b.scrollIntoView({ block: 'center', behavior: 'smooth' });
         const prev = b.style.boxShadow;

@@ -10,6 +10,10 @@ Tiện ích cho Chrome / Edge / Cốc Cốc. Nó điền sẵn các ô trên VBD
 4. Bấm biểu tượng 🧩 rồi ghim “VBDLIS Điền Nhanh” lên thanh công cụ.
 
 ## Cách nhanh nhất: nút “▶ Chạy cả TB”
+Nút này tự biết bạn đang ở bước nào:
+- đang ở màn hình **Tiếp nhận hồ sơ** (không mở cửa sổ con) → làm bước tiếp nhận (dưới đây);
+- đang mở cửa sổ **Nhập đơn đăng ký** → làm bước đơn đăng ký (xem mục “Bước Nhập đơn đăng ký”).
+
 Mở màn hình **Tiếp nhận hồ sơ** mới, bấm Alt+Q, chọn TB, bấm **▶ Chạy cả TB**. Tiện ích làm lần lượt:
 1. Chọn Phường/Xã “Phường Việt Yên (Phường Bích Động - Thị xã Việt Yên cũ)”.
 2. Chọn quy trình “XA_KH2959…”.
@@ -33,6 +37,14 @@ Nếu bấm Hủy bỏ ở một thửa rồi chạy lại, tiện ích sẽ h�
 **Diện tích:** PDF ghi “56,5” thì VBDLIS nhập “56.5”. Gõ/dán “56,5” hay “1.712,6” vào bảng điền sẽ tự đổi thành 56.5 / 1712.6; giá trị không rõ (vd “1.225”) sẽ bị báo ✗ để bạn sửa.
 
 ## Bước Nhập đơn đăng ký (Xử lý hồ sơ → Xử lý tác vụ)
+**Tự động:** mở cửa sổ **Nhập đơn đăng ký** (Quy trình xử lý → Xử lý tác vụ), chọn đúng TB trong bảng điền, bấm **▶ Chạy cả TB**. Tiện ích làm lần lượt:
+1. Chọn **Điều kiện cấp giấy**, tích **Đăng ký lần đầu**.
+2. Với từng chủ: tự bấm **Thêm → Cá nhân**, điền → **dừng chờ bạn kiểm tra và tự bấm Lưu** (trang hỏi “Giấy tờ tùy thân đã tồn tại…” thì bạn tự trả lời) → thấy chủ đã vào đơn thì làm tiếp.
+3. Với từng thửa: tự bấm **Thêm → Thửa đất**, điền → **chờ bạn tự bấm Lưu** → thấy thửa đã vào đơn thì sang thửa sau.
+4. Đối chiếu: mọi chủ, mọi thửa đã có trong đơn → tô vàng nút **Lưu thông tin đăng ký**. Bạn tự bấm nút đó rồi **Hoàn tất** (1 lần).
+Chủ / thửa đã có trong đơn thì được bỏ qua (chạy lại không thêm trùng). Chủ “tùy chọn” không tự thêm – cần thì bấm Điền ở tab Chủ SD. Nếu bấm Đóng thay vì Lưu, tiện ích dừng và hỏi lại trước khi mở lại mục đó.
+
+**Từng phần (bấm tay từng mục):**
 1. Mở cửa sổ **Nhập đơn đăng ký**, chọn đúng TB trong bảng điền.
 2. Tab **Chủ SD** → bấm **“Điền chủ 1 (tự bấm “Thêm → Cá nhân”)”**. Tiện ích:
    - chọn **Điều kiện cấp giấy** = “Chưa đủ điều kiện cấp giấy” và tích **Đăng ký lần đầu** (đổi được ở ô đầu tab Chủ SD; chọn “(không đổi)” để tiện ích không đụng vào);
@@ -106,6 +118,14 @@ Bấm **Dữ liệu**, dán JSON vào, rồi bấm **Gộp vào**. TB trùng s�
 ```
 
 Dữ liệu TB 1810–1817 đã có sẵn trong `data/du-lieu.json` và được nạp khi cài.
+
+## Xóa dữ liệu
+Bấm **Dữ liệu** → hàng **Xóa:**
+- **TB đang chọn** – xóa TB đang chọn ở ô trên cùng của bảng điền (kèm các dấu ✓ của TB đó);
+- **Tất cả TB** – xóa hết danh sách TB (mở lại bảng cũng không tự nạp lại dữ liệu mẫu);
+- **Bản ghi thao tác** – xóa bản ghi thao tác đã ghi (đang ghi thì phải bấm ● dừng trước).
+
+Mỗi lần xóa tiện ích đều hỏi lại. Xóa chỉ xóa dữ liệu trong tiện ích trên máy này, **không đụng gì trên VBDLIS**. Muốn có lại dữ liệu: dán JSON rồi **Gộp vào**, hoặc bấm **Nạp mẫu** rồi **Gộp vào**. Chỉ muốn bỏ các dấu ✓ thì dùng nút **Xóa dấu ✓**.
 
 ## Lưu ý
 - Dữ liệu chỉ nằm trong trình duyệt của máy này, không gửi đi đâu.

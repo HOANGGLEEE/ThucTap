@@ -17,7 +17,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.7.0'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.8.1'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   const old = document.getElementById(HOST_ID);
   if (old) {
     // Bảng đang mở cùng phiên bản và còn kết nối → bấm biểu tượng là ẩn/hiện; ngược lại thay bảng mới
@@ -65,6 +65,7 @@
   };
   // Lưu theo từng TB vừa sửa (đọc bản mới nhất trong bộ nhớ rồi chỉ thay TB đó) – không ghi đè dữ liệu tab khác vừa nạp
   const dirtyTbs = new Set();
+  const deletedTbs = new Set(); // TB vừa xóa – lần lưu đang chờ không được thêm lại
   const saveData = debounce(async () => {
     if (!dirtyTbs.size) return;
     const ids = [...dirtyTbs];
@@ -79,8 +80,9 @@
         if (k >= 0) arr[k] = mine;
         else arr.push(mine);
       });
-      arr.sort(byTb);
-      await store.set({ tbData: arr });
+      const keep = arr.filter((x) => !deletedTbs.has(String(x.tb)));
+      keep.sort(byTb);
+      await store.set({ tbData: keep });
     } catch (e) {}
   }, 300);
   const markDirty = (tb) => {
@@ -161,6 +163,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
 .dlg .row{flex-wrap:wrap}
 .dh{display:flex;align-items:center;gap:6px}.dh b{font-size:13px}
 .btn.x{color:#b91c1c;border-color:#fecaca;background:#fff5f5;font-weight:600}
+.btn.del{color:#b91c1c;border-color:#fecaca}.btn.del:hover{background:#fff1f2}
 .pn.dlgopen{min-height:min(460px,calc(100vh - 90px))}
 .pn.min .dlg{display:none}.pn.min.dlgopen{min-height:0}
 `;
@@ -180,7 +183,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
   <div class="hd"><b>VBDLIS Điền Nhanh <small style="font-weight:400;opacity:.8">v${PANEL_VERSION}</small></b><button id="rec" title="Ghi thao tác: ghi lại những gì bạn làm trên VBDLIS rồi xuất ra file để gửi người hỗ trợ">●</button><button id="min" title="Thu nhỏ">–</button><button id="close" title="Ẩn (Alt+Q để mở lại)">×</button></div>
   <div class="bd">
     <div class="row"><button class="btn" id="prev" title="TB trước">‹</button><select id="tbSel"></select><button class="btn" id="next" title="TB sau">›</button></div>
-    <div class="row"><button class="btn" id="scan" title="Liệt kê các nhãn/ô tìm thấy trên màn hình đang mở">Quét trường</button><button class="btn" id="dataBtn">Dữ liệu</button><button class="btn run" id="runAll" title="Chọn Phường/Xã, quy trình, điền Số biên nhận, lần lượt thêm từng thửa (bạn tự bấm Lưu), điền người nộp, đối chiếu bảng thửa. Không bấm nút Lưu nào.">▶ Chạy cả TB</button><span class="sp"></span><button class="btn" id="resetDone" title="Xóa dấu ✓ của TB này">Xóa dấu ✓</button></div>
+    <div class="row"><button class="btn" id="scan" title="Liệt kê các nhãn/ô tìm thấy trên màn hình đang mở">Quét trường</button><button class="btn" id="dataBtn">Dữ liệu</button><button class="btn run" id="runAll" title="Màn hình Tiếp nhận hồ sơ: chọn Phường/Xã, quy trình, Số biên nhận, thêm thửa đầu, điền người nộp. Cửa sổ Nhập đơn đăng ký: chọn Điều kiện cấp giấy, tích Đăng ký lần đầu, rồi lần lượt tự bấm Thêm → Cá nhân / Thửa đất và điền từng chủ, từng thửa. Bạn tự bấm mọi nút Lưu.">▶ Chạy cả TB</button><span class="sp"></span><button class="btn" id="resetDone" title="Xóa dấu ✓ của TB này">Xóa dấu ✓</button></div>
     <div class="note" id="note" style="display:none"></div>
     <div class="tabs">
       <button data-tab="bn">Biên nhận</button><button data-tab="chu">Chủ SD</button><button data-tab="thua">Thửa đất</button><button data-tab="gt">Giấy tờ</button>
@@ -564,6 +567,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
   const THUA_MODAL = /^((them|moi|thong tin|chi tiet|cap nhat|sua) )*thua dat\b/;
   const THUA_ADD = /^them( moi)? thua dat\b/; // chỉ cửa sổ THÊM mới được tận dụng khi chạy cả TB
   const DON_MODAL = /^nhap don dang ky\b/;
+  const CHU_MODAL = /^((thong tin|them|moi|cap nhat|sua|chi tiet) )*(ca nhan|chu su dung|nguoi su dung|chu so huu)\b/;
   const modalKey = (x) => x.key || norm(x.title || '').replace(/^[^a-z0-9]+/, '');
   const WAIT_MAX_MS = 20 * 60 * 1000; // chờ bạn bấm Lưu tối đa 20 phút
 
@@ -633,7 +637,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     S.stopReq = false;
     updateRunBtn();
     const log = [];
-    const title = `Chạy cả TB ${tb.tb} – ${(tb.nguoiNop && tb.nguoiNop.hoTen) || ''}`;
+    let title = `Chạy cả TB ${tb.tb} – ${(tb.nguoiNop && tb.nguoiNop.hoTen) || ''}`;
     let tail = '';
     let tailOk = '';
     const show = () =>
@@ -674,7 +678,183 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     const thua = tb.thua || [];
     const allMode = S.opts.thuaTN === 'tatca';
     let cur = null;
+
+    // ---------- Bước “Nhập đơn đăng ký” (Xử lý hồ sơ → Xử lý tác vụ) ----------
+    // Giống bạn làm tay: chọn Điều kiện cấp giấy + tích Đăng ký lần đầu; rồi với từng chủ, từng thửa:
+    // tự bấm “Thêm → Cá nhân / Thửa đất”, điền, CHỜ bạn kiểm tra và tự bấm Lưu, thấy đã vào đơn mới làm mục sau.
+    const topNow = async () => (await act('modalState')).find((x) => x.open) || null;
+    const donHas = async (it) => {
+      const f = (await act('donHas', { kind: it.kind, values: it.values })).find((x) => x.ok);
+      return f ? !!f.has : null; // null = cửa sổ “Nhập đơn đăng ký” không nằm trên cùng
+    };
+    const runDon = async () => {
+      title = `${title} · Nhập đơn đăng ký`;
+      cur = step('Kiểm tra dữ liệu (bước Nhập đơn đăng ký)');
+      const chuList = (tb.chu || []).map((p, i) => ({ p, i })).filter((x) => !x.p.tuyChon);
+      const optional = (tb.chu || []).filter((p) => p.tuyChon);
+      const errs = [];
+      if (!chuList.length) errs.push('chưa có chủ sử dụng');
+      chuList.forEach(({ p, i }) => {
+        if (!String(p.hoTen || '').trim()) errs.push(`chủ ${i + 1}: thiếu họ tên`);
+      });
+      if (!thua.length) errs.push('chưa có thửa nào');
+      thua.forEach((t, i) => errs.push(...thuaErrors(t, tb, `thửa ${i + 1} (${t.soThua}/${t.soTo})`)));
+      if (errs.length) throw new Error('dữ liệu TB chưa đủ/chưa đúng: ' + errs.join('; '));
+      const dlg = (await act('dialogState')).find((x) => x.open);
+      if (dlg) throw new Error(`trang đang hiện hộp “${dlg.titles[0]}” – trả lời hộp đó trước rồi bấm “Chạy cả TB” lại`);
+      cur.ok(
+        `${chuList.length} chủ, ${thua.length} thửa` +
+          (optional.length ? ` (bỏ qua chủ tùy chọn ${optional.map((p) => p.hoTen).join(', ')} – cần thì bấm Điền ở tab Chủ SD)` : '')
+      );
+      stopIf();
+
+      // 1. Điều kiện cấp giấy, Đăng ký lần đầu
+      const dv = buildValues('donDK', tb);
+      if (dv.dieuKienCapGiay || dv.dangKyLanDau) {
+        cur = step('Điều kiện cấp giấy, Đăng ký lần đầu');
+        const f = mustFill(await fillSec('donDK', dv));
+        cur.ok(f.results.map((x) => `${x.name}: ${x.value}`).join(', '));
+        if (f.results.some((x) => x.changed)) await sleep(800); // trang tự điền Mã đơn sau khi tích Đăng ký lần đầu
+      }
+
+      // 2–3. Từng chủ, rồi từng thửa
+      const items = [
+        ...chuList.map(({ p, i }) => ({ kind: 'chu', key: `chu${i}`, label: `Chủ ${i + 1}: ${p.hoTen}`, values: buildValues('chu', tb, i), win: CHU_MODAL })),
+        ...thua.map((t, i) => ({
+          kind: 'thua',
+          key: `thua${i}`,
+          label: `Thửa ${t.soThua} tờ ${t.soTo} (${i + 1}/${thua.length})`,
+          values: buildValues('thua', tb, i),
+          win: THUA_MODAL,
+        })),
+      ];
+      for (const it of items) {
+        stopIf();
+        cur = step(it.label);
+        const pendKey = `${tb.tb}|don-${it.key}|pending`;
+        const finish = (msg, skip) => {
+          delete S.done[pendKey];
+          S.done[`${tb.tb}|${it.key}`] = true;
+          saveUi();
+          if (skip) cur.skip(msg);
+          else cur.ok(msg);
+        };
+        await waitDialogs(cur);
+        const top = await topNow();
+        if (!top) throw new Error('cửa sổ “Nhập đơn đăng ký” đã đóng – mở lại (Xử lý tác vụ) rồi bấm “Chạy cả TB” để làm tiếp');
+        if (!DON_MODAL.test(modalKey(top)))
+          throw new Error(`đang mở ${top.name} – bấm Lưu hoặc Đóng cửa sổ đó để về “Nhập đơn đăng ký”, rồi bấm “Chạy cả TB” lại`);
+        if ((await donHas(it)) === true) {
+          finish('đã có trong đơn', true);
+          continue;
+        }
+        // lần trước đã mở cửa sổ cho mục này mà đơn vẫn chưa có → hỏi lại trước khi mở lại (tránh nhập trùng)
+        if (S.done[pendKey] === true) {
+          S.done[pendKey] = 'confirm';
+          saveUi();
+          throw new Error(
+            'lần trước cửa sổ đã đóng nhưng đơn chưa có mục này. Nếu bạn đã bấm Đóng thì bấm “▶ Chạy cả TB” lần nữa để mở lại; nếu đã bấm Lưu mà trong đơn không hiện thì kiểm tra tay'
+          );
+        }
+        // tự bấm “Thêm → Cá nhân / Thửa đất” rồi điền
+        let r = await send({ type: 'vbdlis-fill', section: it.kind, values: it.values });
+        if (!r || !r.ok) throw new Error(friendly((r && r.error) || 'Không chạy được'));
+        let pf = pickFrame(r, it.kind);
+        if (pf.dup) {
+          finish('đã có trong đơn', true);
+          continue;
+        }
+        if (!pf.f && pf.late) {
+          // đã bấm “Thêm” nhưng cửa sổ hiện chậm → chờ thêm tối đa 30 giây rồi điền vào cửa sổ đó (không bấm Thêm lần 2)
+          cur.wait('đã bấm “Thêm”, đang chờ cửa sổ hiện…');
+          let seen = false;
+          for (let k = 0; k < 30 && !seen; k++) {
+            stopIf();
+            await sleep(1000);
+            const tp = await topNow();
+            seen = !!tp && it.win.test(modalKey(tp));
+          }
+          if (!seen) throw new Error(pf.err);
+          r = await send({ type: 'vbdlis-fill', section: it.kind, values: it.values });
+          if (!r || !r.ok) throw new Error(friendly((r && r.error) || 'Không chạy được'));
+          pf = pickFrame(r, it.kind);
+        }
+        if (!pf.f) throw new Error(pf.err);
+        const bad = pf.f.results.filter((x) => !x.ok);
+        S.done[pendKey] = true; // đang chờ bạn bấm Lưu cho mục này
+        saveUi();
+        const waitMsg =
+          (bad.length ? `chưa điền được ${bad.map((x) => `${x.name} (${x.msg})`).join(', ')} – điền tay; ` : 'đã điền – ') +
+          'bạn kiểm tra rồi tự bấm “Lưu” trong cửa sổ (bấm “■ Dừng” để thôi)';
+        cur.wait(waitMsg);
+        // chờ bạn bấm Lưu: trang có thể hỏi (vd. “Giấy tờ tùy thân đã tồn tại…”) → bạn trả lời; xong thì về lại cửa sổ đơn
+        const t0 = Date.now();
+        let asked = '';
+        for (;;) {
+          stopIf();
+          const tp = await topNow();
+          const d = (await act('dialogState')).find((x) => x.open);
+          if (!tp) throw new Error('cửa sổ “Nhập đơn đăng ký” đã đóng – mở lại rồi bấm “Chạy cả TB” để làm tiếp');
+          if (DON_MODAL.test(modalKey(tp)) && !d) break;
+          if (d && asked !== d.titles[0]) {
+            asked = d.titles[0];
+            cur.wait(`trang đang hỏi “${asked}” – bạn tự trả lời, tiện ích chờ rồi làm tiếp`);
+          } else if (!d && asked) {
+            asked = '';
+            cur.wait(waitMsg);
+          }
+          if (Date.now() - t0 > WAIT_MAX_MS) throw new Error('chờ bấm Lưu quá 20 phút – đã dừng; bấm “Chạy cả TB” để làm tiếp');
+          await sleep(1000);
+        }
+        // đã vào đơn chưa (cây Chủ sử dụng / Thửa đất và tài sản – trang có thể nạp lại chậm)
+        let ok = false;
+        for (let k = 0; k < 16 && !ok; k++) {
+          await sleep(500);
+          ok = await donHas(it);
+          if (ok === null) {
+            const tp = await topNow();
+            if (!tp) throw new Error('cửa sổ “Nhập đơn đăng ký” đã đóng – mở lại (Xử lý tác vụ) rồi bấm “Chạy cả TB” để làm tiếp');
+            if (!DON_MODAL.test(modalKey(tp))) throw new Error(`đang mở ${tp.name} – xong cửa sổ đó rồi bấm “Chạy cả TB” để làm tiếp`);
+          }
+        }
+        if (!ok)
+          throw new Error(
+            'cửa sổ đã đóng nhưng đơn chưa có mục này (bấm Đóng?) – bấm “▶ Chạy cả TB” để làm tiếp (tiện ích sẽ hỏi lại trước khi mở lại)'
+          );
+        finish('đã vào đơn');
+      }
+
+      // 4. Đối chiếu: mọi chủ, mọi thửa đã có trong đơn
+      cur = step('Đối chiếu đơn với dữ liệu');
+      const miss = [];
+      for (const it of items) if ((await donHas(it)) !== true) miss.push(it.label);
+      if (miss.length) throw new Error('đơn còn thiếu: ' + miss.join('; '));
+      cur.ok(`${chuList.length} chủ, ${thua.length} thửa đã có trong đơn`);
+
+      // 5. Chỉ chỗ nút “Lưu thông tin đăng ký” (không bấm)
+      cur = step('Nút “Lưu thông tin đăng ký”');
+      if (anyOk(await act('highlight', { texts: ['Lưu thông tin đăng ký'], inModal: true })))
+        cur.ok('đã tô vàng – bạn kiểm tra rồi tự bấm, sau đó bấm “Hoàn tất” (1 lần là đủ)');
+      else cur.skip('không thấy nút – bạn tự bấm “Lưu thông tin đăng ký” rồi “Hoàn tất”');
+      cur = null;
+      tailOk =
+        '<div class="hint">Xong bước Nhập đơn đăng ký: bạn kiểm tra rồi tự bấm <b>Lưu thông tin đăng ký</b>, sau đó <b>Hoàn tất</b> (bấm 1 lần, thấy “Lưu đơn đăng ký thành công” là xong).</div>';
+    };
+
     try {
+      // Cửa sổ nào đang mở → chọn bước: “Nhập đơn đăng ký” hay màn hình Tiếp nhận hồ sơ
+      const top0 = (await act('modalState')).find((x) => x.open);
+      const k0 = top0 ? modalKey(top0) : '';
+      if (top0 && DON_MODAL.test(k0)) {
+        await runDon();
+        return;
+      }
+      if (top0 && (CHU_MODAL.test(k0) || (THUA_MODAL.test(k0) && !THUA_ADD.test(k0))))
+        throw new Error(`đang mở ${top0.name} – kiểm tra rồi bấm Lưu (hoặc Đóng) để về cửa sổ trước, rồi bấm “Chạy cả TB” lại`);
+      if (top0 && /^quy trinh xu ly\b/.test(k0))
+        throw new Error(
+          'đang mở cửa sổ “Quy trình xử lý” – muốn chạy bước Nhập đơn đăng ký thì bấm “Xử lý tác vụ” để mở cửa sổ đó rồi bấm “Chạy cả TB”'
+        );
       // 0. Kiểm tra trước – không ghi gì lên trang nếu có vấn đề
       cur = step('Kiểm tra dữ liệu và màn hình');
       const errs = checkData(tb);
@@ -985,6 +1165,29 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     }, 400)
   );
 
+  async function removeTbs(ids) {
+    const all = ids === null;
+    const gone = all ? S.data.map((x) => String(x.tb)) : ids;
+    const k0 = S.data.findIndex((x) => String(x.tb) === String(S.cur));
+    gone.forEach((id) => {
+      deletedTbs.add(id);
+      dirtyTbs.delete(id);
+      Object.keys(S.done)
+        .filter((k) => k.startsWith(id + '|'))
+        .forEach((k) => delete S.done[k]);
+    });
+    const latest = (await store.get('tbData')).tbData || S.data; // xóa trên bản mới nhất (tab khác có thể vừa nạp thêm)
+    S.data = all ? [] : latest.filter((x) => !gone.includes(String(x.tb))).sort(byTb);
+    if (!S.data.some((x) => String(x.tb) === String(S.cur))) {
+      const next = S.data[Math.min(Math.max(k0, 0), S.data.length - 1)];
+      S.cur = next ? next.tb : null;
+    }
+    await store.set({ tbData: S.data });
+    saveUi();
+    setResult('');
+    render();
+  }
+
   function openData() {
     const old = pn.querySelector('.dlg');
     if (old) {
@@ -997,6 +1200,8 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
       <div class="hint">Dán dữ liệu một TB hoặc danh sách TB. “Gộp vào” thay TB trùng số và giữ các TB khác.</div>
       <textarea id="dlgTxt" spellcheck="false"></textarea>
       <div class="row"><button class="btn pri" id="dlgMerge">Gộp vào</button><button class="btn" id="dlgReplace">Thay toàn bộ</button><button class="btn" id="dlgCopy">Sao chép hiện có</button><button class="btn" id="dlgSample">Nạp mẫu</button><button class="btn" id="dlgRec" title="Xuất lại file của lần ghi thao tác gần nhất">Xuất bản ghi</button><span class="sp"></span><button class="btn" id="dlgClose2">Đóng</button></div>
+      <div class="row"><span class="muted">Xóa:</span><button class="btn del" id="dlgDelOne" title="Xóa TB đang chọn ở ô trên cùng của bảng điền">TB đang chọn</button><button class="btn del" id="dlgDelAll" title="Xóa mọi TB trong tiện ích">Tất cả TB</button><button class="btn del" id="dlgDelRec" title="Xóa bản ghi thao tác đã ghi">Bản ghi thao tác</button></div>
+      <div class="hint">Xóa chỉ xóa dữ liệu trong tiện ích (trên máy này), không đụng gì trên VBDLIS. Muốn có lại: dán JSON rồi “Gộp vào”, hoặc “Nạp mẫu”.</div>
       <div id="dlgMsg" class="hint"></div>`;
     d.style.top = ($('.hd').offsetHeight || 37) + 'px'; // không che thanh tiêu đề (nút –, × vẫn bấm được)
     pn.classList.add('dlgopen');
@@ -1020,11 +1225,11 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     d.addEventListener('click', async (e) => {
       const id = e.target.id;
       const txt = d.querySelector('#dlgTxt').value.trim();
-      if (['dlgMerge', 'dlgReplace'].includes(id) && S.running) {
-        msg('Đang “Chạy cả TB” – bấm “■ Dừng” trước khi nạp dữ liệu.', true);
+      if (['dlgMerge', 'dlgReplace', 'dlgDelOne', 'dlgDelAll'].includes(id) && S.running) {
+        msg('Đang “Chạy cả TB” – bấm “■ Dừng” trước khi nạp / xóa dữ liệu.', true);
         return;
       }
-      if (['dlgMerge', 'dlgReplace', 'dlgSample'].includes(id) && !isAlive()) {
+      if (['dlgMerge', 'dlgReplace', 'dlgSample', 'dlgDelOne', 'dlgDelAll', 'dlgDelRec'].includes(id) && !isAlive()) {
         msg('Chưa lưu được: ' + DEAD_MSG + ' (Nội dung đã dán vẫn còn trong ô – sao chép lại trước khi mở bảng mới.)', true);
         return;
       }
@@ -1048,6 +1253,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
             });
           }
           arr.sort(byTb);
+          items.forEach((x) => deletedTbs.delete(String(x.tb))); // nạp lại TB đã xóa → cho lưu bình thường
           S.data = arr;
           S.cur = items[0].tb;
           await store.set({ tbData: S.data });
@@ -1066,6 +1272,27 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
           if (!i.has) return msg('Chưa có bản ghi thao tác nào – bấm nút ● trên thanh tiêu đề để ghi.', true);
           const res = await R.exportFile();
           msg(`Đã xuất “${res.name}” (${res.events} bước) vào thư mục Tải xuống.`);
+        } else if (id === 'dlgDelOne') {
+          const tb = curTB();
+          if (!tb) return msg('Không còn TB nào.', true);
+          const who = (tb.nguoiNop && tb.nguoiNop.hoTen) || (tb.chu && tb.chu[0] && tb.chu[0].hoTen) || '';
+          if (!confirm(`Xóa TB ${tb.tb}${who ? ' – ' + who : ''} khỏi tiện ích?\n\nChỉ xóa trong tiện ích, không đụng gì trên VBDLIS.`)) return;
+          await removeTbs([String(tb.tb)]);
+          msg(`Đã xóa TB ${tb.tb}. Còn ${S.data.length} TB.`);
+        } else if (id === 'dlgDelAll') {
+          if (!S.data.length) return msg('Không còn TB nào.', true);
+          if (!confirm(`Xóa TẤT CẢ ${S.data.length} TB khỏi tiện ích?\n\nChỉ xóa trong tiện ích, không đụng gì trên VBDLIS. Muốn có lại thì dán JSON hoặc bấm “Nạp mẫu”.`)) return;
+          await removeTbs(null);
+          msg('Đã xóa hết dữ liệu TB. Dán JSON rồi bấm “Gộp vào” (hoặc “Nạp mẫu”) để có dữ liệu mới.');
+        } else if (id === 'dlgDelRec') {
+          const R = await recorder();
+          if (!R) return msg('Không mở được bộ ghi thao tác trên trang này.', true);
+          const i = await R.info();
+          if (i.on) return msg('Đang ghi thao tác – bấm nút ● để dừng (và xuất file) trước khi xóa.', true);
+          if (!i.has) return msg('Không có bản ghi thao tác nào.', true);
+          if (!confirm(i.exported ? 'Xóa bản ghi thao tác?' : 'Bản ghi thao tác CHƯA được xuất file. Vẫn xóa?')) return;
+          await R.clear();
+          msg('Đã xóa bản ghi thao tác.');
         } else if (id === 'dlgSample') {
           const r = await send({ type: 'vbdlis-sample' });
           if (!r || !r.ok) return msg((r && r.error) || 'Không nạp được dữ liệu mẫu.', true);
@@ -1275,7 +1502,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     S.done = r.tbDone || {};
     S.cur = r.tbCur;
     S.tab = TABS[r.tbTab] ? r.tbTab : 'bn';
-    if (!S.data.length) {
+    if (r.tbData === undefined) {
       const s = await send({ type: 'vbdlis-sample' });
       if (s && s.ok) {
         S.data = s.data.sort(byTb);

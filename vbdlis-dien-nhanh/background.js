@@ -12,7 +12,7 @@ async function loadSample() {
 
 chrome.runtime.onInstalled.addListener(async () => {
   const { tbData } = await chrome.storage.local.get('tbData');
-  if (!tbData || !tbData.length) {
+  if (tbData === undefined) { // chỉ khi chưa có dữ liệu bao giờ (bạn đã xóa hết thì để trống)
     try {
       await chrome.storage.local.set({ tbData: await loadSample() });
     } catch (e) {

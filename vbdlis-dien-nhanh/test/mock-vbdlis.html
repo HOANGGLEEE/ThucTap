@@ -43,6 +43,7 @@
   <button onclick="window.__fromDon=false;openM('mCaNhan')">Mở: Thông tin cá nhân</button>
   <button onclick="window.__fromDon=false;openM('mThua')">Mở: Thông tin thửa đất</button>
   <button onclick="openDon()">Mở: Nhập đơn đăng ký</button>
+  <button onclick="openQuyTrinh()">Mở: Quy trình xử lý (rồi Xử lý tác vụ)</button>
   <button onclick="openM('mQuet')">Mở: Thông tin hồ sơ quét</button>
   <button onclick="openM('mThemThua')">Mở: Thêm thửa đất (VBDLIS thật)</button>
 </p>
@@ -244,7 +245,8 @@
 </div></div>
 
 <!-- ============ NHẬP ĐƠN ĐĂNG KÝ (giống VBDLIS thật) ============ -->
-<div class="modal" id="mDon"><div class="modal-dialog">
+<div id="modalHost" style="position:relative;z-index:1100">
+<div class="modal" id="mDon" style="z-index:1060"><div class="modal-dialog">
   <div class="modal-header"><h4 class="modal-title">Nhập đơn đăng ký</h4></div>
   <div class="modal-body">
     <fieldset><legend>Thông tin đơn đăng ký</legend>
@@ -271,6 +273,23 @@
     </fieldset>
   </div>
   <div class="modal-footer"><button id="btnLuuDangKy" onclick="log('!!! NÚT LƯU THÔNG TIN ĐĂNG KÝ ĐÃ BỊ BẤM !!!')">Lưu thông tin đăng ký</button> <a class="btn" id="btnHoanTat" onclick="log('!!! NÚT HOÀN TẤT ĐÃ BỊ BẤM !!!')">Hoàn tất</a> <a class="btn" onclick="closeM()">Đóng</a></div>
+</div></div>
+<!-- ============ QUY TRÌNH XỬ LÝ (vẫn mở, nằm dưới cửa sổ Nhập đơn đăng ký) ============ -->
+<div class="modal" id="mQuyTrinh" style="z-index:1050"><div class="modal-dialog" style="width:700px">
+  <div class="modal-header"><button type="button" class="close" onclick="closeM()">×</button><h4 class="modal-title">Quy trình xử lý</h4></div>
+  <div class="modal-body">
+    <div class="row"><div class="col"><div class="ctl"><input type="text" id="qtTimTacVu" placeholder="Nhập tên tác vụ cần tìm..."></div></div></div>
+    <table><thead><tr><th>STT</th><th>Công việc</th><th>Thời gian xử lý</th><th>Thao tác</th><th>Đã xử lý</th></tr></thead>
+    <tbody><tr><td>1</td><td>Chuyên viên</td><td>8 giờ</td><td><a class="btn" id="btnXuLyTacVu" onclick="openDonTuQuyTrinh()">Xử lý tác vụ</a></td><td><input type="checkbox"></td></tr></tbody></table>
+  </div>
+  <div class="modal-footer"><button class="btn">Chuyển tiếp</button> <button class="btn" onclick="closeM()">Đóng</button></div>
+</div></div>
+</div>
+<!-- ============ HỘP HỎI KIỂU jconfirm (không có ô nhập) ============ -->
+<div class="jconfirm" id="jcGiayTo" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.2)"><div class="jconfirm-box" role="dialog" style="width:436px;margin:200px auto;background:#fff;padding:12px;border-radius:4px">
+  <div class="jconfirm-title-c"><span class="jconfirm-title">Thông báo</span></div>
+  <div class="jconfirm-content">Giấy tờ tùy thân đã tồn tại trong hệ thống! Bạn có thật sự muốn tiếp tục lưu hay không?</div>
+  <div class="jconfirm-buttons"><button class="btn btn-orange" id="jcDongY" onclick="jcTraLoi(true)">Đồng ý</button> <button class="btn" onclick="jcTraLoi(false)">Bỏ qua</button></div>
 </div></div>
 <div class="modal-backdrop" id="bd"></div>
 
@@ -338,11 +357,20 @@
   }
   function luuCaNhanDon(){
     if (!window.__fromDon) { log('(người dùng bấm Lưu – Thông tin cá nhân)'); closeM(); return; }
+    log('(người dùng bấm Lưu – trang hỏi giấy tờ đã tồn tại)');
+    document.getElementById('jcGiayTo').style.display = 'block';
+  }
+  function jcTraLoi(ok){
+    document.getElementById('jcGiayTo').style.display = 'none';
+    if (!ok) { log('(người dùng bấm Bỏ qua)'); return; }
     const v = (id) => document.getElementById(id).value.trim();
     $('#treeChuSuDung ul').append(`<li>Bà: ${v('cnHoTen')} - Năm sinh:${v('cnNamSinh')} - Địa chỉ: ${v('cnDiaChi')} - Số CCCD:${v('cnSoGT')}</li>`);
-    log('(người dùng bấm Lưu – thêm chủ ' + v('cnHoTen') + ' vào đơn)');
+    log('(người dùng bấm Đồng ý – thêm chủ ' + v('cnHoTen') + ' vào đơn)');
     window.__fromDon = false; openM('mDon');
   }
+  // "Quy trình xử lý" → "Xử lý tác vụ": cửa sổ đơn mở đè lên, cửa sổ quy trình VẪN mở bên dưới
+  function openQuyTrinh(){ window.__fromDon = false; openM('mQuyTrinh'); }
+  function openDonTuQuyTrinh(){ document.getElementById('mDon').classList.add('show'); log('(trang mở Nhập đơn đăng ký, Quy trình xử lý vẫn mở bên dưới)'); }
   function openM(id){ closeM(); document.getElementById(id).classList.add('show'); document.getElementById('bd').classList.add('show'); }
   function closeM(){ document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show')); document.getElementById('bd').classList.remove('show'); }
   // Bẫy tiêu điểm giống Bootstrap: tiêu điểm ra ngoài cửa sổ con thì bị kéo về

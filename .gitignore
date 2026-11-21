@@ -1,1 +1,10 @@
 .claude/
+# Dữ liệu cá nhân (CCCD, tên, địa chỉ) – KHÔNG đưa lên git; máy tải về sẽ có dữ liệu trống
+vbdlis-dien-nhanh/data/*
+!vbdlis-dien-nhanh/data/.gitkeep
+# Hồ sơ quét
+TB */
+*.pdf
+*.zip
+*.xlsx
+*.skill

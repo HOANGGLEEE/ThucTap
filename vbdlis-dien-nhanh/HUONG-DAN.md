@@ -99,6 +99,7 @@ Mở đúng màn hình hoặc cửa sổ đó rồi bấm **Quét trường**. B
 ## Thêm dữ liệu TB mới
 **Cách 1 – thư mục `data`:** tiện ích tự đọc file **`data/du-lieu.json`** mỗi lần mở bảng (Alt+Q): TB mới được thêm, TB bạn chưa sửa được cập nhật, TB bạn đã sửa trong bảng được giữ nguyên, TB bạn đã xóa không tự thêm lại. Khi nhờ Claude làm dữ liệu TB mới, file này luôn được cập nhật kèm theo.
 **Cách 2 – file .json lẻ** (vd `tb-1896.json`): **kéo thả file vào bảng điền**, hoặc bấm **Dữ liệu → Mở file…** (chọn được nhiều file). Lưu ý: trình duyệt không cho tiện ích tự xem các file lẻ trong thư mục `data`, nên file lẻ phải kéo thả / Mở file (hoặc gộp vào `du-lieu.json`).
+**Gộp file lẻ vào du-lieu.json bằng Claude:** skill **tao-du-lieu-vbdlis** (đã cài trong Claude) – nói “cập nhật du-lieu.json” (gộp mọi file `TB_xxxx.json` trong `data`) hoặc “làm json TB 1896” (đọc thư mục scan `TB 1896` rồi tạo `TB_1896.json` và gộp vào). Thư mục `data` mà thiếu `du-lieu.json` thì bảng điền báo “Thư mục data: không đọc được file data/du-lieu.json”.
 **Cách 3 – dán:** bấm **Dữ liệu**, dán JSON vào, rồi bấm **Gộp vào**. Lỗi nhỏ khi gõ/sửa tay (thiếu dấu phẩy cuối dòng, dấu phẩy thừa, diện tích viết 56,5 không có ngoặc kép, ngoặc kép kiểu Word “ ”) được tự sửa; lỗi khác thì tiện ích báo đúng dòng, cột sai. TB trùng số sẽ được thay, các TB khác giữ nguyên. Đóng hộp này bằng nút **✕ Đóng** ở góc trên (hoặc phím Esc). Cách nhanh nhất là gửi thư mục scan cho Claude và nhờ “xuất JSON cho tiện ích VBDLIS”. Mẫu một TB:
 
 ```json

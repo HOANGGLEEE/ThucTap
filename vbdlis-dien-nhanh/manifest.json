@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VBDLIS Điền Nhanh",
-  "version": "1.9.1",
+  "version": "1.9.3",
   "description": "Điền nhanh biên nhận, chủ sử dụng, thửa đất và giấy tờ vào VBDLIS từ dữ liệu TBXN. Không tự bấm Lưu.",
   "permissions": [
     "activeTab",

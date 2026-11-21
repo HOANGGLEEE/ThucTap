@@ -7,14 +7,15 @@ importScripts('page-setter.js'); // định nghĩa vbdlisPageSetter, vbdlisFireS
 
 // Đọc file dữ liệu TB trong thư mục data của tiện ích (đọc thẳng từ đĩa – sửa file là lần mở bảng sau thấy ngay)
 async function loadDataText() {
+  // Chưa có file (máy mới tải tiện ích từ git – dữ liệu không đưa lên git) → coi như dữ liệu trống
   let res;
   try {
     res = await fetch(chrome.runtime.getURL(DATA_FILE));
   } catch (e) {
-    throw new Error(`không đọc được file ${DATA_FILE} (${e.message}) – kiểm tra file còn trong thư mục data của tiện ích rồi bấm ⟳ tiện ích`);
+    return '[]';
   }
-  if (!res.ok) throw new Error(`không đọc được file ${DATA_FILE} (mã ${res.status}) – file có còn trong thư mục data không?`);
-  return (await res.text()).replace(/^\uFEFF/, ''); // bỏ BOM (file lưu từ Notepad / Excel)
+  if (!res.ok) return '[]';
+  return (await res.text()).replace(/^﻿/, '').trim() || '[]'; // bỏ BOM (file lưu từ Notepad / Excel)
 }
 async function loadSample() {
   return JSON.parse(await loadDataText());

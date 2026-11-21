@@ -17,7 +17,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.9.1'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.9.3'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   const old = document.getElementById(HOST_ID);
   if (old) {
     // Bảng đang mở cùng phiên bản và còn kết nối → bấm biểu tượng là ẩn/hiện; ngược lại thay bảng mới
@@ -605,17 +605,25 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
     return f;
   }
   // Dữ liệu TB phải đủ trước khi đụng vào trang
-  function checkData(tb) {
+  // thuaCan: các thửa bước này sẽ thêm (bước tiếp nhận mặc định chỉ thửa đầu → thửa khác thiếu diện tích không chặn)
+  function checkData(tb, thuaCan) {
     const n = tb.nguoiNop || {};
     const errs = [];
     if (!String(tb.soBienNhan || '').trim()) errs.push('thiếu Số biên nhận');
     if (!String(n.hoTen || '').trim()) errs.push('thiếu tên người nộp');
-    if (!String(n.soGiayTo || '').trim()) errs.push('thiếu số giấy tờ người nộp');
     if (!String(n.diaChi || '').trim()) errs.push('thiếu địa chỉ người nộp');
     const thua = tb.thua || [];
     if (!thua.length) errs.push('chưa có thửa nào');
-    thua.forEach((t, i) => errs.push(...thuaErrors(t, tb, `thửa ${i + 1} (${t.soThua}/${t.soTo})`)));
+    (thuaCan || thua).forEach((t) => errs.push(...thuaErrors(t, tb, `thửa ${thua.indexOf(t) + 1} (${t.soThua}/${t.soTo})`)));
     return errs;
+  }
+  // dữ liệu thửa còn thiếu (để nhắc bạn điền tay khi tới thửa đó)
+  function thuaGaps(t, tb) {
+    const g = [];
+    if (normArea(t.dienTich).err) g.push('diện tích');
+    if (!String(t.mdsd || '').trim()) g.push('mục đích sử dụng');
+    if (!String(t.diaChi || (tb.nguoiNop && tb.nguoiNop.diaChi) || '').trim()) g.push('địa chỉ');
+    return g;
   }
 
   function updateRunBtn() {
@@ -701,13 +709,20 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         if (!String(p.hoTen || '').trim()) errs.push(`chủ ${i + 1}: thiếu họ tên`);
       });
       if (!thua.length) errs.push('chưa có thửa nào');
-      thua.forEach((t, i) => errs.push(...thuaErrors(t, tb, `thửa ${i + 1} (${t.soThua}/${t.soTo})`)));
       if (errs.length) throw new Error('dữ liệu TB chưa đủ/chưa đúng: ' + errs.join('; '));
+      // thửa thiếu số thửa / số tờ: không thêm được → bỏ qua; thiếu diện tích / mục đích: vẫn mở, bạn điền tay
+      const noId = thua.filter((t) => !String(t.soThua || '').trim() || !String(t.soTo || '').trim());
+      const gapNote = thua
+        .map((t, i) => ({ t, i, g: thuaGaps(t, tb) }))
+        .filter((x) => x.g.length && !noId.includes(x.t))
+        .map((x) => `${x.t.soThua}/${x.t.soTo}: ${x.g.join(', ')}`);
       const dlg = (await act('dialogState')).find((x) => x.open);
       if (dlg) throw new Error(`trang đang hiện hộp “${dlg.titles[0]}” – trả lời hộp đó trước rồi bấm “Chạy cả TB” lại`);
       cur.ok(
         `${chuList.length} chủ, ${thua.length} thửa` +
-          (optional.length ? ` (bỏ qua chủ tùy chọn ${optional.map((p) => p.hoTen).join(', ')} – cần thì bấm Điền ở tab Chủ SD)` : '')
+          (optional.length ? ` (bỏ qua chủ tùy chọn ${optional.map((p) => p.hoTen).join(', ')} – cần thì bấm Điền ở tab Chủ SD)` : '') +
+          (noId.length ? ` · bỏ qua ${noId.length} thửa thiếu số thửa/số tờ trong dữ liệu` : '') +
+          (gapNote.length ? ` · dữ liệu còn thiếu (điền tay khi tới thửa đó): ${gapNote.join('; ')}` : '')
       );
       stopIf();
 
@@ -723,13 +738,17 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
       // 2–3. Từng chủ, rồi từng thửa
       const items = [
         ...chuList.map(({ p, i }) => ({ kind: 'chu', key: `chu${i}`, label: `Chủ ${i + 1}: ${p.hoTen}`, values: buildValues('chu', tb, i), win: CHU_MODAL })),
-        ...thua.map((t, i) => ({
-          kind: 'thua',
-          key: `thua${i}`,
-          label: `Thửa ${t.soThua} tờ ${t.soTo} (${i + 1}/${thua.length})`,
-          values: buildValues('thua', tb, i),
-          win: THUA_MODAL,
-        })),
+        ...thua
+          .map((t, i) => ({
+            kind: 'thua',
+            key: `thua${i}`,
+            label: `Thửa ${t.soThua} tờ ${t.soTo} (${i + 1}/${thua.length})`,
+            values: buildValues('thua', tb, i),
+            win: THUA_MODAL,
+            gaps: thuaGaps(t, tb),
+            t,
+          }))
+          .filter((it) => !noId.includes(it.t)),
       ];
       for (const it of items) {
         stopIf();
@@ -787,7 +806,9 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         S.done[pendKey] = true; // đang chờ bạn bấm Lưu cho mục này
         saveUi();
         const waitMsg =
-          (bad.length ? `chưa điền được ${bad.map((x) => `${x.name} (${x.msg})`).join(', ')} – điền tay; ` : 'đã điền – ') +
+          (it.gaps && it.gaps.length ? `dữ liệu chưa có ${it.gaps.join(', ')} – bạn điền tay; ` : '') +
+          (bad.length && !(it.gaps && it.gaps.length) ? `chưa điền được ${bad.map((x) => `${x.name} (${x.msg})`).join(', ')} – điền tay; ` : '') +
+          (!bad.length && !(it.gaps && it.gaps.length) ? 'đã điền – ' : '') +
           'bạn kiểm tra rồi tự bấm “Lưu” trong cửa sổ (bấm “■ Dừng” để thôi)';
         cur.wait(waitMsg);
         // chờ bạn bấm Lưu: trang có thể hỏi (vd. “Giấy tờ tùy thân đã tồn tại…”) → bạn trả lời; xong thì về lại cửa sổ đơn
@@ -832,7 +853,10 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
       const miss = [];
       for (const it of items) if ((await donHas(it)) !== true) miss.push(it.label);
       if (miss.length) throw new Error('đơn còn thiếu: ' + miss.join('; '));
-      cur.ok(`${chuList.length} chủ, ${thua.length} thửa đã có trong đơn`);
+      cur.ok(
+        `${chuList.length} chủ, ${items.length - chuList.length} thửa đã có trong đơn` +
+          (noId.length ? ` · còn ${noId.length} thửa dữ liệu thiếu số thửa/số tờ – bạn tự thêm` : '')
+      );
 
       // 5. Chỉ chỗ nút “Lưu thông tin đăng ký” (không bấm)
       cur = step('Nút “Lưu thông tin đăng ký”');
@@ -860,8 +884,9 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         );
       // 0. Kiểm tra trước – không ghi gì lên trang nếu có vấn đề
       cur = step('Kiểm tra dữ liệu và màn hình');
-      const errs = checkData(tb);
+      const errs = checkData(tb, allMode ? thua : thua.slice(0, 1));
       if (errs.length) throw new Error('dữ liệu TB chưa đủ/chưa đúng: ' + errs.join('; '));
+      const thieuGT = !String((tb.nguoiNop && tb.nguoiNop.soGiayTo) || '').trim();
       const open0 = (await act('modalState')).find((x) => x.open);
       if (open0 && !THUA_ADD.test(modalKey(open0)))
         throw new Error(`đang mở ${open0.name} – đóng cửa sổ đó rồi bấm “Chạy cả TB” lại`);
@@ -882,7 +907,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         if (have && normVal(have) !== normVal(want))
           throw new Error(`ô “${label}” trên trang đang là “${have}” (không phải TB ${tb.tb}) – mở hồ sơ mới hoặc xóa ô đó`);
       }
-      cur.ok();
+      cur.ok(thieuGT ? 'dữ liệu chưa có số giấy tờ người nộp – bạn điền tay ô đó' : '');
       stopIf();
 
       // 1. Phường/Xã (đã có quy trình trong bảng thì coi như đã chọn)
@@ -1045,6 +1070,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
         ['Địa chỉ', v.diaChi, true],
         ['Địa chỉ tài sản', v.diaChiTaiSan, false],
       ]) {
+        if (!String(want || '').trim()) continue; // dữ liệu trống → bạn điền tay, không so
         const have = await readField(label);
         if (have === null) {
           if (required) throw new Error(`không đọc lại được ô “${label}” trên trang`);
@@ -1496,6 +1522,7 @@ pre{white-space:pre-wrap;font:11.5px/1.4 Consolas,monospace;background:#f8fafc;b
             return msg('File data/du-lieu.json bị lỗi – ' + e.message, true);
           }
           d.querySelector('#dlgTxt').value = JSON.stringify(items, null, 2);
+          if (!items.length) return msg('Thư mục data chưa có dữ liệu (chưa có file data/du-lieu.json). Kéo thả file .json vào bảng, bấm “Mở file…” hoặc dán JSON.', true);
           msg(`Đã đưa ${items.length} TB của file data/du-lieu.json vào ô. Bấm “Gộp vào” (hoặc “Thay toàn bộ”).`);
         }
       } catch (err) {

@@ -3,7 +3,7 @@
 // Không bao giờ bấm nút Lưu. Chỉ bấm nút MỞ cửa sổ nhập: "+ Thêm thửa đất" (màn hình tiếp nhận) và
 // "Thêm → Cá nhân" / "Thêm → Thửa đất" (cửa sổ Nhập đơn đăng ký).
 (() => {
-  const VERSION = 15;
+  const VERSION = 17;
   if (window.__vbdlis && window.__vbdlis.v === VERSION) return;
   const TOKEN = Math.random().toString(36).slice(2, 8); // đánh dấu riêng cho lần nạp này (tránh nhầm dấu cũ)
   let lastFill = null; // kết quả lần điền gần nhất (cho bước kiểm tra lại)
@@ -82,7 +82,8 @@
           let has;
           if (digits.length >= 9) has = new RegExp(`(^|\\D)${digits}(\\D|$)`).test(t);
           else {
-            const nt = norm(t);
+            // cây ghi “Năm sinh:1957” → bỏ dấu hai chấm trước khi so
+            const nt = norm(t).replace(/\s*:\s*/g, ' ');
             has = !!v.hoTen && nt.includes(norm(v.hoTen)) && (!v.namSinh || nt.includes('nam sinh ' + v.namSinh));
           }
           return has
@@ -199,6 +200,37 @@
   const treeText = (root, id) => {
     const t = root.querySelector('#' + id);
     return t ? (t.textContent || '').replace(/\s+/g, ' ') : null;
+  };
+  // từng nút của cây (jstree: li > a.jstree-anchor, con nằm trong ul lồng) kèm độ sâu; null = không có cây
+  const treeNodes = (root, id) => {
+    const t = root.querySelector('#' + id);
+    if (!t) return null;
+    const out = [];
+    const lis = t.querySelectorAll('li');
+    if (!lis.length) {
+      String(t.innerText || t.textContent || '')
+        .split(/\n+/)
+        .map((s) => s.replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .forEach((text) => out.push({ text, level: 0 }));
+      return out;
+    }
+    for (const li of lis) {
+      const a = li.querySelector(':scope > a, :scope > .jstree-anchor');
+      let text;
+      if (a) text = a.textContent;
+      else {
+        const c = li.cloneNode(true);
+        c.querySelectorAll('ul, ol').forEach((x) => x.remove());
+        text = c.textContent;
+      }
+      text = String(text || '').replace(/\s+/g, ' ').trim();
+      if (!text) continue;
+      let level = 0;
+      for (let p = li.parentElement; p && p !== t; p = p.parentElement) if (p.tagName === 'LI') level++;
+      out.push({ text, level });
+    }
+    return out;
   };
 
   const zIndexOf = (el) => {
@@ -643,6 +675,14 @@
         const tree = treeText(m, msg.kind === 'chu' ? 'treeChuSuDung' : 'treeTaiSan');
         return { ...base, ok: true, tree: tree !== null, has: !!sec.menu.dup(m, msg.values || {}) };
       }
+      case 'donRead': {
+        // đọc cây Chủ sử dụng / Thửa đất và tài sản của cửa sổ “Nhập đơn đăng ký” (để biết hồ sơ của TB nào, đối chiếu số liệu)
+        const m = topModal();
+        if (!m || !/^nhap don dang ky\b/.test(titleKey(modalTitle(m)))) return { ...base, ok: false };
+        // jstree đang nạp dữ liệu: nút “Loading …” (li.jstree-loading)
+        const loading = !!m.querySelector('#treeChuSuDung .jstree-loading, #treeTaiSan .jstree-loading');
+        return { ...base, ok: true, loading, chu: treeNodes(m, 'treeChuSuDung'), thua: treeNodes(m, 'treeTaiSan') };
+      }
       case 'dialogState': {
         // hộp hỏi / thông báo của trang chỉ có nút, không có ô nhập (vd. “Cập nhật địa chỉ tài sản: Đồng ý / Không”)
         const ds = [...document.querySelectorAll(MODAL_SEL)].filter(
@@ -679,6 +719,22 @@
         const id = `${TOKEN}-${++seq}`;
         sel.setAttribute('data-vbdlis-id', id);
         return { ...base, ok: true, id };
+      }
+      case 'probe':
+        return { ...base, ...probe() };
+      case 'focusSave': {
+        // đặt sẵn con trỏ vào nút “Lưu” của cửa sổ đang mở (KHÔNG bấm) – bạn kiểm tra xong tự nhấn Enter
+        const tm = topModal();
+        if (!tm) return { ...base, ok: false };
+        const b = buttonsByText(msg.texts || ['Lưu'], tm, [])[0];
+        if (!b) return { ...base, ok: false };
+        try {
+          b.focus({ preventScroll: true });
+        } catch (e) {}
+        const prev = b.style.boxShadow;
+        b.style.boxShadow = '0 0 0 4px #f59e0b';
+        setTimeout(() => (b.style.boxShadow = prev), 15000);
+        return { ...base, ok: document.activeElement === b };
       }
       case 'highlight': {
         const tm = msg.inModal ? topModal() : null;
@@ -782,6 +838,72 @@
     if (!sec.expect) return true;
     if (scope.title) return sec.expect.test(titleKey(scope.title));
     return (sec.keyLabels || []).some((L) => findLabels(scope, L).length); // cửa sổ không có tiêu đề → nhận theo nhãn chính
+  }
+
+  // ---------- Kiểm tra tiện ích (VBDLIS đổi giao diện → biết ngay ô nào tiện ích không còn tìm thấy) ----------
+  // Chỉ đọc trang, không điền, không bấm gì. Tìm ô giống hệt lúc điền (nhãn → ô; không có nhãn thì chữ mờ gợi ý).
+  function locate(f, scope) {
+    let labs = [];
+    for (const L of f.labels) {
+      labs = findLabels(scope, L);
+      if (labs.length) break;
+    }
+    if (labs.length) {
+      const lab = labs[f.nth || 0] || labs[0];
+      const c = f.kind === 'checkbox' && f.checkText ? findCheckByText(lab, f.checkText, scope) : findControl(lab, f.kind, scope);
+      return c ? { ok: true } : { ok: false, why: 'thấy nhãn nhưng không thấy ô nhập' };
+    }
+    for (const L of f.labels) if (findByPlaceholder(scope, L, f.kind)) return { ok: true };
+    return { ok: false, why: 'không thấy nhãn' };
+  }
+  const NOT_USED = new Set(['ngaySinh']); // tiện ích không điền các ô này
+  function probe() {
+    const m = topModal();
+    const key = m ? titleKey(modalTitle(m)) : '';
+    const items = [];
+    const fields = (secKeys, scope) => {
+      const seen = new Set();
+      for (const k of secKeys)
+        for (const f of SECTIONS[k].fields) {
+          if (NOT_USED.has(f.key) || seen.has(f.name)) continue;
+          seen.add(f.name);
+          const r = locate(f, scope);
+          items.push({ name: 'Ô “' + f.name + '”', ok: r.ok, optional: !!f.optional, why: r.why || '' });
+        }
+    };
+    const thing = (name, ok, optional, why) => items.push({ name, ok: !!ok, optional: !!optional, why: ok ? '' : why || 'không thấy' });
+    let screen;
+    if (!m) {
+      screen = 'màn hình Tiếp nhận hồ sơ';
+      const scope = getScope('page');
+      fields(['donVi', 'quyTrinh', 'bienNhan'], scope);
+      fields(['giayToPage'], scope);
+      items[items.length - 1].optional = true;
+      const t = readThuaTable();
+      thing('Bảng thửa (cột Số thửa, Số tờ)', t.found, false, 'không thấy bảng có cột Số thửa / Số tờ');
+      thing('Cột Diện tích trong bảng thửa', t.found && t.hasArea, false, 'bảng thửa không có cột Diện tích');
+      thing('Nút “Thêm thửa đất”', findOpener(SECTIONS.thua.opener).btn, false);
+      thing('Nút “Lưu hồ sơ” (tiện ích chỉ tô vàng)', buttonsByText(['Lưu hồ sơ'], document.body, openModals()).length, false);
+      // không thấy gì của màn hình tiếp nhận → đây là trang khác (danh sách hồ sơ…) hoặc khung phụ, không phải giao diện đổi
+      if (!items.some((x) => x.ok)) return { frame: location.href, screen, known: false, items: [] };
+    } else if (/^nhap don dang ky\b/.test(key)) {
+      screen = 'cửa sổ “Nhập đơn đăng ký”';
+      const scope = getScope('modal');
+      fields(['donDK'], scope);
+      thing('Cây Chủ sử dụng', m.querySelector('#treeChuSuDung'), false);
+      thing('Cây Thửa đất và tài sản', m.querySelector('#treeTaiSan'), false);
+      thing('Nút “Thêm” (chủ sử dụng)', menuButton(SECTIONS.chu.menu, m), false);
+      thing('Nút “Thêm” (tài sản)', menuButton(SECTIONS.thua.menu, m), false);
+      thing('Nút “Lưu thông tin đăng ký” (tiện ích chỉ tô vàng)', buttonsByText(['Lưu thông tin đăng ký'], m, []).length, false);
+      thing('Nút “Hoàn tất”', buttonsByText(['Hoàn tất'], m, []).length, true);
+    } else {
+      const secKey = ['chu', 'thua', 'giayTo'].find((k) => SECTIONS[k].expect.test(key));
+      screen = scopeName(m);
+      if (!secKey) return { frame: location.href, screen, known: false, items: [] };
+      fields([secKey], getScope('modal'));
+      thing('Nút “Lưu” của cửa sổ (tiện ích không bấm)', buttonsByText(['Lưu'], m, []).length, false);
+    }
+    return { frame: location.href, screen, known: true, items };
   }
 
   // ---------- Điền ----------

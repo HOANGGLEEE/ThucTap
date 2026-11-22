@@ -47,6 +47,11 @@
   <button onclick="openM('mQuet')">Mở: Thông tin hồ sơ quét</button>
   <button onclick="openM('mThemThua')">Mở: Thêm thửa đất (VBDLIS thật)</button>
 </p>
+<p>
+  <button onclick="mockLuuHoSo()">Giả lập: người dùng bấm Lưu hồ sơ</button>
+  <button onclick="mockLuuDK()">Giả lập: Lưu thông tin đăng ký</button>
+  <button onclick="mockHoanTat()">Giả lập: Hoàn tất</button>
+</p>
 
 <fieldset><legend>Đơn vị hành chính</legend>
   <div class="row">
@@ -351,7 +356,8 @@
     if (!window.__fromDon) { log('(người dùng bấm Lưu – Thông tin thửa đất)'); closeM(); return; }
     const v = (id) => document.getElementById(id).value.trim();
     const dt = AutoNumeric.getAutoNumericElement('#tDienTich').getNumber();
-    $('#treeTaiSan ul').append(`<li>Thửa đất lịch sử</li><li>${v('tSoThua')} (${v('tSoTo')}) - Diện tích: ${dt} m² - Địa chỉ: ${v('tDiaChi')}</li>`);
+    // giống VBDLIS thật (jstree): nhóm “Thửa đất lịch sử -…” → thửa “22 (231) - Diện tích: …” → con “LUC: - Số thứ tự:1 - Diện tích:… - Thời hạn: …”
+    mockTreeAdd('treeTaiSan', 'Thửa đất lịch sử -1790000000060_', mockNode(`${v('tSoThua')} (${v('tSoTo')}) - Diện tích: ${dt} m² - Địa chỉ: ${v('tDiaChi')}`, mockNode(`${$('#tMDSD').val() || '?'}: - Số thứ tự:1 - Diện tích:${dt} m² - Thời hạn: ${v('tThoiHan')}`)));
     log('(người dùng bấm Lưu – thêm thửa ' + v('tSoThua') + '/' + v('tSoTo') + ' vào đơn)');
     window.__fromDon = false; openM('mDon');
   }
@@ -364,10 +370,45 @@
     document.getElementById('jcGiayTo').style.display = 'none';
     if (!ok) { log('(người dùng bấm Bỏ qua)'); return; }
     const v = (id) => document.getElementById(id).value.trim();
-    $('#treeChuSuDung ul').append(`<li>Bà: ${v('cnHoTen')} - Năm sinh:${v('cnNamSinh')} - Địa chỉ: ${v('cnDiaChi')} - Số CCCD:${v('cnSoGT')}</li>`);
+    const xung = document.getElementById('cnNam').checked ? 'Ông' : 'Bà';
+    mockTreeAdd('treeChuSuDung', 'Cá nhân -1790000000063_', mockNode(`${xung}: ${v('cnHoTen')} - Năm sinh:${v('cnNamSinh')} - Địa chỉ: ${v('cnDiaChi')} - Số CCCD:${v('cnSoGT')}`));
     log('(người dùng bấm Đồng ý – thêm chủ ' + v('cnHoTen') + ' vào đơn)');
     window.__fromDon = false; openM('mDon');
   }
+  // cây kiểu jstree của VBDLIS: li > a.jstree-anchor (+ ul.jstree-children)
+  function mockNode(text, kids){ return `<li class="jstree-node"><i class="jstree-icon"></i><a class="jstree-anchor" href="#">${text}</a>${kids ? `<ul class="jstree-children">${kids}</ul>` : ''}</li>`; }
+  function mockTreeAdd(treeId, group, html){
+    const ul = document.querySelector('#' + treeId + ' > ul');
+    let g = ul.querySelector(':scope > li[data-g]');
+    if (!g) { ul.insertAdjacentHTML('beforeend', `<li class="jstree-node" data-g="1"><i class="jstree-icon"></i><a class="jstree-anchor" href="#">${group}</a><ul class="jstree-children"></ul></li>`); g = ul.querySelector(':scope > li[data-g]'); }
+    g.querySelector(':scope > ul').insertAdjacentHTML('beforeend', html);
+  }
+  // đơn của hồ sơ vừa tiếp nhận: trang mang sẵn chủ + thửa từ bước tiếp nhận vào cây
+  window.mockDonCo = function(chu, thua){
+    document.querySelector('#treeChuSuDung > ul').innerHTML = '';
+    document.querySelector('#treeTaiSan > ul').innerHTML = '';
+    (chu || []).forEach(p => mockTreeAdd('treeChuSuDung', 'Cá nhân -1790000000063_', mockNode(`${p.nam ? 'Ông' : 'Bà'}: ${p.hoTen} - Năm sinh:${p.namSinh} - Địa chỉ: ${p.diaChi || ''} - Số CCCD:${p.so}`)));
+    (thua || []).forEach(t => mockTreeAdd('treeTaiSan', 'Thửa đất lịch sử -1790000000060_', mockNode(`${t.soThua} (${t.soTo}) - Diện tích: ${t.dt} m² - Địa chỉ: ${t.diaChi || ''}`, t.mdsd === null ? '' : mockNode(`${t.mdsd || 'LUC'}: - Số thứ tự:1 - Diện tích:${t.dt} m² - Thời hạn: ${t.thoiHan || '50 năm'}`))));
+  };
+  // thông báo kiểu toastr của VBDLIS (“Thành công” + “Lưu hồ sơ thành công”)
+  function mockToast(title, msg, type){
+    let c = document.getElementById('toast-container');
+    if (!c) { c = document.createElement('div'); c.id = 'toast-container'; c.className = 'toast-top-right'; c.style.cssText = 'position:fixed;top:12px;left:12px;z-index:999999'; document.body.appendChild(c); }
+    const t = document.createElement('div');
+    t.className = 'toast toast-' + (type || 'success');
+    t.style.cssText = 'background:' + (type === 'info' ? '#2f96b4' : '#51a351') + ';color:#fff;padding:10px 14px;margin-bottom:6px;border-radius:4px;min-width:260px';
+    t.innerHTML = `<div class="toast-title">${title}</div><div class="toast-message">${msg}</div>`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 6000);
+  }
+  // NGƯỜI DÙNG bấm (giả lập) – các nút Lưu thật trên trang vẫn là “bẫy”: tiện ích bấm vào là ghi “!!!”
+  window.mockLuuHoSo = function(){
+    log('(người dùng bấm Lưu hồ sơ – giả lập)');
+    mockToast('Thành công', 'Lưu hồ sơ thành công');
+    setTimeout(() => mockToast('Thông báo', 'Bạn đã nhận được 1 yêu cầu xử lý hồ sơ có số biên nhận là ' + document.getElementById('txtSoBienNhan').value, 'info'), 300);
+  };
+  window.mockLuuDK = function(){ log('(người dùng bấm Lưu thông tin đăng ký – giả lập)'); mockToast('Thành công', 'Cập nhật đơn đăng ký thành công'); };
+  window.mockHoanTat = function(){ log('(người dùng bấm Hoàn tất – giả lập)'); mockToast('Thành công', 'Lưu đơn đăng ký thành công'); };
   // "Quy trình xử lý" → "Xử lý tác vụ": cửa sổ đơn mở đè lên, cửa sổ quy trình VẪN mở bên dưới
   function openQuyTrinh(){ window.__fromDon = false; openM('mQuyTrinh'); }
   function openDonTuQuyTrinh(){ document.getElementById('mDon').classList.add('show'); log('(trang mở Nhập đơn đăng ký, Quy trình xử lý vẫn mở bên dưới)'); }

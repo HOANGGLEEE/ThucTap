@@ -33,7 +33,7 @@ Tiện ích **không bấm nút Lưu nào**. Bấm “■ Dừng” để thôi 
 - cuối cùng bảng thửa trên trang **không khớp** dữ liệu (thiếu / thừa / trùng / sai diện tích) → **không** tô nút Lưu hồ sơ, sửa trên trang trước;
 - TB này **đã tiếp nhận rồi**, hoặc **trùng thửa** với một TB đã tiếp nhận → tiện ích báo rõ và chỉ làm khi bạn bấm nút **“Vẫn tiếp nhận TB …”** hiện ngay dưới dòng báo (tránh tạo hồ sơ trùng; bấm đúp nút Chạy không lọt qua được). Đánh dấu nhầm thì đổi ô **Trạng thái** về “Chưa làm”;
 - TB đang **⏸ Tạm hoãn** → dừng, có nút **“Bỏ tạm hoãn, chạy TB …”**;
-- TB có **ghi chú** (tên TBXN khác CCCD, thửa thiếu mục đích, trùng thửa với TB khác…) mà bạn chưa xem → dừng, hiện khung vàng ghi chú và nút **“Đã xem – chạy tiếp”**. Mỗi ghi chú chỉ hỏi **một lần** (ghi chú đổi thì hỏi lại).
+- TB có **ghi chú** (tên TBXN khác CCCD, thửa thiếu mục đích, trùng thửa với TB khác…) → **không dừng**: tiện ích chỉ hiện một dòng “⚠ Ghi chú: …” trong nhật ký rồi chạy tiếp (ghi chú vẫn hiện ở khung vàng đầu bảng).
 
 Nếu bấm Hủy bỏ ở một thửa rồi chạy lại, tiện ích sẽ hỏi lại một lần (bấm “▶ Chạy cả TB” thêm lần nữa) trước khi mở lại thửa đó – để tránh nhập trùng.
 
@@ -148,6 +148,8 @@ Dữ liệu TB 1810–1817 đã có sẵn trong `data/du-lieu.json` và được
 
 ## Phóng to / thu nhỏ bảng điền
 Kéo **góc dưới bên trái (◣)** hoặc **góc dưới bên phải (◢)** của bảng để đổi chiều rộng, chiều cao. Kéo thanh tiêu đề để di chuyển. Tiện ích nhớ cỡ và vị trí cho lần mở sau. Bấm đúp vào góc để về cỡ mặc định.
+
+**Phần nhật ký** (kết quả “Chạy cả TB”, “Kiểm tra trang”… ở dưới bảng): kéo **thanh ngăn “•••”** nằm giữa phần điền và phần nhật ký – kéo **xuống** để nhật ký thấp lại, phần điền phía trên rộng ra; kéo **lên** để xem nhật ký dài hơn. Tiện ích nhớ chiều cao này; bấm đúp vào thanh ngăn để về mặc định.
 
 ## Xóa dữ liệu
 Bấm **Dữ liệu** → hàng **Xóa:**

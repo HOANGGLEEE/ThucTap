@@ -17,7 +17,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.11.0'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.11.2'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   const old = document.getElementById(HOST_ID);
   if (old) {
     // Bảng đang mở cùng phiên bản và còn kết nối → bấm biểu tượng là ẩn/hiện; ngược lại thay bảng mới
@@ -224,12 +224,6 @@
     S[key] = null;
     return !!t && t.tb === String(tb) && Date.now() - t.at < 120000;
   };
-  // khóa nhỏ của ghi chú + dữ liệu thiếu (đổi nội dung → hỏi lại)
-  const hashText = (s) => {
-    let h = 0;
-    for (const c of String(s || '')) h = (h * 31 + c.codePointAt(0)) | 0;
-    return String(h >>> 0);
-  };
 
   const friendly = (e) => {
     const m = String((e && e.message) || e);
@@ -289,9 +283,12 @@ input:focus,select:focus{outline:2px solid #99f6e4;border-color:#0f766e}
 .chk{color:#15803d;font-weight:700}
 .status{flex:none;font-size:11.5px;padding:3px 10px;color:#0f766e;border-top:1px solid #e2e8f0}.status:empty{display:none}.status.bad{color:#b91c1c}
 .btn:disabled,select:disabled{opacity:.5;cursor:not-allowed}
-.result{flex:none;max-height:38vh;overflow:auto;border-top:2px solid #e2e8f0;background:#f8fafc;padding:7px 10px}
+.result{flex:none;height:var(--rh,auto);max-height:var(--rmh,38vh);overflow:auto;background:#f8fafc;padding:7px 10px}
 .result:empty{display:none}
 .pn.min .result{display:none}
+.split{flex:none;height:11px;cursor:ns-resize;background:#e2e8f0;border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:10px;line-height:1;letter-spacing:3px;user-select:none}
+.split:hover,.split.drag{background:#99f6e4;color:#0f766e}
+.pn.min .split{display:none}
 .ln{padding:1px 0;word-break:break-word}
 .sum{font-weight:600;margin-bottom:4px}
 .hint{color:#64748b;font-size:11.5px;margin:2px 0 6px}
@@ -351,6 +348,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     </div>
     <div id="content"></div>
   </div>
+  <div id="split" class="split" title="Kéo lên / xuống để đổi chiều cao phần nhật ký bên dưới (bấm đúp: về mặc định)" style="display:none">•••</div>
   <div id="status" class="status"></div>
   <div id="result" class="result"></div>
   <div class="rz l" title="Kéo để phóng to / thu nhỏ bảng (bấm đúp: về cỡ mặc định)">◣</div><div class="rz r" title="Kéo để phóng to / thu nhỏ bảng (bấm đúp: về cỡ mặc định)">◢</div>
@@ -591,6 +589,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
 
   function setResult(html) {
     $('#result').innerHTML = html;
+    $('#split').style.display = html ? '' : 'none'; // thanh kéo chỉ hiện khi có nhật ký
   }
   // dòng thông báo ngắn (không xóa nhật ký đang chạy)
   let statusTimer = null;
@@ -1273,8 +1272,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     };
 
     // ---------- Chốt trước khi ghi lên trang ----------
-    // TB tạm hoãn → dừng (nút “Bỏ tạm hoãn”). TB có ghi chú / dữ liệu thiếu / trùng thửa mà bạn chưa xem → dừng (nút “Đã xem”),
-    // chỉ hỏi 1 lần cho mỗi nội dung (đổi nội dung thì hỏi lại).
+    // TB tạm hoãn → dừng (nút “Bỏ tạm hoãn”). Ghi chú / dữ liệu thiếu / trùng thửa → chỉ hiện một dòng nhắc rồi chạy tiếp
+    // (không dừng hỏi “Đã xem” – theo ý bạn, cho chạy liên tục).
     const gateTb = () => {
       const s0 = S.stage[String(tb.tb)] || {};
       if (s0.hoan)
@@ -1286,17 +1285,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (String(tb.ghiChu || '').trim()) notes.push(String(tb.ghiChu).trim());
       (tb.thua || []).forEach((t) => {
         const g = thuaGaps(t, tb);
-        if (g.length) notes.push(`Thửa ${t.soThua || '?'}/${t.soTo || '?'}: dữ liệu thiếu ${g.join(', ')} – bạn điền tay`);
+        if (g.length) notes.push(`thửa ${t.soThua || '?'}/${t.soTo || '?'} thiếu ${g.join(', ')} – bạn điền tay`);
       });
       const dd = dupMap().get(String(tb.tb));
-      if (dd) notes.push(`Trùng thửa với ${dupText(dd)} – kiểm tra kẻo nhập 2 lần`);
-      if (!notes.length) return;
-      const h = hashText(notes.join('\n'));
-      if (s0.ack === h) return;
-      throw ask(
-        `TB ${tb.tb} có ghi chú cần xem trước khi nhập (bên dưới) – đọc xong bấm “Đã xem – chạy tiếp”`,
-        `<div class="note" style="width:100%;margin:0 0 4px">⚠ ${esc(notes.join('\n⚠ '))}</div>` + actBtn('ackNote', tb.tb, 'Đã xem – chạy tiếp', ` data-h="${h}"`)
-      );
+      if (dd) notes.push(`trùng thửa với ${dupText(dd)} – kiểm tra kẻo nhập 2 lần`);
+      if (!notes.length || log.some((l) => l.note)) return; // mỗi lần chạy chỉ nhắc 1 lần
+      log.push({ icon: '⚠', cls: 'warn', html: esc('Ghi chú: ' + notes.join(' · ')), note: true });
+      show();
     };
 
     // ---------- Bước “Nhập đơn đăng ký” (Xử lý hồ sơ → Xử lý tác vụ) ----------
@@ -2383,10 +2378,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
       if (String((curTB() || {}).tb) !== id) selectTb(id); // nút của TB khác → chọn TB đó trước
       if (a === 'confirmTn' || a === 'confirmDon') S[a] = { tb: id, at: Date.now() };
-      else if (a === 'ackNote') {
-        S.stage[id] = { ...(S.stage[id] || {}), ack: b.dataset.h };
-        saveStage(id);
-      } else if (a === 'unHoan') markStage(id, (S.stage[id] || {}).tn ? 'tn' : 'chua', 'tay');
+      else if (a === 'unHoan') markStage(id, (S.stage[id] || {}).tn ? 'tn' : 'chua', 'tay');
       audioReady();
       runAll();
       return;
@@ -2508,15 +2500,57 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       host.style.top = Math.max(0, Math.min(innerHeight - 40, b.top)) + 'px';
       host.style.right = 'auto';
     }
+    if (b.rh) {
+      // chiều cao phần nhật ký bạn đã kéo lần trước (không quá cao so với cửa sổ hiện tại)
+      pn.style.setProperty('--rh', Math.max(40, Math.min(b.rh, innerHeight - 220)) + 'px');
+      pn.style.setProperty('--rmh', 'none');
+    }
   }
   function saveBox() {
     const r = host.getBoundingClientRect();
     const b = { left: Math.round(r.left), top: Math.round(r.top) };
     const w = parseInt(pn.style.getPropertyValue('--w'), 10);
     const h = parseInt(pn.style.getPropertyValue('--h'), 10);
+    const rh = parseInt(pn.style.getPropertyValue('--rh'), 10);
     if (w) b.w = w;
     if (h) b.h = h;
+    if (rh) b.rh = rh;
     safeSet({ tbBox: b });
+  }
+  // ---------- thanh kéo giữa phần điền và phần nhật ký: kéo lên = nhật ký cao hơn, kéo xuống = thấp hơn ----------
+  {
+    const split = $('#split');
+    split.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const y0 = e.clientY;
+      const h0 = $('#result').getBoundingClientRect().height;
+      const p0 = pn.getBoundingClientRect();
+      const hd = $('.hd').getBoundingClientRect().height;
+      // bảng có chiều cao cố định → nhật ký chiếm tối đa gần hết bảng; không thì bảng cao tới mép dưới cửa sổ
+      const room = pn.style.getPropertyValue('--h') ? p0.height : Math.min(innerHeight - p0.top - 8, innerHeight - 90);
+      const maxH = Math.max(60, room - hd - 80);
+      split.classList.add('drag');
+      const mv = (ev) => {
+        const h = Math.round(Math.max(40, Math.min(maxH, h0 - (ev.clientY - y0))));
+        pn.style.setProperty('--rh', h + 'px');
+        pn.style.setProperty('--rmh', 'none');
+      };
+      const up = () => {
+        split.classList.remove('drag');
+        removeEventListener('mousemove', mv, true);
+        removeEventListener('mouseup', up, true);
+        saveBox();
+      };
+      addEventListener('mousemove', mv, true);
+      addEventListener('mouseup', up, true);
+    });
+    // bấm đúp → về chiều cao mặc định
+    split.addEventListener('dblclick', () => {
+      pn.style.removeProperty('--rh');
+      pn.style.removeProperty('--rmh');
+      saveBox();
+    });
   }
   root.querySelectorAll('.rz').forEach((g) => {
     g.addEventListener('mousedown', (e) => {

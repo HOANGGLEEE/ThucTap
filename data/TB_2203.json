@@ -1,0 +1,55 @@
+{
+  "tb": "2203",
+  "soBienNhan": "KH 2959.07777.210.165-210.189-212.505",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "PHẠM VĂN TỬU",
+    "soGiayTo": "121146321",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "PHẠM VĂN TỬU",
+      "namSinh": "1975",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Chứng minh nhân dân",
+      "soGiayTo": "121146321",
+      "noiCap": "Công an tỉnh Bắc Giang",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "165",
+      "soTo": "210",
+      "dienTich": "398.4",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "189",
+      "soTo": "210",
+      "dienTich": "96.9",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "505",
+      "soTo": "212",
+      "dienTich": "397.6",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Hồ sơ chỉ có CMND 9 số (cấp 10/10/2014, CA Bắc Giang); TBXN và đơn ghi là CCCD nhưng là số CMND – nhập loại giấy tờ Chứng minh nhân dân."
+}

@@ -1,0 +1,100 @@
+{
+  "tb": "2086",
+  "soBienNhan": "KH 2959.07777.211.473-211.487-218.381-218.724-219.165-219.225-219.274-228.61",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "ĐỖ VĂN PHƯỢNG",
+    "soGiayTo": "024065016026",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "ĐỖ VĂN PHƯỢNG",
+      "namSinh": "1965",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước",
+      "soGiayTo": "024065016026",
+      "noiCap": "Bộ Công an",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "473",
+      "soTo": "211",
+      "dienTich": "513.9",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "487",
+      "soTo": "211",
+      "dienTich": "409.7",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "381",
+      "soTo": "218",
+      "dienTich": "107.8",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "724",
+      "soTo": "218",
+      "dienTich": "386.6",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "165",
+      "soTo": "219",
+      "dienTich": "253.4",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "225",
+      "soTo": "219",
+      "dienTich": "147.6",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "274",
+      "soTo": "219",
+      "dienTich": "817.1",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "61",
+      "soTo": "228",
+      "dienTich": "197.2",
+      "mdsd": "BHK",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Thẻ mẫu mới CĂN CƯỚC (nơi cấp Bộ Công an)."
+}

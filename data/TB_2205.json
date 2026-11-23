@@ -1,0 +1,46 @@
+{
+  "tb": "2205",
+  "soBienNhan": "KH 2959.07777.226.185-227.51",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "ĐỖ VĂN DUYỆT",
+    "soGiayTo": "024072011692",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "ĐỖ VĂN DUYỆT",
+      "namSinh": "1972",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "024072011692",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "185",
+      "soTo": "226",
+      "dienTich": "518.7",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "51",
+      "soTo": "227",
+      "dienTich": "395.5",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Đơn do Hoàng Thị Liên ký (người kê khai)."
+}

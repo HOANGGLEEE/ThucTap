@@ -1,0 +1,37 @@
+{
+  "tb": "2167",
+  "soBienNhan": "KH 2959.07777.221.54",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "NGUYỄN VĂN DUYẾN",
+    "soGiayTo": "024064016695",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "NGUYỄN VĂN DUYẾN",
+      "namSinh": "1964",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước",
+      "soGiayTo": "024064016695",
+      "noiCap": "Bộ Công an",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "54",
+      "soTo": "221",
+      "dienTich": "212.1",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "TBXN mẫu 1 thửa không có mục đích sử dụng – lấy LUC theo đơn (mục 2d)."
+}

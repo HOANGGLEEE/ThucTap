@@ -1,0 +1,64 @@
+{
+  "tb": "2197",
+  "soBienNhan": "KH 2959.07777.210.223-210.230-211.350-211.351",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "ĐỖ DUY THIÊM",
+    "soGiayTo": "036045005444",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "ĐỖ DUY THIÊM",
+      "namSinh": "1945",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "036045005444",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "223",
+      "soTo": "210",
+      "dienTich": "446.6",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "230",
+      "soTo": "210",
+      "dienTich": "460.6",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "350",
+      "soTo": "211",
+      "dienTich": "329.9",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "351",
+      "soTo": "211",
+      "dienTich": "266.7",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Tên ĐỖ DUY THIÊM khớp TBXN, đơn và thẻ CCCD (khác người với ĐỖ DUY THIỀM ở TB 2180 – số CCCD khác). Danh sách thửa của đơn ghi tay thời hạn \"Lâu dài\", nguồn gốc \"cấy 2 vụ\" – nhập thời hạn 50 năm, nguồn gốc mặc định đất nông nghiệp."
+}

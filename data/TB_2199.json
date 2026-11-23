@@ -1,0 +1,73 @@
+{
+  "tb": "2199",
+  "soBienNhan": "KH 2959.07777.210.171-210.172-210.178-210.179-211.342",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "NGUYỄN THỊ HỒ",
+    "soGiayTo": "024158012244",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "NGUYỄN THỊ HỒ",
+      "namSinh": "1958",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "024158012244",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "171",
+      "soTo": "210",
+      "dienTich": "437.3",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "172",
+      "soTo": "210",
+      "dienTich": "328.5",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "178",
+      "soTo": "210",
+      "dienTich": "418.6",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "179",
+      "soTo": "210",
+      "dienTich": "368.4",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "342",
+      "soTo": "211",
+      "dienTich": "527.7",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Đơn in tên NGUYỄN VĂN PHƯỢNG (đã mất), gạch sửa tay thành Nguyễn Thị Hồ – TBXN và thẻ đều là NGUYỄN THỊ HỒ. Tên: thẻ CCCD mờ dấu chữ cuối (như HÒ) – nhập theo TBXN (NGUYỄN THỊ HỒ)."
+}

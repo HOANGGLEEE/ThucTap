@@ -1,0 +1,55 @@
+{
+  "tb": "2193",
+  "soBienNhan": "KH 2959.07777.210.168-211.472-221.24",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "ĐỖ THỊ PHƯƠNG",
+    "soGiayTo": "024164009369",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "ĐỖ THỊ PHƯƠNG",
+      "namSinh": "1964",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước",
+      "soGiayTo": "024164009369",
+      "noiCap": "Bộ Công an",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "168",
+      "soTo": "210",
+      "dienTich": "282.7",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "472",
+      "soTo": "211",
+      "dienTich": "152.7",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "24",
+      "soTo": "221",
+      "dienTich": "110.1",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Tên: TBXN ghi ĐỖ THỊ PHƯỢNG, thẻ Căn cước ghi ĐỖ THỊ PHƯƠNG – nhập theo CCCD. Đơn: tên in ĐÀO VĂN DŨNG, ghi tay \"(đã mất) Đỗ Thị Phượng\". Danh sách thửa của đơn có ghi tay: thửa 168 tờ 210 \"còn thiếu 23,3 m²\", thửa 24 tờ 221 \"còn thiếu 38 m²\" – diện tích nhập theo TBXN."
+}

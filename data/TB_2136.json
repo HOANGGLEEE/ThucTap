@@ -1,0 +1,37 @@
+{
+  "tb": "2136",
+  "soBienNhan": "KH 2959.07777.218.329",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "PHAN THỊ HOÀN",
+    "soGiayTo": "024176006195",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "PHAN THỊ HOÀN",
+      "namSinh": "1976",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "024176006195",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "329",
+      "soTo": "218",
+      "dienTich": "122.5",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Tên: hồ sơ không có thẻ – nhập theo TBXN (PHAN THỊ HOÀN); số CCCD theo TBXN/đơn, năm sinh 1976 theo Mẫu 15a (cùng người, cùng số thẻ với TB 2135). Đơn in sẵn 'PHAN VĂN HOÀN', chữ VĂN gạch, viết tay 'Phan thị Hoàn'. TBXN mẫu 1 thửa không có mục đích – lấy LUC theo đơn."
+}

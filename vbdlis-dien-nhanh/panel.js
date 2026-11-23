@@ -20,7 +20,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.19.5'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.19.6'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -478,6 +478,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
 .btn.auto{font-weight:600}.btn.auto.on{background:#16a34a;border-color:#16a34a;color:#fff}
 .tpl td input,.tpl td select{font-size:11.5px;padding:2px 4px}.tpl td:first-child{width:20px;text-align:center}.tpl tr.ban td{color:#94a3b8}
 .chip .x{border:0;background:none;color:#64748b;cursor:pointer;padding:0 4px;font-size:11px;line-height:16px}.chip .x:hover{color:#b91c1c}
+.hd button#dock{font-size:12px}.hd button#dock.on{background:#f59e0b}
+.pn.dock{width:var(--dw,420px) !important;height:100vh !important;max-height:100vh !important;border-radius:0;border-width:0 0 0 1px;box-shadow:-6px 0 18px rgba(15,23,42,.18)}
+.pn.dock .hd{cursor:default}.pn.dock .rz{display:none}
+.pn.dock.min{width:220px !important;height:auto !important;max-height:none !important;border-radius:10px;border-width:1px;box-shadow:0 12px 32px rgba(15,23,42,.28)}
+.dz{display:none;position:absolute;left:0;top:0;bottom:0;width:6px;cursor:ew-resize;z-index:6}
+.pn.dock .dz{display:block}.pn.dock.min .dz{display:none}.dz:hover,.dz.drag{background:rgba(15,118,110,.3)}
 `;
 
   const host = document.createElement('div');
@@ -492,7 +498,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   const root = host.attachShadow({ mode: 'open' });
   root.innerHTML = `<style>${CSS}</style>
 <div class="pn">
-  <div class="hd"><b>VBDLIS Điền Nhanh <small style="font-weight:400;opacity:.8">v${PANEL_VERSION}</small></b><button id="miniAuto" title="🤖 Tự động hết: bấm để bật (tự chạy luôn màn hình đang mở) / tắt">🤖</button><button id="rec" title="Ghi thao tác: ghi lại những gì bạn làm trên VBDLIS rồi xuất ra file để gửi người hỗ trợ">●</button><button id="min" title="Thu nhỏ">–</button><button id="close" title="Ẩn (Alt+Q để mở lại)">×</button></div>
+  <div class="hd"><b>VBDLIS Điền Nhanh <small style="font-weight:400;opacity:.8">v${PANEL_VERSION}</small></b><button id="miniAuto" title="🤖 Tự động hết: bấm để bật (tự chạy luôn màn hình đang mở) / tắt">🤖</button><button id="rec" title="Ghi thao tác: ghi lại những gì bạn làm trên VBDLIS rồi xuất ra file để gửi người hỗ trợ">●</button><button id="dock" title="Gắn bảng sát cạnh phải, cao hết màn hình (trang VBDLIS dồn sang trái nhường chỗ)">📌</button><button id="min" title="Thu nhỏ">–</button><button id="close" title="Ẩn (Alt+Q để mở lại)">×</button></div>
   <div class="bd">
     <div class="row"><button class="btn" id="prev" title="TB trước">‹</button><select id="tbSel"></select><button class="btn" id="next" title="TB sau">›</button></div>
     <div class="row"><span class="muted" style="flex:none">Trạng thái:</span><select id="tbStage" title="Tiện ích tự đánh dấu: ◐ Đã tiếp nhận khi trang báo “Lưu hồ sơ thành công” (nhập đơn xong – “Lưu đơn đăng ký thành công” – vẫn là Đã tiếp nhận, chỉ ghi thêm giờ); ✓ Xong khi đã có cả nhập đơn xong và lưu kho hồ sơ quét (“Cập nhật thành công”). Sai thì sửa tay ở đây."><option value="chua">○ Chưa làm</option><option value="tn">◐ Đã tiếp nhận (kể cả đã nhập đơn)</option><option value="xong">✓ Xong – đã nhập đơn và lưu kho hồ sơ quét</option><option value="hoan">⏸ Tạm hoãn (chưa nhập được)</option></select><span id="stageInfo" class="muted"></span></div>
@@ -508,7 +514,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   <div id="split" class="split" title="Kéo lên / xuống để đổi chiều cao phần nhật ký bên dưới (bấm đúp: về mặc định)" style="display:none">•••</div>
   <div id="status" class="status"></div>
   <div id="result" class="result"></div>
-  <div class="rz l" title="Kéo để phóng to / thu nhỏ bảng (bấm đúp: về cỡ mặc định)">◣</div><div class="rz r" title="Kéo để phóng to / thu nhỏ bảng (bấm đúp: về cỡ mặc định)">◢</div>
+  <div class="rz l" title="Kéo để phóng to / thu nhỏ bảng (bấm đúp: về cỡ mặc định)">◣</div><div class="rz r" title="Kéo để phóng to / thu nhỏ bảng (bấm đúp: về cỡ mặc định)">◢</div><div class="dz" title="Kéo để đổi bề rộng bảng (bấm đúp: về mặc định)"></div>
 </div>`;
   const $ = (s) => root.querySelector(s);
   const pn = $('.pn');
@@ -5195,7 +5201,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       setStatus('Đang điền – chờ xong đã.', true);
       return;
     }
-    if (!isAlive() && b.id !== 'min' && b.id !== 'close') {
+    if (!isAlive() && b.id !== 'min' && b.id !== 'close' && b.id !== 'dock') {
       setResult(`<div class="bad">✗ ${esc(DEAD_MSG)}</div>`);
       return;
     }
@@ -5371,6 +5377,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     } else if (b.id === 'min') {
       pn.classList.toggle('min');
       b.textContent = pn.classList.contains('min') ? '+' : '–';
+      dockApply(true); // đang gắn phải: thu nhỏ → trang về như cũ, mở lại → trang dồn sang trái
+    } else if (b.id === 'dock') {
+      dockSet(!DOCK.on);
     } else if (b.id === 'close') {
       if (S.running) S.stopReq = true; // ẩn bảng khi đang chạy → dừng luôn
       host.style.display = 'none';
@@ -5380,7 +5389,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
 
   // kéo bảng bằng thanh tiêu đề
   $('.hd').addEventListener('mousedown', (e) => {
-    if (e.target.closest('button')) return;
+    if (e.target.closest('button') || DOCK.on) return; // đang gắn cạnh phải: không kéo (bấm 📌 để thả nổi)
     const r = host.getBoundingClientRect();
     const dx = e.clientX - r.left;
     const dy = e.clientY - r.top;
@@ -5400,8 +5409,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   });
 
   // ---------- kéo góc dưới để phóng to / thu nhỏ bảng (nhớ cỡ và vị trí) ----------
+  // tbBox: bảng nổi { left, top, w, h }, nhật ký { rh }, gắn cạnh phải { dock, dw }
+  let BOX = {};
   function applyBox(b) {
     if (!b) return;
+    BOX = { ...b };
     if (b.w) pn.style.setProperty('--w', b.w + 'px');
     if (b.h) {
       pn.style.setProperty('--h', b.h + 'px');
@@ -5417,17 +5429,199 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       pn.style.setProperty('--rh', Math.max(40, Math.min(b.rh, innerHeight - 220)) + 'px');
       pn.style.setProperty('--rmh', 'none');
     }
+    if (b.dock) dockSet(true, true);
   }
   function saveBox() {
-    const r = host.getBoundingClientRect();
-    const b = { left: Math.round(r.left), top: Math.round(r.top) };
-    const w = parseInt(pn.style.getPropertyValue('--w'), 10);
-    const h = parseInt(pn.style.getPropertyValue('--h'), 10);
+    const b = { ...BOX };
     const rh = parseInt(pn.style.getPropertyValue('--rh'), 10);
-    if (w) b.w = w;
-    if (h) b.h = h;
     if (rh) b.rh = rh;
+    else delete b.rh;
+    if (DOCK.on) {
+      // đang gắn phải: chỉ nhớ bề rộng khi gắn; chỗ và cỡ của bảng nổi giữ như lần trước
+      b.dock = true;
+      b.dw = DOCK.w;
+    } else {
+      const r = host.getBoundingClientRect();
+      b.left = Math.round(r.left);
+      b.top = Math.round(r.top);
+      const w = parseInt(pn.style.getPropertyValue('--w'), 10);
+      const h = parseInt(pn.style.getPropertyValue('--h'), 10);
+      if (w) b.w = w;
+      else delete b.w;
+      if (h) b.h = h;
+      else delete b.h;
+      delete b.dock;
+    }
+    BOX = b;
     safeSet({ tbBox: b });
+  }
+
+  // ---------- 📌 gắn bảng sát cạnh phải (bạn yêu cầu 23/11: “dính thẳng bên cạnh phải”) ----------
+  // Bảng cao hết màn hình, sát mép phải (bên trái thanh cuộn của trang); trang VBDLIS dồn sang trái nhường chỗ: phần trang và
+  // thanh ngang cố định của trang hẹp lại, cửa sổ / hộp hỏi / thông báo của trang canh giữa phần còn lại. Thu nhỏ (–) hoặc ẩn (×)
+  // bảng → trang về như cũ. Bấm 📌 lần nữa → bảng nổi như trước. Nhớ lựa chọn và bề rộng (tbBox.dock, tbBox.dw).
+  // Chỉ đổi cách hiện bảng – không đụng việc điền / bấm của tiện ích.
+  const DOCK = { on: false, w: 420, timer: null };
+  const DOCK_CSS_ID = 'vbdlis-dien-nhanh-dock';
+  const DOCK_ATTR = 'data-vbdlis-dock'; // thanh cố định của trang đã dời sang trái (giữ giá trị cũ để trả lại khi thôi gắn)
+  const DOCK_OVERLAY = ['.modal', '.modal-backdrop', '.jconfirm', '.swal2-container', '.ui-widget-overlay', '.k-overlay', '.layui-layer-shade', '.bootbox'];
+  const DOCK_TOAST = ['#toast-container', '.notifyjs-corner', '.jq-toast-wrap', '.ui-pnotify'];
+  const dockCss = (w) =>
+    `html.vbdlis-docked{margin-right:${w}px !important}` +
+    DOCK_OVERLAY.map((x) => 'html.vbdlis-docked ' + x).join(',') +
+    `{right:${w}px !important;max-width:calc(100% - ${w}px) !important}` +
+    // cửa sổ rộng hơn phần trang còn lại (màn hình nhỏ) → kéo ngang trong cửa sổ để thấy hết, không bị bảng che
+    'html.vbdlis-docked .modal{overflow-x:auto !important}' +
+    DOCK_TOAST.map((x) => 'html.vbdlis-docked ' + x).join(',') +
+    `{margin-right:${w}px !important}`;
+  // thanh ngang cố định của trang chạm mép phải (vd. thanh trên cùng) → thu lại bên trái bảng. scan: tìm thêm thanh mới
+  function dockFix(w, scan) {
+    for (const el of document.querySelectorAll('[' + DOCK_ATTR + ']')) {
+      el.style.setProperty('right', w + 'px', 'important');
+      el.style.setProperty('max-width', `calc(100% - ${w}px)`, 'important');
+    }
+    if (!scan || !document.body) return;
+    const vw = document.documentElement.clientWidth;
+    const skip = [...DOCK_OVERLAY, ...DOCK_TOAST, '#' + HOST_ID, '#vbdlis-rec-host'].join(', ');
+    for (const el of document.body.querySelectorAll('*')) {
+      if (el.offsetParent !== null || el.hasAttribute(DOCK_ATTR) || el.matches(skip)) continue;
+      const cs = getComputedStyle(el);
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden') continue;
+      const r = el.getBoundingClientRect();
+      // chỉ thanh ngang rộng chạm mép phải; không lấy lớp phủ cả màn hình, không lấy khung trượt hẹp (vd. bảng thông báo bên phải)
+      if (r.width < vw * 0.4 || r.right < vw - 2 || r.height > innerHeight * 0.8) continue;
+      const st = el.style;
+      el.setAttribute(DOCK_ATTR, JSON.stringify([st.getPropertyValue('right'), st.getPropertyPriority('right'), st.getPropertyValue('max-width'), st.getPropertyPriority('max-width')]));
+      st.setProperty('right', w + 'px', 'important');
+      st.setProperty('max-width', `calc(100% - ${w}px)`, 'important');
+    }
+  }
+  function dockUnfix() {
+    for (const el of document.querySelectorAll('[' + DOCK_ATTR + ']')) {
+      let v = [];
+      try {
+        v = JSON.parse(el.getAttribute(DOCK_ATTR)) || [];
+      } catch (e) {}
+      el.removeAttribute(DOCK_ATTR);
+      if (v[0]) el.style.setProperty('right', v[0], v[1] || '');
+      else el.style.removeProperty('right');
+      if (v[2]) el.style.setProperty('max-width', v[2], v[3] || '');
+      else el.style.removeProperty('max-width');
+    }
+  }
+  // đặt bảng + dồn trang theo trạng thái hiện tại (gắn / nổi, hiện / ẩn / thu nhỏ, có thanh cuộn hay không)
+  function dockApply(scan) {
+    if (!host.isConnected) return;
+    const full = DOCK.on && host.style.display !== 'none' && !pn.classList.contains('min');
+    if (DOCK.on) {
+      DOCK.w = Math.round(Math.max(300, Math.min(DOCK.w, innerWidth * 0.7)));
+      pn.style.setProperty('--dw', DOCK.w + 'px');
+      // right:0 của khung cố định = sát bên trái thanh cuộn của trang (thanh cuộn vẫn kéo được)
+      const set = (k, v) => {
+        if (host.style[k] !== v) host.style[k] = v;
+      };
+      set('left', 'auto');
+      set('right', full ? '0px' : '16px');
+      set('top', full ? '0px' : '72px');
+    }
+    let st = document.getElementById(DOCK_CSS_ID);
+    if (full) {
+      if (!st) {
+        st = document.createElement('style');
+        st.id = DOCK_CSS_ID;
+        (document.head || document.documentElement).appendChild(st);
+      }
+      const css = dockCss(DOCK.w);
+      if (st.textContent !== css) st.textContent = css;
+      document.documentElement.classList.add('vbdlis-docked');
+      dockFix(DOCK.w, scan);
+    } else {
+      document.documentElement.classList.remove('vbdlis-docked');
+      if (st) st.remove();
+      dockUnfix();
+    }
+  }
+  function dockSet(on, initial) {
+    DOCK.on = !!on;
+    pn.classList.toggle('dock', DOCK.on);
+    const btn = $('#dock');
+    if (btn) {
+      btn.classList.toggle('on', DOCK.on);
+      btn.title = DOCK.on
+        ? 'Đang gắn sát cạnh phải – bấm để thả bảng nổi như trước'
+        : 'Gắn bảng sát cạnh phải, cao hết màn hình (trang VBDLIS dồn sang trái nhường chỗ)';
+    }
+    clearInterval(DOCK.timer);
+    DOCK.timer = null;
+    if (DOCK.on) {
+      DOCK.w = BOX.dw || parseInt(pn.style.getPropertyValue('--w'), 10) || 420;
+      let n = 0;
+      DOCK.timer = setInterval(() => {
+        if (!host.isConnected) return clearInterval(DOCK.timer); // bảng đã được thay bằng bảng mới – không đụng trang nữa
+        dockApply(++n % 3 === 0); // 2 giây: giữ trang dồn trái (trang tự vẽ lại); 6 giây: tìm thêm thanh cố định mới của trang
+      }, 2000);
+    } else if (!initial) {
+      // thả nổi: về chỗ bạn kéo bảng lần trước, không có thì chỗ mặc định
+      if (BOX.left != null && BOX.top != null) {
+        host.style.left = Math.max(0, Math.min(innerWidth - 120, BOX.left)) + 'px';
+        host.style.top = Math.max(0, Math.min(innerHeight - 40, BOX.top)) + 'px';
+        host.style.right = 'auto';
+      } else {
+        host.style.left = 'auto';
+        host.style.top = '72px';
+        host.style.right = '16px';
+      }
+    }
+    dockApply(true);
+    if (!initial) saveBox();
+  }
+  // bảng bị ẩn / hiện lại (×, Alt+Q, bấm biểu tượng) → trang dồn / trả lại theo
+  {
+    let pend = false;
+    new MutationObserver(() => {
+      if (pend || !DOCK.on) return;
+      pend = true;
+      setTimeout(() => {
+        pend = false;
+        dockApply(false);
+      }, 50);
+    }).observe(host, { attributes: true, attributeFilter: ['style'] });
+  }
+  addEventListener('resize', () => DOCK.on && dockApply(true));
+  // kéo mép trái để đổi bề rộng bảng khi đang gắn phải (bấm đúp: về 420)
+  {
+    const dz = $('.dz');
+    dz.addEventListener('mousedown', (e) => {
+      if (!DOCK.on) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const x0 = e.clientX;
+      const w0 = DOCK.w;
+      let raf = 0;
+      dz.classList.add('drag');
+      const mv = (ev) => {
+        DOCK.w = Math.round(Math.max(300, Math.min(innerWidth * 0.7, w0 - (ev.clientX - x0))));
+        if (!raf)
+          raf = requestAnimationFrame(() => {
+            raf = 0;
+            dockApply(false);
+          });
+      };
+      const up = () => {
+        dz.classList.remove('drag');
+        removeEventListener('mousemove', mv, true);
+        removeEventListener('mouseup', up, true);
+        dockApply(true);
+        saveBox();
+      };
+      addEventListener('mousemove', mv, true);
+      addEventListener('mouseup', up, true);
+    });
+    dz.addEventListener('dblclick', () => {
+      DOCK.w = 420;
+      dockApply(true);
+      saveBox();
+    });
   }
   // ---------- thanh kéo giữa phần điền và phần nhật ký: kéo lên = nhật ký cao hơn, kéo xuống = thấp hơn ----------
   {

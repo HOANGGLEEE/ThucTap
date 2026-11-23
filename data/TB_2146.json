@@ -1,0 +1,37 @@
+{
+  "tb": "2146",
+  "soBienNhan": "KH 2959.07777.226.178",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "HOÀNG THỊ LIÊN",
+    "soGiayTo": "042160011727",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "HOÀNG THỊ LIÊN",
+      "namSinh": "1960",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "042160011727",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "178",
+      "soTo": "226",
+      "dienTich": "254.1",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "TBXN mẫu 1 thửa không ghi mục đích – LUC theo đơn. Trang 1 đơn in nhầm họ tên NGUYỄN QUỐC HẠ (số CCCD trên đơn là của HOÀNG THỊ LIÊN; Mẫu 15a và chữ ký là Hoàng Thị Liên) – nhập chủ HOÀNG THỊ LIÊN theo TBXN và thẻ CCCD."
+}

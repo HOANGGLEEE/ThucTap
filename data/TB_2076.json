@@ -1,0 +1,46 @@
+{
+  "tb": "2076",
+  "soBienNhan": "KH 2959.07777.220.279-220.280",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "CHU THỊ VI",
+    "soGiayTo": "024164004513",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "CHU THỊ VI",
+      "namSinh": "1964",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước",
+      "soGiayTo": "024164004513",
+      "noiCap": "Bộ Công an",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "279",
+      "soTo": "220",
+      "dienTich": "305.6",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "280",
+      "soTo": "220",
+      "dienTich": "466.8",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Thẻ mẫu mới CĂN CƯỚC (nơi cấp Bộ Công an). Đơn: họ tên in sẵn LƯƠNG NGỌC TUẤN, viết tay bên cạnh \"(Chu Thị Vi)\"; số CCCD trên đơn, Mẫu 15a và thẻ đều của CHU THỊ VI – nhập theo thẻ/TBXN."
+}

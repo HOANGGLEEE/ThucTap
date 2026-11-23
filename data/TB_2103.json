@@ -1,0 +1,46 @@
+{
+  "tb": "2103",
+  "soBienNhan": "KH 2959.07777.218.184",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "DƯƠNG MINH NAM",
+    "soGiayTo": "024047004989",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "DƯƠNG MINH NAM",
+      "namSinh": "1947",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "024047004989",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    },
+    {
+      "hoTen": "DƯƠNG THÀNH BẮC",
+      "namSinh": "1975",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước công dân",
+      "soGiayTo": "024075019642",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "184",
+      "soTo": "218",
+      "dienTich": "448.8",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "TBXN mẫu 1 thửa không có mục đích – lấy LUC theo đơn. 2 thẻ CCCD: DƯƠNG MINH NAM (đứng tên TBXN) và DƯƠNG THÀNH BẮC (có trong Mẫu 15a) – nhập cả hai. Đơn in tên DƯƠNG BẮC THÀNH đã gạch, viết tay DƯƠNG THÀNH BẮC nhưng số CCCD trên đơn là của DƯƠNG MINH NAM."
+}

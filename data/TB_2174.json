@@ -1,0 +1,46 @@
+{
+  "tb": "2174",
+  "soBienNhan": "KH 2959.07777.210.63-210.67",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "HOÀNG THỊ NHÃ",
+    "soGiayTo": "024158000339",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "HOÀNG THỊ NHÃ",
+      "namSinh": "1958",
+      "gioiTinh": "Nữ",
+      "loaiGiayTo": "Căn cước",
+      "soGiayTo": "024158000339",
+      "noiCap": "Bộ Công an",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "63",
+      "soTo": "210",
+      "dienTich": "153.2",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    },
+    {
+      "soThua": "67",
+      "soTo": "210",
+      "dienTich": "139.1",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Đơn in tên NGUYỄN THỊ NÔNG, viết tay '(Đã mất) chuyển Hoàng Thị Nhã'; TBXN, Mẫu 15a và thẻ Căn cước ghi HOÀNG THỊ NHÃ. Thẻ ghi nơi cư trú Ngõ 50 Nguyễn Thị Lưu, Bắc Giang – địa chỉ nhập theo TBXN mục 1c."
+}

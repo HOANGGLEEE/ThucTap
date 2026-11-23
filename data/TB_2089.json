@@ -1,0 +1,37 @@
+{
+  "tb": "2089",
+  "soBienNhan": "KH 2959.07777.210.215",
+  "diaChiTaiSan": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+  "nguoiNop": {
+    "hoTen": "ĐẶNG VĂN GIANG",
+    "soGiayTo": "024065018769",
+    "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+  },
+  "chu": [
+    {
+      "hoTen": "ĐẶNG VĂN GIANG",
+      "namSinh": "1965",
+      "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước",
+      "soGiayTo": "024065018769",
+      "noiCap": "Bộ Công an",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh"
+    }
+  ],
+  "thua": [
+    {
+      "soThua": "215",
+      "soTo": "210",
+      "dienTich": "464.1",
+      "mdsd": "LUC",
+      "diaChi": "TDP Trung Xuân, Phường Việt Yên, TP. Bắc Ninh",
+      "thoiHan": "50 năm",
+      "nguonGoc": "Công nhận QSDĐ như giao đất không thu tiền sử dụng đất"
+    }
+  ],
+  "giayTo": [
+    "Đơn đăng ký",
+    "Thông báo xác nhận kết quả đăng ký"
+  ],
+  "ghiChu": "Đơn ghi tờ 55 (mã cũ) – đã dùng tờ 210 theo TBXN. TBXN không có mục đích – lấy LUC theo đơn. Thẻ Căn cước scan nhạt, không thấy rõ dấu nặng chữ ĐẶNG – nhập ĐẶNG VĂN GIANG như TBXN/đơn (số thẻ khớp)."
+}

@@ -181,7 +181,7 @@
     const st = stageOf(tb);
     if (st === 'xong' || st === 'hoan') return st;
     const s = tb && S.stage[String(tb.tb)];
-    return s && s.ld ? 'tn' : 'chua';
+    return s && (s.ld || s.daDung) ? 'tn' : 'chua';
   };
   const BY_TEXT = {
     auto: 'tự ghi nhận',
@@ -228,7 +228,7 @@
     if (stage === 'chua') {
       [
         'tn', 'tnBy', 'don', 'donBy', 'lech', 'quet', 'quetBy', 'xong', 'xongBy', 'hoan', 'nhap', 'boQua',
-        'cv', 'cvBy', 'ld', 'ldBy', 'trk', 'trkBy', 'tra', 'traBy', 'fwd', 'tnClick', 'htClick', 'kq',
+        'cv', 'cvBy', 'ld', 'ldBy', 'trk', 'trkBy', 'tra', 'traBy', 'fwd', 'tnClick', 'htClick', 'kq', 'daDung',
       ].forEach((k) => delete s[k]);
     } else if (stage === 'hoan') {
       delete s.xong;
@@ -714,8 +714,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const k = String(t.titleKey || '');
     if (/^d:/.test(t.key || k)) return '🤖 bật: tự trả lời đúng hộp hỏi này bằng nút đã tích (hộp báo lỗi thì không)';
     if (base === 'bienNhan')
-      return '▶ / 🤖 điền theo tích; ô bắt buộc bỏ tích (Phường/Xã, Quy trình, Số biên nhận, Người nộp) tiện ích không điền – trống / khác dữ liệu TB thì dừng trước Lưu hồ sơ';
-    if (base === 'chu' || base === 'thua' || base === 'donDK') return '▶ / 🤖 điền theo tích; 🤖 bấm thêm nút đã tích trước nút Lưu (ô bắt buộc bỏ tích mà trống / khác dữ liệu TB → không tự Lưu)';
+      return '▶ / 🤖 CHỈ điền ô đã tích (ô bỏ tích / không có trong mẫu không điền); ô bắt buộc (Phường/Xã, Quy trình, Số biên nhận, Người nộp) không điền mà trống / khác dữ liệu TB → dừng trước Lưu hồ sơ';
+    if (base === 'chu' || base === 'thua' || base === 'donDK')
+      return '▶ / 🤖 CHỈ điền ô đã tích (ô bỏ tích / không có trong mẫu không điền); 🤖 bấm thêm nút đã tích trước nút Lưu; ô bắt buộc không điền mà trống / khác dữ liệu TB → không tự Lưu';
     if (base === 'giayTo') return '🤖 (tác vụ lưu kho): điền thêm ô / bấm thêm nút đã tích trước nút Lưu / Cập nhật';
     if (t.scope === 'page') return '🤖 bật: tự chạy mẫu mỗi lần vào màn hình này (màn hình tiện ích tự làm thì không)';
     if (T_CHO.test(k)) return '🤖: tích “Thực thi” = tự chọn đúng tài khoản trong cài đặt rồi Thực thi (đủ kiểm tra); ô / nút khác đã tích 🤖 làm thêm trước Thực thi';
@@ -811,7 +812,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     return (
       `<div class="card"><div class="ct">Lấy tất cả các trường</div>
         <div class="hint">Mở màn hình / cửa sổ / hộp hỏi cần điền trên VBDLIS rồi bấm. Tiện ích liệt kê mọi ô (cả ô tròn, ô chỉ có chữ mờ, ô trong bảng) và mọi <b>nút</b>. <b>Tích ô cần điền</b>: ô tiện ích biết lấy từ <b>dữ liệu TB</b> từng hồ sơ; ô khác điền <b>giá trị mẫu</b> (giống nhau mọi hồ sơ, sửa được). Tích nút cần bấm (ô số = thứ tự bấm). <b>Tích / sửa là tự lưu</b> – lần sau không phải tích lại; lấy lại trường lần nữa vẫn giữ tích cũ (ô lần đó không thấy cũng giữ, có ✕ để bỏ).<br>
-        Dùng: bấm <b>Điền</b> ở mẫu (mọi lúc). <b>🤖 Tự động hết</b>: cửa sổ / màn hình tiện ích không tự làm → tự điền + bấm theo mẫu mỗi lần mở; cửa sổ tiện ích tự làm (chủ, thửa, đơn, chọn người, Trả hồ sơ, hồ sơ quét) → 🤖 làm như cũ, đủ kiểm tra, rồi điền thêm ô / bấm thêm nút đã tích <b>trước</b> nút chốt (Lưu / Thực thi / Thực hiện); Quy trình xử lý → 🤖 theo bước riêng. <b>Hộp hỏi lạ</b>: lấy hộp đó lúc đang hiện, tích nút trả lời – từ đó 🤖 tự trả lời đúng hộp đó. Ô bắt buộc bỏ tích: tiện ích không điền; ô đó trống / khác dữ liệu TB thì 🤖 dừng trước Lưu. Không bao giờ điền Ngày sinh, Ngày cấp, Ngày hết hạn.</div>
+        Dùng: bấm <b>Điền</b> ở mẫu (mọi lúc). <b>🤖 Tự động hết</b>: cửa sổ / màn hình tiện ích không tự làm → tự điền + bấm theo mẫu mỗi lần mở; cửa sổ tiện ích tự làm (chủ, thửa, đơn, chọn người, Trả hồ sơ, hồ sơ quét) → 🤖 làm như cũ, đủ kiểm tra, rồi điền thêm ô / bấm thêm nút đã tích <b>trước</b> nút chốt (Lưu / Thực thi / Thực hiện); Quy trình xử lý → 🤖 theo bước riêng. <b>Hộp hỏi lạ</b>: lấy hộp đó lúc đang hiện, tích nút trả lời – từ đó 🤖 tự trả lời đúng hộp đó. Đã có mẫu thì tiện ích <b>chỉ điền ô đã tích</b> (ô bỏ tích / không có trong mẫu không điền); ô bắt buộc không điền mà trống / khác dữ liệu TB thì 🤖 dừng trước Lưu. Không bao giờ điền Ngày sinh, Ngày cấp, Ngày hết hạn.</div>
         <button class="btn pri full" id="tplScan">Lấy tất cả các trường trên màn hình đang mở</button></div>` +
       (d
         ? `<div class="card"><div class="ct">${esc(d.name)} – ${d.items.length} ô · ${(d.btns || []).length} nút<span class="sp"></span><button class="btn" id="tplAll" title="Tích các ô lấy từ dữ liệu TB và ô bạn đã gõ giá trị mẫu (ô giá trị mẫu khác: tích tay)">Tích hết</button><button class="btn" id="tplNone">Bỏ hết</button></div>
@@ -832,7 +833,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         : '') +
       `<div class="card"><div class="ct">Mẫu đã lưu (${saved.length})</div>` +
       (saved.length ? saved.map(savedRow).join('') : '<div class="muted">Chưa có mẫu. Không có mẫu thì tiện ích điền như cũ (mọi ô có dữ liệu).</div>') +
-      '</div>'
+      '</div>' +
+      `<div class="card"><div class="ct">Cấu hình tab Trường – dùng cho nơi khác</div>
+        <div class="hint">Mỗi nơi làm một kiểu: lấy trường, tích xong thì <b>Xuất cấu hình</b> – một file gồm mọi mẫu (cửa sổ, ô đã tích, lấy từ đâu, giá trị mẫu bạn đặt, thứ tự nút; không có dữ liệu hồ sơ, tên tài khoản). Nơi khác bấm <b>Nạp cấu hình</b>, chọn file đó: tiện ích cho xem mẫu nào thêm mới, mẫu nào đã có, hỏi trước khi thay.</div>
+        <div class="row"><button class="btn" id="cfgExp">⬇ Xuất cấu hình</button><button class="btn" id="cfgImpBtn">⬆ Nạp cấu hình…</button><input type="file" id="cfgFile" accept=".json,application/json" style="display:none"></div></div>`
     );
   }
   // gộp dòng mới lấy với dòng của mẫu cũ: giữ tích / nguồn / giá trị; dòng cũ lần này không thấy → GIỮ, ghi “không thấy lần lấy này”
@@ -1324,6 +1328,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // ---- mẫu tab Trường trong file sao lưu tiến độ: tích, thứ tự nút, giá trị mẫu bạn đặt ----
   // Không đưa vào file: giá trị có thể là dữ liệu cá nhân (dãy số dài, ô họ tên / giấy tờ / địa chỉ / điện thoại / email…)
   const PII_LAB = /(ho ten|ho va ten|so giay to|dinh danh|cccd|cmnd|can cuoc|dien thoai|email|dia chi|ngay sinh|nam sinh)/;
+  const TAI_KHOAN = /\b[a-z]{2,8}\.[a-z0-9_]{3,}\b/i; // tên tài khoản (vd. bgi.xxx_vy) – không đưa vào file
   function tplForBackup(all) {
     let dropped = 0;
     const out = {};
@@ -1332,7 +1337,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const items = t.items.map((x) => {
         const y = { label: x.label, nth: x.nth || 0, kind: x.kind, key: x.key || '', kname: x.kname || '', ban: !!x.ban, on: !!x.on, src: x.src, by: x.by || '', loc: x.loc || null, ctl: x.ctl || null, multi: !!x.multi };
         if (x.on && !x.ban && x.src !== 'tb' && x.val !== undefined) {
-          if (/\d{9,}/.test(String(x.val)) || PII_LAB.test(norm(x.label))) dropped++;
+          const v = String(x.val);
+          const acc = [S.opts.ctCV, S.opts.ctLD].filter(Boolean).some((a) => norm(v).includes(norm(a)));
+          if (/\d{9,}/.test(v) || PII_LAB.test(norm(x.label)) || TAI_KHOAN.test(v) || acc) dropped++;
           else y.val = x.val;
         }
         return y;
@@ -1370,10 +1377,74 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     }
     return { tplAdd, tplKeep };
   }
+  // ---- cấu hình tab Trường (bạn yêu cầu 23/11: “mỗi nơi làm 1 khác … lưu lại cấu hình để cho các nơi có thể dùng”) ----
+  // Xuất: một file JSON gồm mọi mẫu (đã lọc như file sao lưu). Nạp: cho xem mẫu thêm mới / đã có, hỏi trước khi thay mẫu đang có
+  function tplExport() {
+    const mt = tplForBackup(S.tpl);
+    const obj = { loai: 'vbdlis-cau-hinh-truong', phienBan: PANEL_VERSION, luc: new Date().toISOString(), soMau: Object.keys(mt.out).length, mauTruong: mt.out };
+    const name = saveFile(`cau-hinh-truong-vbdlis-${stamp()}.json`, new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }));
+    return { name, n: obj.soMau, dropped: mt.dropped };
+  }
+  // mẫu hợp lệ trong file cấu hình (hoặc file sao lưu tiến độ có mẫu), đã chuyển sang khóa bản 1.20
+  function tplParseImport(j) {
+    const inc = j && (j.loai === 'vbdlis-cau-hinh-truong' || j.loai === 'vbdlis-tien-do') ? j.mauTruong : null;
+    if (!inc || typeof inc !== 'object' || Array.isArray(inc)) throw new Error('không phải file cấu hình tab Trường của tiện ích (cau-hinh-truong-vbdlis-….json)');
+    const map = {};
+    for (const [k, t] of Object.entries(inc)) {
+      if (/^(__proto__|constructor|prototype)$/.test(k) || !t || typeof t !== 'object' || t.key !== k || !Array.isArray(t.items) || !Array.isArray(t.btns || [])) continue;
+      if (!/^(w:|d:|chu|thua|donDK|giayTo|bienNhan)/.test(k)) continue;
+      map[k] = { ...t, btns: (t.btns || []).map((b) => ({ ...b })), items: t.items.map((x) => ({ ...x })) };
+    }
+    tplMigrateAll(map);
+    return map;
+  }
+  async function tplImportFile(file) {
+    let j;
+    try {
+      j = JSON.parse(await file.text());
+    } catch (e) {
+      throw new Error('file không đọc được (không phải file JSON)');
+    }
+    const map = tplParseImport(j);
+    const keys = Object.keys(map);
+    if (!keys.length) throw new Error('file không có mẫu nào');
+    const add = keys.filter((k) => !S.tpl[k]);
+    const repl = keys.filter((k) => S.tpl[k]);
+    S.cfgImp = { map, add, repl };
+    const nm = (ks) => ks.map((k) => esc(map[k].name || k)).join(', ');
+    const luc = j.luc ? Date.parse(j.luc) : 0;
+    setResult(
+      `<div class="sum">Nạp cấu hình “${esc(file.name)}”${luc ? ` (xuất lúc ${esc(fmtTime(luc))})` : ''}: ${keys.length} mẫu</div>` +
+        (add.length ? `<div class="ln ok">+ Thêm mới ${add.length}: ${nm(add)}</div>` : '') +
+        (repl.length ? `<div class="ln muted">↻ Máy này đã có ${repl.length}: ${nm(repl)} – thay bằng bản trong file thì mất tích / giá trị của mẫu đang có</div>` : '') +
+        `<div class="row">${add.length ? `<button class="btn pri" id="cfgAdd">Thêm ${add.length} mẫu mới${repl.length ? ', giữ mẫu đang có' : ''}</button>` : ''}${
+          repl.length ? `<button class="btn" id="cfgAll">${add.length ? 'Thêm + ' : ''}thay ${repl.length} mẫu đang có</button>` : ''
+        }<button class="btn" id="cfgCancel">Hủy</button></div>`
+    );
+  }
+  async function tplImportApply(all) {
+    const c = S.cfgImp;
+    if (!c) return;
+    const put = all ? [...c.add, ...c.repl] : c.add;
+    const n = { ...S.tpl };
+    put.forEach((k) => (n[k] = { ...c.map[k], at: Date.now() }));
+    // đang mở bảng tích của mẫu vừa thay → đóng (không để lần tích sau ghi đè bản vừa nạp)
+    if (S.tplDraft && put.includes(S.tplDraft.key)) {
+      clearTimeout(S.tplSaveT);
+      S.tplSaveT = null;
+      S.tplDraft = null;
+    }
+    S.tpl = n;
+    S.cfgImp = null;
+    await store.set({ tbTpl: n });
+    setResult(
+      `<div class="ok">✓ Đã nạp cấu hình: thêm ${c.add.length} mẫu${all && c.repl.length ? `, thay ${c.repl.length} mẫu` : c.repl.length ? `, giữ nguyên ${c.repl.length} mẫu đang có` : ''}.</div>`
+    );
+  }
   // ghi chú của lần điền theo mẫu: ô bỏ tích (không điền), ô bắt buộc bỏ tích mà trang trống / khác, ô mẫu không thấy lúc này
   const tplNoteHtml = (f) =>
     [
-      (f.off || []).length && `• Bỏ qua theo mẫu tab Trường (ô bỏ tích): ${f.off.join(', ')}`,
+      (f.off || []).length && `• Không điền theo mẫu tab Trường (ô bỏ tích / không có trong mẫu): ${f.off.join(', ')}`,
       (f.tplSkip || []).length && `⚠ Ô bắt buộc bỏ tích mà trên trang đang trống / khác dữ liệu TB: ${f.tplSkip.join(', ')} – bạn điền tay`,
       ...(f.notes || []).map((n) => `• ${n}`),
     ]
@@ -1413,12 +1484,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // màn hình Tiếp nhận + mẫu “Màn hình Tiếp nhận hồ sơ” (tab Trường): mỗi ô chính lấy gì –
   // tb (dữ liệu TB), fix (giá trị mẫu), off (bỏ tích: tiện ích không điền; ô bắt buộc vẫn phải đúng dữ liệu TB trước khi Lưu hồ sơ)
   const RECEP_REQ = ['phuongXa', 'quyTrinh', 'soBienNhan', 'nguoiNop'];
+  const RECEP_NAME = { phuongXa: 'Phường/Xã', quyTrinh: 'Quy trình/Thủ tục', soBienNhan: 'Số biên nhận', diaChiTaiSan: 'Địa chỉ tài sản', nguoiNop: 'Người nộp hồ sơ', soGiayTo: 'Số giấy tờ', diaChi: 'Địa chỉ' };
   function recepPlan() {
     const t = S.tpl && S.tpl.bienNhan;
     const plan = {};
     for (const k of ['phuongXa', 'quyTrinh', 'soBienNhan', 'diaChiTaiSan', 'nguoiNop', 'soGiayTo', 'diaChi']) {
       const x = t && (t.items || []).find((y) => y.key === k);
-      if (!x) plan[k] = { use: 'tb' };
+      // “chỉ nhập chỗ ý” (bạn yêu cầu 23/11): đã có mẫu màn hình Tiếp nhận mà mẫu không có ô này → không điền
+      if (!x) plan[k] = t && t.items ? { use: 'off', label: `${RECEP_NAME[k]} (không có trong mẫu)` } : { use: 'tb' };
       else if (!x.on || x.ban) plan[k] = { use: 'off', label: tplLabel(x) };
       else if (x.src === 'tb') plan[k] = { use: 'tb' };
       else {
@@ -1569,6 +1642,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           s.cv && `chuyển CV ${fmtTime(s.cv)}`,
           s.don && `nhập đơn ${fmtTime(s.don)}`,
           s.ld && `chuyển LĐ ${fmtTime(s.ld)}${s.ldBy === 'suy' ? ' (suy ra)' : ''}`,
+          s.daDung && `số biên nhận đã dùng cho hồ sơ khác ${fmtTime(s.daDung)}`,
           s.kq && !s.trk && `LĐ trả về ${fmtTime(s.kq)}`,
           s.trk && `sang Trả KQ ${fmtTime(s.trk)}`,
           s.tra && `trả hồ sơ ${fmtTime(s.tra)}`,
@@ -2151,6 +2225,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // hộp xác nhận ngay sau khi tiện ích bấm “Lưu hồ sơ” (VBDLIS thật, ảnh 22/11):
   // “XÁC NHẬN THÊM MỚI HỒ SƠ – Bạn có thật sự muốn thêm mới hồ sơ hay không?  ĐỒNG Ý / KHÔNG” → Đồng ý
   const LHS_DIALOGS = [...AUTO_DIALOGS, { re: '(xac nhan them moi ho so|that su muon them moi ho so)', btn: ['Đồng ý'] }];
+  // hộp báo sau Lưu hồ sơ: số biên nhận đã được dùng cho hồ sơ khác (trang thật 23/11 – hồ sơ của số này đã có trên VBDLIS)
+  const SBN_USED = /da (duoc )?su dung cho ho so khac/;
   // hộp hỏi ngay sau khi tiện ích bấm “Thực hiện” ở cửa sổ “Trả hồ sơ” → Đồng ý (bạn yêu cầu “bấm thực hiện rồi đồng ý”);
   // hộp báo lỗi (vui lòng…, không thể…, thất bại…) thì không
   // chỉ hộp HỎI xác nhận việc trả hồ sơ (vd. “Bạn có chắc chắn muốn trả hồ sơ này?”), chỉ 1 lần; hộp báo lỗi / hộp khác → dừng chờ bạn
@@ -3120,6 +3196,20 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           );
         if (s1.don) step('Lưu thông tin đăng ký, Hoàn tất').skip(`đơn đã hoàn tất lúc ${fmtTime(s1.don)} – không bấm lại`);
         else {
+          // “chỉ nhập chỗ ý”: mẫu tab Trường của cửa sổ đơn không điền ô bắt buộc (bỏ tích / không có trong mẫu) → ô đó trên trang
+          // phải đúng dữ liệu TB, không thì dừng trước “Lưu thông tin đăng ký”
+          {
+            const md = tplMsg('donDK', buildValues('donDK', tb));
+            if (md.section && typeof md.section === 'object') {
+              const ck = (await act('tplCheck', md)).find((x) => x.ok);
+              if (ck && ck.skip.length) {
+                needYou('Ô bắt buộc chưa đúng – bạn xem', 'bad');
+                throw new Error(
+                  `mẫu tab Trường không điền ô bắt buộc ${ck.skip.join(', ')} mà trên trang ô đó đang trống / khác dữ liệu TB – bạn điền đúng rồi bấm “▶ Chạy cả TB” (tiện ích dừng trước “Lưu thông tin đăng ký”)`
+                );
+              }
+            }
+          }
           // 🤖 (bạn chọn 23/11): nút bạn tích thêm trong mẫu cửa sổ Nhập đơn đăng ký (tab Trường) – bấm trước “Lưu thông tin đăng ký”
           const exD = await tplChainExtras({ base: 'donDK', decide: ['luu thong tin dang ky', 'hoan tat'], step });
           if (exD) throw new Error(`${exD} – tiện ích dừng trước “Lưu thông tin đăng ký”, bạn xem rồi bấm “▶ Chạy cả TB”`);
@@ -4993,6 +5083,39 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           if ((S.lastMsg.tn || 0) > t0) break;
           // hộp “XÁC NHẬN THÊM MỚI HỒ SƠ – Bạn có thật sự muốn thêm mới hồ sơ hay không?” → Đồng ý (bạn yêu cầu); hộp lạ → chờ bạn
           const d = await dlgNow(LHS_DIALOGS);
+          // “Số biên nhận … đã được sử dụng cho hồ sơ khác” (trang thật 23/11) – đúng số của TB này: hồ sơ đã có trên VBDLIS →
+          // ghi ◐ Đã nhập nhưng chưa xong (đã tiếp nhận – không tiếp nhận lại), bấm Đồng ý, tải lại trang, 🤖 sang TB tiếp theo (bạn yêu cầu 23/11)
+          if (d && !d.answered && SBN_USED.test(norm(d.text)) && digitsOf(tb.soBienNhan).length >= 8 && digitsOf(d.text).includes(digitsOf(tb.soBienNhan))) {
+            S.armed = null;
+            await setMark(tb.tb, 'tnClick', null);
+            markStage(tb.tb, 'tn', 'suy');
+            await setMark(tb.tb, 'daDung', Date.now());
+            cur.ok(`trang báo “${d.text.slice(0, 160)}” – hồ sơ của TB ${tb.tb} đã có trên VBDLIS: ghi ◐ Đã nhập nhưng chưa xong`);
+            const okD = (await act('answerDialog', { rules: [{ re: SBN_USED.source, btn: ['Đồng ý', 'OK', 'Đóng'] }] })).some((x) => x.ok);
+            const nx = nextTodo(true);
+            if (nx) {
+              S.cur = String(nx.tb);
+              saveUi();
+            }
+            try {
+              await stageChain;
+              await store.set({ tbCur: S.cur });
+            } catch (e) {}
+            cur = step(nx ? `Tải lại trang, sang TB ${nx.tb} – ${whoOf(nx)}` : 'Tải lại trang');
+            cur.ok(okD ? 'đã bấm Đồng ý hộp báo' : 'hộp báo đã đóng');
+            cur = null;
+            tailNeed = '-';
+            tailOk = `<div class="hint">TB ${esc(tb.tb)}: số biên nhận đã được dùng cho hồ sơ khác – hồ sơ đã có trên VBDLIS, tiện ích ghi <b>◐ Đã nhập nhưng chưa xong</b> (bạn kiểm tra lại hồ sơ đó). ${
+              nx ? `🤖 tải lại trang rồi tiếp nhận TB <b>${esc(nx.tb)}</b>.` : 'Hết TB chưa làm.'
+            }</div>`;
+            S.autoSig = '';
+            setTimeout(() => {
+              try {
+                location.reload();
+              } catch (e) {}
+            }, 1500);
+            return;
+          }
           if (d && !d.answered && asked !== d.title) {
             asked = d.title;
             cur.wait(`trang hỏi “${d.text.slice(0, 120)}” – tiện ích không tự trả lời hộp này, bạn xem rồi trả lời`);
@@ -5683,6 +5806,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   });
 
   root.addEventListener('change', (e) => {
+    // tab Trường: chọn file cấu hình để nạp
+    if (e.target.id === 'cfgFile') {
+      const inp = e.target;
+      const file = inp.files && inp.files[0];
+      inp.value = '';
+      if (file) tplImportFile(file).catch((err) => setResult(`<div class="bad">✗ Không nạp được cấu hình: ${esc(friendly(err))}</div>`));
+      return;
+    }
     if (e.target.closest && e.target.closest('.dlg')) return; // ô trong hộp Dữ liệu / Tiến độ: hộp tự xử lý
     {
       // tab Trường: tích ô / đổi nguồn / đổi giá trị mẫu / tích nút – lưu ngay
@@ -5860,7 +5991,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           )
         ) {
           const s = { ...s0 };
-          ['ld', 'ldBy', 'kq', 'trk', 'trkBy', 'tra', 'traBy', 'xong', 'xongBy', 'hoan', 'fwd'].forEach((k) => delete s[k]);
+          ['ld', 'ldBy', 'kq', 'trk', 'trkBy', 'tra', 'traBy', 'xong', 'xongBy', 'hoan', 'fwd', 'daDung'].forEach((k) => delete s[k]);
           S.stage[id] = s;
           if (S.chainTb && String(S.chainTb.tb) === id) setChainTb(null);
           saveStage(id);
@@ -5994,7 +6125,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       return;
     }
     if (
-      ['tplScan', 'tplAll', 'tplNone', 'tplSave', 'tplFillNow', 'tplCancel'].includes(b.id) ||
+      ['tplScan', 'tplAll', 'tplNone', 'tplSave', 'tplFillNow', 'tplCancel', 'cfgExp', 'cfgImpBtn', 'cfgAdd', 'cfgAll', 'cfgCancel'].includes(b.id) ||
       b.dataset.tplfill ||
       b.dataset.tpledit ||
       b.dataset.tpldel ||
@@ -6018,7 +6149,21 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       };
       S.busy = true;
       try {
-        if (b.dataset.tplRm != null || b.dataset.tplbRm != null) {
+        if (b.id === 'cfgExp') {
+          const r = tplExport();
+          setResult(
+            `<div class="ok">✓ Đã lưu “${esc(r.name)}” vào thư mục Tải xuống: ${r.n} mẫu${
+              r.dropped ? ` (${r.dropped} giá trị mẫu có thể là dữ liệu cá nhân / tên tài khoản không đưa vào file)` : ''
+            }. Gửi file này cho nơi khác – nơi đó bấm “Nạp cấu hình”.</div>`
+          );
+        } else if (b.id === 'cfgImpBtn') {
+          const f = $('#cfgFile');
+          if (f) f.click();
+        } else if (b.id === 'cfgAdd' || b.id === 'cfgAll') await tplImportApply(b.id === 'cfgAll');
+        else if (b.id === 'cfgCancel') {
+          S.cfgImp = null;
+          setResult('<div class="muted">Đã hủy nạp cấu hình – mẫu trên máy này giữ nguyên.</div>');
+        } else if (b.dataset.tplRm != null || b.dataset.tplbRm != null) {
           // ✕: bỏ dòng / nút “không thấy lần lấy này” khỏi mẫu
           if (d && !tplDead()) {
             if (b.dataset.tplRm != null) d.items.splice(+b.dataset.tplRm, 1);
@@ -8828,6 +8973,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         `đã bấm ${FWD_LONG[s.fwd.k] || 'chuyển tiếp'} lúc ${fmtTime(s.fwd.at)} nhưng chưa xác nhận${s.fwd.bad ? ' (trang báo lỗi / chưa rõ)' : ''} – xem lại trên VBDLIS`,
       s.ld && s.ldBy === 'suy' && !s.kq && 'chuyển lãnh đạo: tiện ích suy ra (không thấy câu báo thành công) – nên kiểm tra trên VBDLIS',
       s.cv && !s.ld && !s.fwd && 'đã chuyển chuyên viên, chưa chuyển lãnh đạo',
+      s.daDung && !s.ld && !s.xong && `lúc ${fmtTime(s.daDung)} trang báo số biên nhận đã được dùng cho hồ sơ khác – hồ sơ đã có trên VBDLIS, nên kiểm tra`,
       traPhase(s) && !s.fwd && 'lãnh đạo đã trả về – chưa Trả hồ sơ',
       x.ghiChu ? `ghi chú: ${x.ghiChu}` : '',
     ].filter(Boolean);
@@ -8896,7 +9042,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         continue;
       }
       const m = { ...cur };
-      ['tn', 'tnBy', 'don', 'donBy', 'lech', 'quet', 'quetBy', 'xong', 'xongBy', 'hoan', 'ack', 'boQua', 'cv', 'cvBy', 'ld', 'ldBy', 'kq', 'trk', 'trkBy', 'tra', 'traBy'].forEach((k) => {
+      ['tn', 'tnBy', 'don', 'donBy', 'lech', 'quet', 'quetBy', 'xong', 'xongBy', 'hoan', 'ack', 'boQua', 'cv', 'cvBy', 'ld', 'ldBy', 'kq', 'trk', 'trkBy', 'tra', 'traBy', 'daDung'].forEach((k) => {
         if (m[k] == null && v[k] != null) m[k] = v[k];
       });
       if (m.fwd && m[m.fwd.k]) delete m.fwd; // bước đó đã xong → bỏ dấu “đang chuyển”

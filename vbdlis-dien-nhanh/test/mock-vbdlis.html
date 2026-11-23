@@ -677,7 +677,13 @@
     // Lưu hồ sơ (giống trang thật 22/11): trang hỏi “XÁC NHẬN THÊM MỚI HỒ SƠ” (ĐỒNG Ý / KHÔNG, không có ô nhập)
     //   ĐỒNG Ý → báo thành công rồi ở lại hồ sơ vừa lưu (thanh Xử lý hồ sơ…; __mockReload: trang tải lại cả trang); KHÔNG → không lưu gì
     if (k === 'hs') return setTimeout(() => mockConfirm('XÁC NHẬN THÊM MỚI HỒ SƠ', 'Bạn có thật sự muốn thêm mới hồ sơ hay không?', [
-      { text: 'ĐỒNG Ý', cls: 'btn-orange', fn: () => setTimeout(() => { mockLuuHoSo(); sauLuuHoSo(); }, 500) },
+      { text: 'ĐỒNG Ý', cls: 'btn-orange', fn: () => setTimeout(() => {
+        // window.__mockSbnDaDung (trang thật 23/11): số biên nhận đã dùng cho hồ sơ khác → hộp THÔNG BÁO (ĐỒNG Ý), không lưu
+        if (window.__mockSbnDaDung) {
+          mockConfirm('THÔNG BÁO', 'Số biên nhận ' + document.getElementById('txtSoBienNhan').value + ' đã được sử dụng cho hồ sơ khác', [{ text: 'ĐỒNG Ý', cls: 'btn-orange', fn: (e) => log('(' + aiBam(e) + ' bấm ĐỒNG Ý – số biên nhận đã dùng)') }]);
+          return log('(trang báo: số biên nhận đã được sử dụng cho hồ sơ khác – không lưu)');
+        }
+        mockLuuHoSo(); sauLuuHoSo(); }, 500) },
       { text: 'KHÔNG', cls: 'btn-default', fn: (e) => log('(' + aiBam(e) + ' bấm Không – không lưu)') }
     ]), 250);
     if (k === 'lt') return setTimeout(() => { mockToast('Thành công', 'Cập nhật đơn đăng ký thành công'); chupDon(); }, 500);

@@ -1,7 +1,87 @@
 # VBDLIS Điền Nhanh – hướng dẫn
 
 Tiện ích cho Chrome / Edge / Cốc Cốc. Nó điền sẵn các ô trên VBDLIS từ dữ liệu TBXN.
-**Tiện ích không bao giờ tự bấm “Lưu”**: bạn kiểm tra lại rồi tự bấm.
+Mặc định **tiện ích không tự bấm “Lưu hồ sơ”, “Lưu thông tin đăng ký”, “Hoàn tất”, “Chuyển tiếp”, “Thực thi”, “Trả hồ sơ”**: bạn kiểm tra lại rồi tự bấm. Muốn tiện ích làm hết thì bật nút **🤖 Tự động** (xem dưới).
+
+## 🤖 Tự động hết (bản 1.18)
+Bấm nút **🤖 Tự động: TẮT** cạnh “▶ Chạy cả TB”, đọc hộp xác nhận rồi bấm OK, nút chuyển thành **🤖 Tự động: BẬT** (màu xanh). Khi **thu nhỏ bảng** (nút –), thanh nhỏ có nút **🤖** thay cho nút ● ghi thao tác: bấm một cái là bật và chạy luôn màn hình đang mở (lần đầu vẫn hỏi xác nhận). Từ đó bạn **không cần bấm ▶**: mở màn hình là tiện ích tự chạy, làm trọn mỗi TB như bạn làm tay (ảnh 22/11):
+
+**Bước 1 – tiếp nhận và chuyển chuyên viên**
+1. **Màn hình Tiếp nhận hồ sơ trống** → tiếp nhận TB đang chọn (TB đó đã làm thì tự chọn TB chưa làm tiếp theo): tự bấm Lưu cửa sổ thửa, Đồng ý “Cập nhật địa chỉ tài sản”, **Lưu hồ sơ** → hộp “**XÁC NHẬN THÊM MỚI HỒ SƠ**” → **Đồng ý**.
+2. Trang ra **màn hình hồ sơ** (nút “Xử lý hồ sơ”) → **Xử lý hồ sơ** → Quy trình chỉ có “Tiếp nhận hồ sơ”: tích **Đã xử lý** → **Chuyển tiếp** → cửa sổ “Chọn người xử lý tác vụ tiếp theo” (bước *2. Chuyên viên (Tiếp theo)*): chọn đúng **tài khoản của bạn** → **Thực thi**.
+
+**Bước 2 – nhập đơn và chuyển lãnh đạo**
+3. Về lại màn hình hồ sơ → **Xử lý hồ sơ** → Quy trình “Nhập đăng ký” + “Giấy tờ đính kèm” → **Xử lý tác vụ** của Nhập đăng ký → thêm đủ chủ, thửa (tự Lưu từng cửa sổ, tự Đồng ý “Giấy tờ tùy thân đã tồn tại”), lập phiếu đối chiếu → **Lưu thông tin đăng ký** → **Hoàn tất** → **Đóng**.
+4. Tích **Đã xử lý** cả “Nhập đăng ký” và “Giấy tờ đính kèm” → **Chuyển tiếp** → bước *3. Lãnh đạo UBND xã (Tiếp theo)*: chọn đúng **tài khoản lãnh đạo** → **Thực thi**. TB vẫn là **◐ Đã tiếp nhận** (ghi thêm giờ chuyển chuyên viên, chuyển lãnh đạo).
+5. Bấm **Về trang tiếp nhận hồ sơ** và làm luôn **TB chưa làm tiếp theo** (tắt được: bỏ tích “Chuyển lãnh đạo xong thì tự sang TB…”). Tiện ích chỉ đi tiếp xuống dưới danh sách, không quay lại TB phía trước.
+
+**Bước 3 – tìm hồ sơ lãnh đạo trả về (Xử lý công việc → Danh sách hồ sơ thụ lý)**
+6. Làm hết TB chưa tiếp nhận thì tiện ích tự bấm **Xử lý công việc** (thanh bên trái) → **Danh sách hồ sơ thụ lý** – kể cả khi bạn vừa **bật 🤖** ở màn hình Tiếp nhận trống (hay màn hình không có việc) mà mọi TB đã tiếp nhận: không phải bấm ▶ (bản 1.18.6). Với từng TB “◐ Đã tiếp nhận” mà chưa xong: gõ **Số biên nhận** vào ô tìm, bấm 🔍. Chưa ra kết quả (lãnh đạo chưa trả về) thì **khoảng 5 giây sau tìm lại** (lần lượt các TB). Ra hồ sơ → **bấm vào hồ sơ** → **Xử lý hồ sơ** → làm tiếp theo Quy trình của hồ sơ.
+7. Quy trình 5 tác vụ: tiện ích làm tác vụ 2 *Cập nhật dữ liệu pháp lý* và 3 *Lưu kho hồ sơ quét* (file từ hàng chờ), tích “Đã xử lý”. **Bạn tự làm Kết ISO** và tích “Đã xử lý”. Tích đủ cả 5 tác vụ → tiện ích **Chuyển tiếp** → bước *5. Trả kết quả (Tiếp theo)* → chọn **tài khoản của bạn** → **Thực thi**.
+8. Tiện ích **bấm vào hồ sơ** (danh sách còn lọc sẵn đúng hồ sơ đó thì bấm luôn, không thì gõ lại số biên nhận vào ô tìm; khung “Thông tin hồ sơ” bên phải còn giữ số của hồ sơ vừa làm cũng không sao – bản 1.18.9) → **Xử lý hồ sơ** → Quy trình “Kết ISO” + “Trả hồ sơ” → **Xử lý tác vụ** của Trả hồ sơ → **Thực hiện** → **Đồng ý** (hộp “Bạn có thật sự muốn trả hồ sơ hay không?”) → trang báo thành công → TB thành **✓ Xong** (bản 1.18.5: TB đi chuỗi chuyển tiếp chỉ Xong khi đã Trả hồ sơ) → **làm tiếp TB khác**: còn TB chờ thì tìm tiếp ở Danh sách hồ sơ thụ lý; tìm hết một lượt mà chưa thấy hồ sơ nào và còn TB chưa tiếp nhận thì sang **Tiếp nhận hồ sơ** làm TB đó, làm hết lại về danh sách.
+- Tìm **chậm, chắc** (bản 1.18.4): gõ số biên nhận, bấm 🔍, chờ trang tải xong; chỉ khi danh sách còn **đúng 1 hồ sơ** và ô thông tin hồ sơ của dòng đó có **đúng số biên nhận vừa gõ** (đọc lại lần nữa vẫn vậy) mới bấm vào hồ sơ – bấm vào ô chữ, không bấm link số biên nhận – chờ dòng được chọn rồi mới bấm **Xử lý hồ sơ**. Trang báo “chọn hồ sơ” thì bấm lại dòng một lần. Muốn chậm hơn nữa: tab Biên nhận → Tốc độ “Chậm” / “Rất chậm”.
+- Bản 1.18.6: trang tìm theo “chứa chữ” nên có thể ra thêm hồ sơ số dài hơn (vd. …237.51 và …237.51-237.50) – tiện ích chỉ bấm dòng có **đúng** số. Sau khi bấm dòng, khung **Thông tin hồ sơ** bên phải phải hiện đúng Số biên nhận đó mới bấm **Xử lý hồ sơ** (chưa đúng thì bấm lại 1 lần, vẫn sai thì dừng); Quy trình mở ra không phải của hồ sơ đó → dừng, không làm gì. Danh sách trống → coi như chưa có, khoảng 5 giây sau tìm tiếp.
+- Bạn đang bấm / gõ trên trang danh sách (15 giây gần nhất; ô tìm đang có chữ **bạn** gõ → 60 giây) hoặc đang dùng bảng điền (20 giây) thì tiện ích không gõ vào ô tìm.
+- Bấm **■ Dừng** lúc tiện ích **đang tìm** ở danh sách → **tạm dừng tìm** (cả khi trang tải lại) tới khi bạn bấm **▶**, bấm nút trong dòng báo, hoặc tắt / bật lại 🤖 (bản 1.18.8: dừng việc khác – tiếp nhận, chuyển tiếp… – thì **không** tạm dừng tìm; tiện ích làm xong một TB rồi tự về danh sách thì cũng tìm lại).
+- Màn hình **Tiếp nhận hồ sơ** mà bạn đã gõ (người nộp, số giấy tờ, điện thoại, email, nội dung hồ sơ) thì 🤖 **không rời trang**; bạn vừa thao tác trên trang thì chờ 20 giây (bản 1.18.8).
+- Tiện ích đi trang (**Xử lý công việc**, **Tiếp nhận hồ sơ**, **Về trang tiếp nhận hồ sơ**) bằng **địa chỉ của link, ngay trong tab này** (bản 1.18.7 – trên trang thật, 🤖 bấm Xử lý công việc mà trang không chuyển). Trang không chuyển trong 15 giây → dừng, kêu ting, có dòng **“Để báo lỗi…”** (thẻ, địa chỉ link) – chụp gửi người hỗ trợ; tạm thời bạn tự bấm mục đó, 🤖 làm tiếp. Tiện ích nhớ địa chỉ trang Danh sách hồ sơ thụ lý mỗi khi bạn mở trang đó (có bảng điền) để đi thẳng tới khi cần.
+- TB tiện ích đã mở mà chưa có gì mới (vd. đang chờ bạn Kết ISO, hàng chờ chưa có file quét) thì không mở lại nữa; bấm **▶ Chạy cả TB** để tìm lại từ đầu.
+- Ở trang danh sách, bấm **▶**: danh sách đang lọc theo số trong ô tìm (kể cả khi trang ra thêm hồ sơ số dài hơn) thì làm luôn hồ sơ **đúng số** đó; không thì tìm ngay TB đang chọn / TB kế tiếp. 🤖 đang bật mà TB đang chọn chỉ đang chờ lãnh đạo trả về (vd. TB vừa chuyển lãnh đạo) → ▶ cho 🤖 tìm lần lượt **mọi** TB chờ, không chỉ TB đó (bản 1.18.8).
+- Tìm hết **một lượt** (mọi TB chờ đã tìm 1 lần, chưa thấy hồ sơ nào) mà còn TB chưa tiếp nhận → 🤖 sang **Tiếp nhận hồ sơ** làm TB đó – nhiều TB chờ bao nhiêu cũng vậy (bản 1.18.8).
+- Bạn có thể tự bấm **Xử lý công việc** bất cứ lúc nào (🤖 bật) để tiện ích bắt đầu tìm.
+- Đang ở bước **Mở lại hồ sơ** mà chưa bấm được, dòng đó hiện ngay lý do đang chờ (cửa sổ chưa đóng, chưa thấy dòng đúng số…); hết 45 giây thì kêu ting, ghi ✗ kèm lý do – bạn bấm vào hồ sơ rồi **Xử lý hồ sơ**, 🤖 làm tiếp Trả hồ sơ. Chụp dòng “Để báo lỗi…” gửi người hỗ trợ.
+- Tiện ích nhận ra trang danh sách nhờ: ô tìm có chữ mờ chứa “số biên nhận”, nút **Xử lý hồ sơ** (hoặc cột “Thông tin hồ sơ”), không có nhãn “Người nộp hồ sơ”. Không nhận ra → bảng điền có dòng **“Để báo lỗi…”** (ô nhập, cột, nút, số dòng hồ sơ thấy trên trang) – chụp dòng đó gửi người hỗ trợ.
+
+**Cài đặt** (tab **Biên nhận** → mục “🤖 Tự động hết – chuyển tiếp”):
+- **Tài khoản**: ô *Chuyên viên* (tài khoản của bạn – dùng cho bước 2 và bước Trả kết quả) và ô *Lãnh đạo*. Trên máy này đã đặt sẵn từ file `cau-hinh.local.json` (file này không lên git). Tiện ích chỉ chọn dòng có **Tên tài khoản đúng y** như ô đó, và chỉ bấm Thực thi khi **chỉ dòng đó** có dấu chọn (✓ ở cột STT). Không thấy, thấy 2 dòng, bước nhận không đúng, không chắc đã chọn, hoặc bạn vừa bấm / gõ trên trang (2 giây) → **dừng, không bấm Thực thi**. Bạn tự bấm **Chuyển tiếp** để mở cửa sổ thì không sao – tiện ích vẫn bấm Thực thi; chỉ khi bạn vừa tự bấm **Thực thi** ở đúng bước đó (trong 1 phút) thì tiện ích không bấm thêm (tránh chuyển 2 lần).
+- **Tốc độ**: Nhanh / Bình thường / Chậm / Rất chậm. Mạng hay VBDLIS chậm thì chọn Chậm; muốn nhìn từng bước thì chọn Rất chậm.
+- **Chạy thử**: tiện ích làm hết, chọn sẵn đúng người, rồi **dừng ở Thực thi / Trả hồ sơ** cho bạn tự bấm. Bạn bấm Thực thi (Thực hiện) xong là tiện ích **tự làm tiếp**. Nên bật cho 1–2 hồ sơ đầu trên VBDLIS thật, thấy đúng rồi tắt.
+
+**An toàn**
+- Mỗi bước chỉ bấm **Thực thi một lần**. Đã bấm mà chưa thấy báo thành công (trang tải lại…) thì lần sau tiện ích **không bấm lại**: nó mở Quy trình xem hồ sơ đã sang bước mới chưa; vẫn ở bước cũ thì dừng và hiện nút **“Chưa chuyển – làm lại”** để bạn quyết.
+- Chuyển lãnh đạo mà không thấy câu báo thành công: tiện ích mở lại **Xử lý hồ sơ** để xem. Trang báo rõ hồ sơ không còn của bạn → ghi đã chuyển, sang TB sau. Chưa rõ → dừng, hiện 2 nút **“Đã chuyển lãnh đạo – sang TB sau”** và **“Chưa chuyển – làm lại”**.
+- Cửa sổ chọn người: tiện ích chỉ tính dấu ✓ **đang hiện** ở cột STT (dấu ẩn không tính). Vẫn dừng ở bước này thì trong bảng điền có dòng “Để báo lỗi…” – chụp gửi người hỗ trợ.
+- Đã bấm Lưu hồ sơ / Hoàn tất mà chưa thấy báo thành công (trang tải lại…) → không tự tiếp nhận / hoàn tất lần nữa, hiện nút cho bạn xác nhận.
+- **Trang tải lại** (sau Lưu hồ sơ, Thực thi…): bảng điền tự mở lại và làm tiếp, chỉ khi đang bật Tự động hết và bạn không ẩn bảng (×). Sau Thực thi bước Trả kết quả, trang về Danh sách hồ sơ thụ lý: tiện ích tự bấm lại dòng hồ sơ rồi Trả hồ sơ. Làm xong bước 3 của hồ sơ cũ, **TB đang chọn trong bảng trở về như trước** (không làm lệch “TB chưa làm tiếp theo”).
+- Trả hồ sơ: tiện ích chỉ **Đồng ý một** hộp hỏi “Bạn có thật sự / chắc chắn muốn trả hồ sơ…”. Hộp khác / hộp báo lỗi → dừng chờ bạn.
+- 🤖 chờ bạn **ngừng bấm / gõ trên trang 3 giây** rồi mới tự chạy (bản 1.18.6) – vd. bạn vừa Kết ISO xong thì 3 giây sau tiện ích mới chuyển tiếp, không còn dừng vì “bạn vừa bấm”.
+- Trang tải lại giữa lúc 🤖 đang làm một TB mở từ Danh sách hồ sơ thụ lý (không phải TB đang chọn): bảng điền mới vẫn làm tiếp TB đó (30 phút), TB đang chọn không đổi.
+- **Dừng, kêu ting chờ bạn** (kêu được cả khi trang vừa tải lại; dấu **!** đỏ trên biểu tượng tiện ích còn tới khi bạn bấm / gõ) khi: phiếu đối chiếu có ô lệch (✗), Số biên nhận trên trang không khớp đúng một TB, không thấy đúng người, trang hiện hộp hỏi lạ, hoặc trang báo lỗi. Dữ liệu TB thiếu ô (⚠) thì vẫn lưu đơn, ghi nhắc để bạn xem lại. Bạn sửa xong thì bấm “▶ Chạy cả TB” – tiện ích làm tiếp từ bước đang dở.
+- **Dừng là giữ TB đó**: lần chạy dừng (lỗi, hỏi bạn, bạn bấm Dừng) thì 🤖 **không tự chạy lại TB đó ở màn hình nào**, kể cả sau khi trang tải lại. Thanh trạng thái ghi “🤖 Tự động hết đang chờ bạn ở TB …”. Bạn xem xong bấm **▶ Chạy cả TB** (hoặc nút trong dòng báo, hoặc tắt / bật lại 🤖) là chạy tiếp.
+- Cửa sổ **Nhập đơn đăng ký** chỉ tự chạy khi đơn đó của **TB đang chọn**. Đơn của TB khác → bấm ▶.
+- **Không bao giờ bấm** Kết ISO.
+- 🤖 **chỉ chạy ở tab bạn bật**. Tab VBDLIS khác hiện “🤖 Tự động: ở tab khác” và không tự bấm gì; muốn chạy ở tab đó thì bấm nút đó. Tắt 🤖 / đổi tài khoản, tốc độ… ở tab nào thì các tab khác nhận ngay.
+- Bấm lại nút để **TẮT**. Khi tắt, tiện ích quay về cách cũ: tô vàng các nút cho bạn tự bấm (ở cửa sổ chọn người, bấm ▶ thì tiện ích chọn sẵn đúng người, bạn tự bấm Thực thi). Bật 🤖 không còn sửa 3 ô “tự động” của bạn (chủ / hồ sơ quét / Quy trình) – khi bật thì coi như bật, tắt thì theo lựa chọn cũ.
+- Cửa sổ chọn người đang **mở sẵn** lúc bạn bấm ▶: tiện ích chỉ chọn đúng người và tô vàng Thực thi, **không tự bấm**.
+
+## Tab “Trường” – lấy tất cả các trường, tích trường cần điền
+1. Mở cửa sổ / màn hình cần điền trên VBDLIS (cửa sổ chủ, cửa sổ thửa, Nhập đơn đăng ký, màn hình Tiếp nhận…).
+2. Vào tab **Trường** → bấm **Lấy tất cả các trường trên màn hình đang mở**. Tiện ích liệt kê mọi ô kèm giá trị đang có – cả các **ô tích** (vd. “Có quyền sử dụng đất”, “Đồng sử dụng”, “Đăng ký lần đầu”). Chỉ lấy được ô đang hiện trên màn hình (tab đang mở).
+3. **Tích ô cần điền**. Với mỗi ô chọn **lấy từ đâu**:
+   - **Dữ liệu TB**: chỉ có ở ô tiện ích vốn biết, như Họ tên, Số giấy tờ, Diện tích…
+   - **Giá trị mẫu**: giá trị đang có trên trang. Sửa ngay trong bảng được.
+4. **Tích / sửa là tự lưu mẫu** (không cần bấm gì thêm; nút **Lưu mẫu** chỉ để lưu rồi đóng bảng tích). Lần sau mở lại cửa sổ đó **không phải tích lại**. Từ đó “▶ Chạy cả TB” và “🤖 Tự động” **chỉ điền các ô đã tích** của cửa sổ đó, kèm các ô giá trị mẫu. Ô bỏ tích thì không điền.
+   - Cửa sổ khác (tiện ích không tự làm): **🤖 Tự động hết tự điền + bấm theo mẫu** mỗi khi cửa sổ đó mở. 🤖 tắt thì dùng nút **Điền** ở danh sách mẫu.
+   - Tên cửa sổ có số (vd. số biên nhận) → mẫu lưu theo phần chữ đứng trước số, nên **dùng lại cho mọi hồ sơ**. Mẫu chỉ khớp cửa sổ có đúng phần chữ đó (không khớp cửa sổ khác chỉ vì tên bắt đầu giống).
+   - Màn hình chính (không có cửa sổ con): mỗi màn hình một mẫu riêng (vd. Danh sách hồ sơ thụ lý không đè mẫu của màn hình Tiếp nhận).
+   - **Sửa** / **Xóa** mẫu ở danh sách. Xóa mẫu thì tiện ích điền như cũ.
+5. **Nút trên màn hình**: bảng thứ hai liệt kê **mọi nút** của màn hình / cửa sổ đó – cả đường link, nút chỉ có biểu tượng (lấy theo tên gợi ý hoặc tên biểu tượng); tên nút bỏ số đếm cuối (vd. “Quá hạn xử lý (16)”). **Nút nào cũng tích được.** Tích nút cần bấm; ô số bên cạnh là **thứ tự bấm** (tích là tự đánh số tiếp, sửa được). Khi bấm **Điền** / **Điền ngay** (hoặc 🤖 tự chạy mẫu như trên), tiện ích điền các ô đã tích rồi **bấm lần lượt các nút đã tích**:
+   - chỉ bấm khi thấy đúng một nút đó, đúng cửa sổ của mẫu; nút đang mờ thì dừng;
+   - có ô chưa điền được thì **không bấm nút nào**;
+   - trang hiện hộp hỏi → 🤖 bật thì trả lời hộp đã biết, không thì dừng chờ bạn;
+   - nút là đường link sang trang khác: bấm là trang chuyển, các nút sau không bấm nữa.
+   - Bấm theo mẫu thì tiện ích **không kiểm tra thêm** (vd. Thực thi theo mẫu không kiểm người nhận) – bạn tự chọn đúng trước.
+   - Ở cửa sổ tiện ích tự làm (đơn, chủ, thửa, Quy trình, Trả hồ sơ), 🤖 vẫn làm theo cách riêng; nút của mẫu ở các cửa sổ này chỉ bấm khi bạn bấm Điền.
+   - Riêng **cửa sổ chọn người nhận**: tích nút **Thực thi** trong mẫu của cửa sổ này = cho 🤖 **tự bấm Thực thi cả khi cửa sổ do bạn mở**. Tiện ích vẫn kiểm: đúng bước “… (Tiếp theo)”, đúng hồ sơ trong dữ liệu, chọn đúng tài khoản trong cài đặt (chưa chọn thì tự chọn). Bạn đang chọn **người khác** thì tiện ích không đổi người, không bấm. Đang bật “Chạy thử” thì chỉ tô vàng.
+- Ngày sinh, Ngày cấp, Ngày hết hạn không tích được (quy tắc: không điền 3 ô này).
+
+## Chọn thư mục file quét (TB 18xx)
+Bấm **Chọn thư mục…** ở tab Giấy tờ, hoặc kéo cả thư mục (vd. `18 TH`) thả vào bảng. Trong thư mục có các thư mục **TB 1846**, **TB 1847**…, mỗi thư mục chứa PDF của TB đó.
+- File **DDK** vào dòng *Đơn đăng ký*, file **TBXN** vào dòng *Thông báo xác nhận kết quả đăng ký*.
+- Số biên nhận trong tên file **phải khớp** số biên nhận của TB có số trên tên thư mục. Không khớp thì tiện ích **bỏ file đó** và ghi rõ lý do.
+- Tên file không có số biên nhận (vd. `TB 1847/TBXN.pdf`) thì lấy số biên nhận của TB 1847 trong dữ liệu.
+- File không có chữ DDK / TBXN trong tên thì bỏ qua. Thư mục TB thiếu DDK hoặc TBXN thì có dòng ⚠ nhắc.
+- File cùng tên ở các thư mục TB khác nhau (vd. `TB 1846/DDK.pdf`, `TB 1847/DDK.pdf`) là 2 file khác nhau – không đè nhau.
 
 ## Cài đặt (một lần)
 1. Mở trình duyệt, gõ vào thanh địa chỉ: `chrome://extensions` (Edge: `edge://extensions`, Cốc Cốc: `coccoc://extensions`).
@@ -12,7 +92,8 @@ Tiện ích cho Chrome / Edge / Cốc Cốc. Nó điền sẵn các ô trên VBD
 ## Cách nhanh nhất: nút “▶ Chạy cả TB”
 Nút này tự biết bạn đang ở bước nào:
 - đang ở màn hình **Tiếp nhận hồ sơ** (không mở cửa sổ con) → làm bước tiếp nhận (dưới đây);
-- đang mở cửa sổ **Nhập đơn đăng ký** → làm bước đơn đăng ký (xem mục “Bước Nhập đơn đăng ký”).
+- đang mở cửa sổ **Nhập đơn đăng ký** → làm bước đơn đăng ký (xem mục “Bước Nhập đơn đăng ký”);
+- **TB đang chọn đã “◐ Đã tiếp nhận” mà chưa xong** (bản 1.18.2) → **không tiếp nhận lại**: tiện ích bấm **Xử lý công việc** (thanh bên trái) → Danh sách hồ sơ thụ lý → gõ **Số biên nhận** của TB đó vào ô tìm, bấm 🔍. Chưa ra (lãnh đạo chưa trả về) thì **5 giây tìm lại** (tối đa 30 phút, bấm **■ Dừng** để thôi). Ra hồ sơ → **bấm vào hồ sơ** → **Xử lý hồ sơ** → làm tiếp theo Quy trình (tác vụ 2–3, chờ bạn Kết ISO…). Trang tải lại khi bấm Xử lý công việc thì bảng điền tự mở lại và tìm tiếp (kể cả khi 🤖 tắt). Đang ở Danh sách hồ sơ thụ lý thì bấm ▶ là tìm ngay TB đang chọn. Muốn tiếp nhận lại TB đó thật (hiếm): đổi ô **Trạng thái** của TB về “Chưa làm” rồi bấm ▶. Màn hình Tiếp nhận đang có dữ liệu chưa lưu, hoặc thanh trái không có mục Xử lý công việc → tiện ích không rời trang, hiện nút **“Vẫn tiếp nhận TB …”**.
 
 Mở màn hình **Tiếp nhận hồ sơ** mới, bấm Alt+Q, chọn TB, bấm **▶ Chạy cả TB**. Tiện ích làm lần lượt:
 1. Chọn Phường/Xã “Phường Việt Yên (Phường Bích Động - Thị xã Việt Yên cũ)”.
@@ -24,14 +105,14 @@ Mở màn hình **Tiếp nhận hồ sơ** mới, bấm Alt+Q, chọn TB, bấm 
 6. Đối chiếu bảng thửa trên trang với dữ liệu (thiếu / thừa / trùng / sai diện tích).
 7. Tô vàng nút **“Lưu hồ sơ”** – bạn kiểm tra toàn bộ rồi tự bấm. Khi trang báo **“Lưu hồ sơ thành công”**, tiện ích tự đánh dấu TB đó **◐ đã tiếp nhận** và gợi ý TB chưa làm tiếp theo (bấm **Chọn**).
 
-Tiện ích **không bấm nút Lưu nào**. Bấm “■ Dừng” để thôi giữa chừng; bấm “▶ Chạy cả TB” lại thì bước nào/thửa nào đã xong sẽ được bỏ qua. Phường/Xã và quy trình có thể đổi trong tab Biên nhận.
+Ở màn hình tiếp nhận tiện ích **không bấm nút Lưu nào**. Bấm “■ Dừng” để thôi giữa chừng; bấm “▶ Chạy cả TB” lại thì bước nào/thửa nào đã xong sẽ được bỏ qua. Phường/Xã và quy trình có thể đổi trong tab Biên nhận.
 
 **Tiện ích tự dừng (không ghi gì lên trang) khi:**
 - dữ liệu TB thiếu (Số biên nhận, người nộp, thửa…) hoặc diện tích viết không rõ;
 - trang đang còn hồ sơ khác (bảng thửa có thửa không thuộc TB này, hoặc Số biên nhận / Người nộp đang là của TB khác) → mở màn hình Tiếp nhận hồ sơ mới;
 - đang mở một cửa sổ khác (vd. Thông tin cá nhân) hoặc một hộp hỏi của trang → đóng / trả lời nó trước;
 - cuối cùng bảng thửa trên trang **không khớp** dữ liệu (thiếu / thừa / trùng / sai diện tích) → **không** tô nút Lưu hồ sơ, sửa trên trang trước;
-- TB này **đã tiếp nhận rồi**, hoặc **trùng thửa** với một TB đã tiếp nhận → tiện ích báo rõ và chỉ làm khi bạn bấm nút **“Vẫn tiếp nhận TB …”** hiện ngay dưới dòng báo (tránh tạo hồ sơ trùng; bấm đúp nút Chạy không lọt qua được). Đánh dấu nhầm thì đổi ô **Trạng thái** về “Chưa làm”;
+- TB này **đã tiếp nhận rồi** → tiện ích báo rõ và chỉ làm khi bạn bấm nút **“Vẫn tiếp nhận TB …”** hiện ngay dưới dòng báo (tránh tạo hồ sơ trùng; bấm đúp nút Chạy không lọt qua được). Đánh dấu nhầm thì đổi ô **Trạng thái** về “Chưa làm”. (Thửa trùng thì **không** dừng – xem mục “Thửa trùng – tự bỏ qua”);
 - TB đang **⏸ Tạm hoãn** → dừng, có nút **“Bỏ tạm hoãn, chạy TB …”**;
 - TB có **ghi chú** (tên TBXN khác CCCD, thửa thiếu mục đích, trùng thửa với TB khác…) → **không dừng**: tiện ích chỉ hiện một dòng “⚠ Ghi chú: …” trong nhật ký rồi chạy tiếp (ghi chú vẫn hiện ở khung vàng đầu bảng).
 
@@ -41,19 +122,18 @@ Nếu bấm Hủy bỏ ở một thửa rồi chạy lại, tiện ích sẽ h�
 
 ## Bước Nhập đơn đăng ký (Xử lý hồ sơ → Xử lý tác vụ)
 **Tự động:** mở cửa sổ **Nhập đơn đăng ký** (Quy trình xử lý → Xử lý tác vụ), bấm **▶ Chạy cả TB**. Tiện ích làm lần lượt:
-0. **Nhận hồ sơ đang mở là của TB nào**: đọc chủ và thửa đã có sẵn trong đơn (mang từ bước tiếp nhận) rồi so với dữ liệu.
-   - Đúng TB đang chọn → làm tiếp.
-   - Khớp rõ một TB khác → **tự chọn TB đó** (báo “đã tự chọn TB …”).
-   - Không khớp TB nào → **dừng**. Đơn có thửa thì phải trùng ít nhất một thửa mới tính (một người có thể đứng tên nhiều TB, trùng chủ thôi chưa đủ).
-   - Khớp nhiều TB như nhau (vd. cùng chủ đứng tên 2 TB mà đơn chưa có thửa), hoặc cây của đơn chưa đọc được (đang tải) → **dừng**, hiện nút **“Đúng là hồ sơ của TB … – làm tiếp”** để bạn xác nhận. Nhờ vậy không điền nhầm dữ liệu TB này vào hồ sơ TB khác.
+0. **Nhận hồ sơ đang mở là của TB nào** – không dừng hỏi nữa (theo ý bạn):
+   - Đọc ô **Mã đơn** (VBDLIS điền sẵn số biên nhận, vd. KH 2959.07777.255.47-245.142…): đúng TB đang chọn → chạy luôn; là của TB khác → **tự chọn TB đó** (báo “đã tự chọn TB …”); khác một chút nhưng chung thửa → vẫn chạy, ghi ⚠ để bạn xem lại.
+   - Ô Mã đơn trống thì xem chủ / thửa đã có trên cây của đơn; cây trống (đơn mới mở thường “Không có dữ liệu”) hay khớp nhiều TB thì **làm theo TB đang chọn**.
+   - Chỉ dừng khi chắc chắn mở **nhầm hồ sơ**: Mã đơn không chung thửa nào với TB nào trong dữ liệu, hoặc cây của đơn có thửa của TB khác. Chắc chắn đúng thì bấm nút “Đúng là hồ sơ của TB … – làm tiếp”.
 1. Chọn **Điều kiện cấp giấy**, tích **Đăng ký lần đầu**.
-2. Với từng chủ: tự bấm **Thêm → Cá nhân**, điền → **dừng chờ bạn kiểm tra và tự bấm Lưu** (trang hỏi “Giấy tờ tùy thân đã tồn tại…” thì bạn tự trả lời) → thấy chủ đã vào đơn thì làm tiếp.
+2. Với từng chủ (**nhập chủ tự động**): tự bấm **Thêm → Cá nhân**, điền; **mọi ô khớp dữ liệu và chắc chắn đúng hồ sơ** (Mã đơn khớp hẳn số biên nhận của TB, hoặc cây của đơn khớp riêng TB này) thì tiện ích tự bấm **“Lưu”** của cửa sổ chủ rồi sang chủ sau – không dừng chờ bạn xem. Chưa chắc (vd. Mã đơn chỉ chung một phần thửa, đơn trống không đọc được Mã đơn) thì vẫn chạy nhưng **không tự Lưu chủ** – con trỏ ở nút Lưu, bạn nhấn Enter. Ngay trước khi bấm, tiện ích đọc lại các ô: trang tự xóa / đổi ô nào thì **không bấm**, dừng cho bạn xem. Dữ liệu thiếu (vd. chưa có số CCCD, năm sinh) hoặc ô chưa điền được → **dừng chờ bạn** điền rồi tự bấm Lưu như cũ. Trang hỏi “Giấy tờ tùy thân đã tồn tại…” → tiện ích **không trả lời**, chờ bạn bấm Đồng ý / Bỏ qua rồi làm tiếp. Tắt được ở tab **Biên nhận** → “Tự động”.
 3. Với từng thửa: tự bấm **Thêm → Thửa đất**, điền → **chờ bạn tự bấm Lưu** → thấy thửa đã vào đơn thì sang thửa sau.
 4. Đối chiếu: mọi chủ, mọi thửa đã có trong đơn.
 5. **Phiếu đối chiếu số liệu**: đọc lại những gì VBDLIS đã lưu trong đơn và so từng ô với dữ liệu – chủ: họ tên, năm sinh, giới tính (Ông/Bà), số giấy tờ; thửa: diện tích, mục đích sử dụng, thời hạn. Mỗi ô có dấu: ✓ khớp, ✗ lệch, ⚠ dữ liệu thiếu (bạn tự điền), • trang không hiện để so. Có ô ✗ thì **dừng, không tô nút** – sửa trên VBDLIS (chọn mục → Sửa) rồi chạy lại; cố ý để khác thì cứ tự bấm Lưu.
    Phiếu còn bắt: ô **Năm sinh / Số CCCD để trống**, giới tính **chưa chọn** (trang ghi “Ông/Bà”), **chủ hoặc thửa bị thêm 2 lần** vào đơn, mục có trong đơn mà dữ liệu TB không có. Tên chỉ khác chỗ đặt dấu (Thủy / Thuỷ, Hòa / Hoà) coi là khớp; khác dấu thật (Cừ / Cử) là lệch.
-6. Tô vàng nút **Lưu thông tin đăng ký**. Bạn tự bấm nút đó rồi **Hoàn tất** (1 lần). Khi trang báo **“Lưu đơn đăng ký thành công”**, tiện ích tự đánh dấu TB **✓ Xong**.
-Chủ / thửa đã có trong đơn thì được bỏ qua (chạy lại không thêm trùng). TB có nhiều chủ (kể cả người dùng chung, vợ/chồng) thì tiện ích thêm **lần lượt tất cả** các chủ: mở Thêm → Cá nhân, điền, chờ bạn bấm Lưu rồi mới sang chủ tiếp theo. Nếu bấm Đóng thay vì Lưu, tiện ích dừng và hỏi lại trước khi mở lại mục đó.
+6. Tô vàng nút **Lưu thông tin đăng ký**. Bạn tự bấm nút đó rồi **Hoàn tất** (1 lần). Khi trang báo **“Lưu đơn đăng ký thành công”**, tiện ích ghi **giờ nhập đơn** – trạng thái TB vẫn là **◐ Đã tiếp nhận** (✓ Xong khi đã lưu kho hồ sơ quét).
+Chủ / thửa đã có trong đơn thì được bỏ qua (chạy lại không thêm trùng). TB có nhiều chủ (kể cả người dùng chung, vợ/chồng) thì tiện ích thêm **lần lượt tất cả** các chủ: mở Thêm → Cá nhân, điền, chờ bạn bấm Lưu rồi mới sang chủ tiếp theo. Ở cửa sổ **chủ**, nếu bấm Đóng thay vì Lưu, tiện ích dừng và hỏi lại trước khi mở lại. Ở cửa sổ **thửa**, bấm Đóng (vd. VBDLIS báo thửa đã có) thì tiện ích **bỏ qua thửa đó và làm tiếp thửa sau** – xem mục “Thửa trùng – tự bỏ qua”.
 
 **Từng phần (bấm tay từng mục):**
 1. Mở cửa sổ **Nhập đơn đăng ký**, chọn đúng TB trong bảng điền.
@@ -65,17 +145,44 @@ Chủ / thửa đã có trong đơn thì được bỏ qua (chạy lại không 
 4. Chủ / thửa **đã có trong đơn** (đã hiện ở cây Chủ sử dụng / Thửa đất) thì bấm Điền lần nữa tiện ích chỉ báo “đã có trong đơn”, **không thêm trùng**.
 5. Cuối cùng bạn tự bấm **Lưu thông tin đăng ký** / **Hoàn tất** (bấm một lần là đủ – thấy “Lưu đơn đăng ký thành công” là xong).
 
+## Quy trình xử lý tự động (tác vụ 2 và 3 – thả sẵn file, bấm ▶)
+Giống hệt các bước bạn ghi thao tác / hướng dẫn, tiện ích làm thay:
+1. **Thả sẵn file quét** của nhiều hồ sơ vào bảng điền – được cả **thả nguyên thư mục** (vd. `18 TH`, tiện ích tự lấy file trong các thư mục TB con), hoặc tab **Giấy tờ** → **“Thêm file quét…”** / **“Chọn thư mục…”**. Tên file theo quy định 25.10: `KH 2959.07777.<tờ>.<thửa>[-<tờ>.<thửa>…].DDK.pdf` / `.TBXN.pdf`. File tên sai bị từ chối ngay.
+2. File vào **hàng chờ** (nút **📎 số file** ở đầu bảng; tab **Giấy tờ** liệt kê theo TB, ✕ bỏ từng file, **Xóa hàng chờ** bỏ hết). Hàng chờ nằm trong bộ nhớ tiện ích **trên máy này** (F5 vẫn còn), không gửi đi đâu.
+3. Trên VBDLIS: chọn hồ sơ → **Xử lý hồ sơ** → cửa sổ **Quy trình xử lý** → bấm **▶ Chạy cả TB**. Tiện ích làm lần lượt:
+   - **Tác vụ 2 – Cập nhật dữ liệu pháp lý** (nếu chưa tích “Đã xử lý”): bấm “Xử lý tác vụ” → tab thứ 3 **“Thông tin sau biến động”** (Thông tin giấy SBD) → bấm dòng **“Đơn đăng ký”** (chuyển xanh – tiện ích đọc Mã đơn trên dòng đó, tự chọn đúng TB) → **Thực hiện** → hộp hỏi xác nhận: **Đồng ý** (chỉ đúng hộp hỏi của bước này; trang báo lỗi / hỏi lạ thì dừng chờ bạn) → chờ “Cập nhật dữ liệu pháp lý thành công” → **tích “Đã xử lý”** (trang thường tự tích; chưa tích thì tiện ích tích).
+   - **Tác vụ 3 – Lưu kho hồ sơ quét** (nếu chưa tích): bấm “Xử lý tác vụ” → chờ cửa sổ tải **xong hẳn** → đọc **Mã đơn**, lấy đúng **file DDK + TBXN cùng số biên nhận** trong hàng chờ → **+** → Thêm tập tin (Loại giấy tờ, Mô tả, Tên giấy tờ) → **Lưu** nhỏ, 2 lần → **Tải lên** đúng file vào từng dòng (không mở hộp chọn file; **file nào đính kèm xong tự mất khỏi hàng chờ**) → **Cập nhật** → chờ trang lưu xong → **Đóng** → **tích “Đã xử lý”**.
+   - Không làm Kết ISO, Chuyển tiếp – bạn tự làm.
+4. Tác vụ “Nhập đăng ký” chưa tích “Đã xử lý” → tiện ích dừng (nhập đơn xong rồi chạy). Cửa sổ khác đang che Quy trình xử lý → dừng, nhắc đóng cửa sổ đó.
+
+Chạy được cả khi đang mở sẵn cửa sổ **Cập nhật dữ liệu pháp lý**, **Lưu kho hồ sơ quét** hoặc **Hồ sơ quét** (dòng nào đã có thì không thêm lại; dòng đã có tập tin thì không cần file trong hàng chờ). Tiện ích tự kiểm tra:
+- Hàng chờ **chưa có đủ** DDK + TBXN của hồ sơ đó → dừng, **chưa bấm “+”**.
+- Chỉ lấy file có **đúng bộ tờ.thửa** của hồ sơ. Tên dài bị chia đôi → các nửa phải **giống hệt nhau** (cùng dung lượng) mới coi là một; file của TB khác chỉ trùng thửa → **không lấy**. Hai file cùng hồ sơ cùng loại mà **khác nhau** (vd. bản quét lại “(1)”) → dừng, bạn bỏ (✕) bản sai.
+- Cửa sổ Lưu kho phải tải xong (Mã đơn, thửa, danh sách hồ sơ quét) mới quyết định. Hồ sơ **đã có hồ sơ quét** đủ 2 tập tin → không thêm nữa (không tạo hồ sơ quét trùng), bỏ file của hồ sơ đó khỏi hàng chờ, Đóng và tích “Đã xử lý”. Có hồ sơ quét nhưng thiếu → dừng để bạn tự bổ sung.
+- Trang không nhận file (⏸ “trang chưa nhận file”, nút “Tải lên” tô vàng, có tiếng báo) → bạn bấm **Tải lên** ở dòng đó, file vẫn tự vào.
+- Bấm **■ Dừng** giữa chừng: file tạm bỏ ngay, file chưa tải lên **vẫn còn** trong hàng chờ – bấm ▶ lại là làm tiếp.
+
+Tắt ở tab **Biên nhận** → “Tự động”: “Quy trình xử lý tự động” (Thực hiện, Đồng ý, Cập nhật, tích Đã xử lý) – tắt thì tiện ích dừng ở các nút đó cho bạn bấm; “Lưu kho hồ sơ quét tự động” (thêm dòng, tải lên). Tiện ích **không bao giờ** bấm Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Kết ISO, Chuyển tiếp, Thực thi.
+
 ## Theo dõi tiến độ – không sót TB nào
-- Danh sách TB ở ô trên cùng có dấu: **○** chưa làm, **◐** đã tiếp nhận (chưa nhập đơn), **✓** xong (đã nhập đơn). TB nào trùng thửa với TB khác có thêm **⚠ trùng thửa** (khung vàng ghi rõ trùng với TB nào – kiểm tra kẻo nhập 2 lần).
-- Dòng dưới cho biết số TB xong / đã tiếp nhận / chưa làm. Nút **→ TB chưa làm** chọn TB chưa tiếp nhận tiếp theo.
-- Tiện ích **tự đánh dấu** khi trang báo “Lưu hồ sơ thành công” (◐) hoặc “Lưu đơn đăng ký thành công” (✓) sau khi bạn chạy “▶ Chạy cả TB” cho TB đó – và chỉ khi **chắc đúng hồ sơ** (ô Số biên nhận đúng của TB đó / cây của đơn đúng là đơn TB đó). Không chắc thì dòng báo hiện nút **“Đánh dấu TB … đã tiếp nhận / xong”** để bạn bấm. Nó chỉ đọc thông báo, không bấm gì. Làm tay không qua “Chạy cả TB” (hoặc lúc bảng điền chưa mở) thì đổi ô **Trạng thái** bằng tay. Ô này cũng dùng để sửa khi đánh dấu sai.
+- Danh sách TB ở ô trên cùng có dấu: **○** chưa làm, **◐** đã tiếp nhận (**kể cả đã nhập đơn xong** – theo ý bạn), **✓** xong (đã nhập đơn **và** đã lưu kho hồ sơ quét – thứ tự nào cũng được). TB nào trùng thửa với TB khác có thêm **⚠ trùng thửa** (khung vàng ghi rõ trùng với TB nào – kiểm tra kẻo nhập 2 lần).
+- Dòng dưới cho biết số TB xong / đã tiếp nhận (trong đó bao nhiêu TB đã nhập đơn) / chưa làm; cạnh ô Trạng thái ghi giờ tiếp nhận, giờ nhập đơn, giờ xong. Nút **→ TB chưa làm** chọn TB chưa tiếp nhận tiếp theo.
+- Tiện ích **tự đánh dấu** sau khi bạn chạy “▶ Chạy cả TB” cho TB đó: trang báo “Lưu hồ sơ thành công” → **◐ đã tiếp nhận**; “Lưu đơn đăng ký thành công” → ghi **giờ nhập đơn** (vẫn ◐); “Cập nhật thành công” sau khi tiện ích lưu kho hồ sơ quét → ghi **giờ lưu kho**; có đủ giờ nhập đơn + giờ lưu kho thì **✓ Xong** – và chỉ khi **chắc đúng hồ sơ** (ô Số biên nhận / cây của đơn / Mã đơn đúng của TB đó). Không chắc thì dòng báo hiện nút **“Đánh dấu TB … đã tiếp nhận / đã nhập đơn / xong”** để bạn bấm. Nó chỉ đọc thông báo, không bấm gì. Làm tay không qua “Chạy cả TB” (hoặc lúc bảng điền chưa mở) thì đổi ô **Trạng thái** bằng tay. Ô này cũng dùng để sửa khi đánh dấu sai.
 - **⏸ Tạm hoãn**: TB chưa nhập được (chưa rõ chủ, trùng TB khác, chờ hỏi lại…) → ô **Trạng thái** chọn “⏸ Tạm hoãn” và ghi lý do. TB hoãn không lẫn vào “chưa làm”, nút “→ TB chưa làm” bỏ qua nó, bảng Tiến độ có bộ lọc riêng; chạy TB đó thì tiện ích nhắc lý do và hỏi “Bỏ tạm hoãn”.
-- Nút **☰ Tiến độ**: số TB tiếp nhận / xong **hôm nay** và 7 ngày gần nhất; bảng tất cả TB kèm giờ tiếp nhận, giờ nhập đơn, điều cần xem (tạm hoãn, trùng thửa, lệch số liệu, ghi chú). Lọc **○ Chưa làm / ◐ Đã tiếp nhận / ✓ Xong / ⏸ Tạm hoãn / ⚠ Cần xem**. Bấm một dòng để chọn TB đó. **⧉ Sao chép bảng** rồi dán vào Excel, hoặc **⬇ Tải file Excel** (file `tien-do-vbdlis-….csv` vào thư mục Tải xuống).
+- Nút **☰ Tiến độ**: số TB tiếp nhận / nhập đơn / xong **hôm nay** và 7 ngày gần nhất; bảng tất cả TB kèm giờ tiếp nhận, giờ nhập đơn, giờ xong, điều cần xem (tạm hoãn, trùng thửa, lệch số liệu, ghi chú). Lọc **○ Chưa làm / ◐ Đã tiếp nhận / ✓ Xong / ⏸ Tạm hoãn / ⚠ Cần xem**. Bấm một dòng để chọn TB đó. **⧉ Sao chép bảng** rồi dán vào Excel, hoặc **⬇ Tải file Excel** (file `tien-do-vbdlis-….csv` vào thư mục Tải xuống).
 - **Sao lưu tiến độ** (trong ☰ Tiến độ): **⬇ Sao lưu tiến độ** lưu file `tien-do-vbdlis-….json` (chỉ có số TB, giờ, trạng thái – không có tên, số giấy tờ). Gỡ / cài lại tiện ích, đổi máy hay xóa dữ liệu trình duyệt thì tiến độ mất → **⬆ Nạp tiến độ…** chọn file đó là có lại (gộp với tiến độ đang có). Nên sao lưu cuối mỗi ngày; bảng có ghi “Sao lưu gần nhất”.
 - Tiến độ nằm trong trình duyệt của máy này, dùng chung cho mọi tab VBDLIS. Xóa TB khỏi tiện ích không xóa tiến độ của nó (nạp lại TB đó vẫn thấy dấu cũ).
 
+## Thửa trùng – tự bỏ qua
+Tiện ích **không mở cửa sổ** cho thửa trùng, chỉ ghi một dòng “• Thửa … – … – bỏ qua” rồi làm tiếp:
+- thửa **ghi 2 lần** trong danh sách của cùng một TB (lần 2 bỏ qua);
+- thửa **đã nhập ở TB khác** (cùng số tờ, số thửa – vd. TB 1582 trùng TB 1527, TB 1592 trùng thửa 344/111 với TB 1534): TB kia đã tiếp nhận / nhập đơn có thửa đó thì TB này bỏ qua;
+- thửa mà lần trước **bạn bấm Đóng / Hủy bỏ** ở cửa sổ thửa (thường vì VBDLIS báo thửa đã có): tiện ích ghi nhớ “bỏ qua” và chạy tiếp thửa sau, không dừng nữa.
+
+Cuối nhật ký có dòng **“Thửa đang bỏ qua: …”** kèm nút **“Mở lại để thêm”** – bấm nếu bạn lỡ tay đóng, tiện ích chạy lại và mở thửa đó. Ở bước tiếp nhận (chỉ cần 1 thửa), thửa đầu bị bỏ qua thì tiện ích dùng thửa kế tiếp; nếu **mọi thửa** của TB đều trùng thì dừng, có nút **“⏸ Tạm hoãn TB …”**. Bảng **☰ Tiến độ** ghi “bỏ qua thửa …” ở cột Cần xem.
+
 ## Kiểm tra nhanh rồi Enter, tiếng báo
-- Khi tiện ích điền xong một cửa sổ (chủ, thửa) mà **mọi ô đều khớp dữ liệu**, dòng chờ ghi tóm tắt, vd. “đã điền: thửa 5/111 · 100.5 m² · LUC · 50 năm (10/10 ô ✓)”, và **con trỏ nằm sẵn ở nút “Lưu”** của cửa sổ (viền vàng). Bạn liếc thấy đúng thì chỉ cần **nhấn Enter**. Tiện ích vẫn **không tự bấm**; có ô chưa điền được hay dữ liệu thiếu thì không đặt con trỏ, bạn tự điền rồi bấm Lưu. Tắt ở tab **Biên nhận** → “Khi Chạy cả TB dừng chờ bạn”.
+- Khi tiện ích điền xong một cửa sổ **thửa** (cửa sổ chủ thì tiện ích tự Lưu – xem trên) mà **mọi ô đều khớp dữ liệu**, dòng chờ ghi tóm tắt, vd. “đã điền: thửa 5/111 · 100.5 m² · LUC · 50 năm (10/10 ô ✓)”, và **con trỏ nằm sẵn ở nút “Lưu”** của cửa sổ (viền vàng). Bạn liếc thấy đúng thì chỉ cần **nhấn Enter**. Tiện ích vẫn **không tự bấm**. Không đặt con trỏ khi: có ô chưa điền được, dữ liệu thiếu (vd. chủ chưa có số CCCD, giới tính, năm sinh), hoặc bạn đang gõ / vừa bấm vào một ô trên trang (khỏi giành con trỏ của bạn) – khi đó bạn tự điền rồi bấm Lưu. Tắt ở tab **Biên nhận** → “Khi Chạy cả TB dừng chờ bạn”.
 - **Tiếng báo**: mỗi khi tiện ích dừng chờ bạn (bấm Lưu, trả lời hộp hỏi của trang, xong cả TB, hoặc dừng vì lỗi) sẽ kêu “ting”, và nếu bạn đang ở cửa sổ / tab khác thì **tên tab nháy** “⏸ …” cho tới khi bạn quay lại. Nhờ vậy trong lúc VBDLIS chạy chậm bạn làm việc khác được. Tắt cũng ở chỗ trên.
 
 ## Ghi thao tác (để gửi cho người hỗ trợ chỉnh tiện ích)
@@ -128,16 +235,16 @@ Mở đúng màn hình hoặc cửa sổ đó (Tiếp nhận hồ sơ, Nhập đ
 
 ```json
 {
-  "tb": "1817",
-  "soBienNhan": "KH 2959.07777.270.90-270.119",
-  "nguoiNop": { "hoTen": "THÂN VĂN BÁT", "soGiayTo": "024054005425", "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh" },
+  "tb": "1000",
+  "soBienNhan": "KH 2959.07777.1.1",
+  "nguoiNop": { "hoTen": "NGUYỄN VĂN A", "soGiayTo": "012345678901", "diaChi": "Tổ dân phố 1, phường Việt Yên, TP Bắc Ninh" },
   "chu": [
-    { "hoTen": "THÂN VĂN BÁT", "ngaySinh": "01/01/1954", "namSinh": "1954", "gioiTinh": "Nam",
-      "loaiGiayTo": "Căn cước công dân", "soGiayTo": "024054005425", "ngayCap": "04/06/2023", "ngayHetHan": "",
-      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH", "diaChi": "Tổ dân phố Minh Đức, phường Việt Yên, TP Bắc Ninh" }
+    { "hoTen": "NGUYỄN VĂN A", "ngaySinh": "01/01/1960", "namSinh": "1960", "gioiTinh": "Nam",
+      "loaiGiayTo": "Căn cước công dân", "soGiayTo": "012345678901", "ngayCap": "01/01/2023", "ngayHetHan": "",
+      "noiCap": "Cục Cảnh sát Quản lý hành chính về TTXH", "diaChi": "Tổ dân phố 1, phường Việt Yên, TP Bắc Ninh" }
   ],
   "thua": [
-    { "soThua": "90", "soTo": "270", "dienTich": "1712.6", "mdsd": "LUC", "diaChi": "Tổ dân phố Bình Minh, phường Việt Yên, TP Bắc Ninh" }
+    { "soThua": "1", "soTo": "1", "dienTich": "1712.6", "mdsd": "LUC", "diaChi": "Tổ dân phố 2, phường Việt Yên, TP Bắc Ninh" }
   ],
   "giayTo": ["Đơn đăng ký", "Căn cước công dân"],
   "ghiChu": "Ghi chú hiện ở khung vàng (không bắt buộc)"
@@ -161,6 +268,7 @@ Mỗi lần xóa tiện ích đều hỏi lại. Xóa chỉ xóa dữ liệu tro
 
 ## Lưu ý
 - Dữ liệu chỉ nằm trong trình duyệt của máy này, không gửi đi đâu.
+- File quét bạn thả vào nằm trong hàng chờ (bộ nhớ tiện ích trên máy này) tới khi đính kèm xong thì tự xóa; chỉ được đưa lên VBDLIS ở đúng dòng của đúng hồ sơ (giống bạn tự bấm “Tải lên”).
 - Tiện ích chỉ chạy trên tab khi bạn bấm biểu tượng hoặc Alt+Q. Nếu trang VBDLIS tải lại mà bảng biến mất, bấm biểu tượng lần nữa.
 - Sau khi sửa file của tiện ích, vào trang tiện ích bấm ⟳ (Tải lại), rồi bấm F5 trang VBDLIS.
 - Thư mục `test/` chỉ dùng để thử trên trang giả lập, không ảnh hưởng tiện ích.

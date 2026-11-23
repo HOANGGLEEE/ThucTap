@@ -1,6 +1,7 @@
 // VBDLIS Điền Nhanh – service worker
 // Bấm biểu tượng (hoặc Alt+Q) để mở/ẩn bảng điền trên tab đang xem.
-// Tiện ích chỉ chạm vào trang khi bạn bấm biểu tượng / các nút trong bảng điền. Không bấm nút Lưu nào.
+// Tiện ích chỉ chạm vào trang khi bạn bấm biểu tượng / các nút trong bảng điền, hoặc khi bạn bật “🤖 Tự động hết”
+// (khi đó trang tải lại thì bảng tự mở lại để làm tiếp).
 
 const DATA_FILE = 'data/du-lieu.json';
 importScripts('page-setter.js'); // định nghĩa vbdlisPageSetter, vbdlisFireSelect2 (chạy trong trang)
@@ -38,6 +39,54 @@ chrome.action.onClicked.addListener(async (tab) => {
   } catch (e) {
     console.warn('Không mở được bảng điền trên trang này:', e);
   }
+});
+
+// Cấu hình riêng trên máy (không đưa lên git): cau-hinh.local.json, vd. { "ctCV": "<tài khoản chuyên viên>", "ctLD": "<tài khoản lãnh đạo>" }
+// – tài khoản nhận khi Tự động hết chuyển tiếp hồ sơ. Không có file → {}
+const CONFIG_FILE = 'cau-hinh.local.json';
+async function loadConfig() {
+  try {
+    const res = await fetch(chrome.runtime.getURL(CONFIG_FILE));
+    if (!res.ok) return {};
+    const o = JSON.parse((await res.text()).replace(/^﻿/, '') || '{}');
+    return o && typeof o === 'object' ? o : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+// “Tự động hết”: VBDLIS tải lại trang / chuyển trang (sau Lưu hồ sơ, Thực thi, Về trang tiếp nhận…) làm mất bảng điền →
+// mở lại bảng để làm tiếp. Chỉ ở ĐÚNG tab bạn bật Tự động hết (tbAutoTab – tab khác mở VBDLIS không tự chạy),
+// khi Tự động hết còn bật và bạn không tự đóng bảng (×).
+const reopening = new Set(); // tab đang được mở lại bảng (tránh mở 2 bảng cùng lúc)
+chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
+  if (info.status !== 'complete' || !tab || !/^https:\/\/bgi\.mplis\.gov\.vn\//.test(tab.url || '')) return;
+  if (reopening.has(tabId)) return;
+  reopening.add(tabId);
+  try {
+    const { tbOpts, tbShownTabs, tbAutoTab, tbGoList } = await chrome.storage.local.get(['tbOpts', 'tbShownTabs', 'tbAutoTab', 'tbGoList']);
+    // bạn vừa bấm ▶ cho TB “Đã tiếp nhận” ở tab này (tiện ích bấm “Xử lý công việc”) → mở lại bảng để tìm tiếp, kể cả khi 🤖 tắt
+    const goList = !!tbGoList && tbGoList.tabId === tabId && Date.now() - (tbGoList.at || 0) < 2 * 60 * 1000;
+    if (!((tbOpts && tbOpts.tuDong === true && tbAutoTab === tabId) || goList) || (tbShownTabs || {})[tabId] === false) return;
+    // bảng đang có trên trang → không đụng (chạy lại panel.js sẽ ẩn / hiện bảng)
+    const [r] = await chrome.scripting.executeScript({ target: { tabId }, func: () => !!document.getElementById('vbdlis-dien-nhanh-host') });
+    if (r && r.result) return;
+    await chrome.scripting.executeScript({ target: { tabId }, files: ['panel.js'] });
+  } catch (e) {
+    console.warn('Không mở lại được bảng điền:', e);
+  } finally {
+    reopening.delete(tabId);
+  }
+});
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  reopening.delete(tabId);
+  try {
+    const { tbShownTabs } = await chrome.storage.local.get('tbShownTabs');
+    if (tbShownTabs && tabId in tbShownTabs) {
+      delete tbShownTabs[tabId];
+      await chrome.storage.local.set({ tbShownTabs });
+    }
+  } catch (e) {}
 });
 
 // Lỗi của Chrome → câu tiếng Việt dễ hiểu
@@ -120,10 +169,78 @@ async function runInFrames(tabId, msg) {
   return res.map((r) => r && r.result).filter(Boolean);
 }
 
+// tiếng “ting” khi bảng điền dừng chờ bạn mà trang chưa cho phát tiếng (trang vừa tải lại): trang ẩn offscreen.html phát
+let offscreenReady = null;
+async function beepOffscreen(kind) {
+  if (!chrome.offscreen) return { ok: false, error: 'trình duyệt chưa hỗ trợ trang ẩn (offscreen)' };
+  // Chrome tự đóng trang ẩn phát tiếng sau một lúc im lặng → lần gửi sau lỗi / không ai trả lời → tạo lại trang ẩn rồi gửi lại 1 lần
+  let err = '';
+  for (let lan = 0; lan < 2; lan++) {
+    try {
+      if (!offscreenReady)
+        offscreenReady = chrome.offscreen
+          .createDocument({ url: 'offscreen.html', reasons: ['AUDIO_PLAYBACK'], justification: 'Kêu “ting” khi tiện ích dừng chờ bạn' })
+          .catch((e) => {
+            // đã có sẵn (service worker vừa khởi động lại) → dùng luôn
+            if (!/single offscreen|already|only one/i.test(String((e && e.message) || e))) throw e;
+          });
+      await offscreenReady;
+      const r = await chrome.runtime.sendMessage({ type: 'vbdlis-offscreen-beep', kind: kind === 'bad' ? 'bad' : 'ok' });
+      if (r && r.ok) return r;
+      err = (r && r.error) || 'trang ẩn không trả lời';
+    } catch (e) {
+      err = String((e && e.message) || e);
+    }
+    offscreenReady = null;
+  }
+  return { ok: false, error: err };
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || typeof msg.type !== 'string' || !msg.type.startsWith('vbdlis-')) return;
   (async () => {
     try {
+      if (msg.type === 'vbdlis-shown') {
+        // bảng điền của tab này vừa hiện / ẩn (×) – nhớ theo TỪNG tab: tab ẩn bảng thì sau khi trang tải lại không tự mở lại bảng ở tab đó
+        const tabId = sender.tab ? sender.tab.id : null;
+        if (tabId != null) {
+          const { tbShownTabs } = await chrome.storage.local.get('tbShownTabs');
+          await chrome.storage.local.set({ tbShownTabs: { ...(tbShownTabs || {}), [tabId]: !!msg.on } });
+        }
+        sendResponse({ ok: true });
+        return;
+      }
+      if (msg.type === 'vbdlis-whoami') {
+        // bảng điền hỏi nó đang ở tab nào (để biết có phải tab chạy Tự động hết không)
+        sendResponse({ ok: true, tabId: sender.tab ? sender.tab.id : null });
+        return;
+      }
+      if (msg.type === 'vbdlis-claim') {
+        // bật Tự động hết ở tab này → chỉ tab này tự chạy và được mở lại bảng sau khi trang tải lại
+        const tabId = sender.tab ? sender.tab.id : null;
+        await chrome.storage.local.set({ tbAutoTab: tabId });
+        sendResponse({ ok: true, tabId });
+        return;
+      }
+      if (msg.type === 'vbdlis-beep') {
+        // trang VBDLIS vừa tải lại (bạn chưa bấm gì) → trang không phát được tiếng → tiện ích phát “ting” qua trang ẩn (offscreen.html)
+        sendResponse(await beepOffscreen(msg.kind));
+        return;
+      }
+      if (msg.type === 'vbdlis-badge') {
+        // tiện ích đang chờ bạn → dấu “!” đỏ trên biểu tượng của tab đó (thấy cả khi tiếng báo chưa bật được)
+        const tabId = sender.tab && sender.tab.id;
+        if (tabId != null) {
+          await chrome.action.setBadgeBackgroundColor({ tabId, color: '#dc2626' });
+          await chrome.action.setBadgeText({ tabId, text: String(msg.text || '').slice(0, 3) });
+        }
+        sendResponse({ ok: true });
+        return;
+      }
+      if (msg.type === 'vbdlis-config') {
+        sendResponse({ ok: true, config: await loadConfig() });
+        return;
+      }
       if (msg.type === 'vbdlis-sample') {
         // gửi nguyên chữ của file: bảng điền tự đọc JSON (tự sửa lỗi nhỏ, báo rõ dòng sai)
         sendResponse({ ok: true, text: await loadDataText() });
@@ -141,6 +258,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       if (msg.type === 'vbdlis-select2') {
         sendResponse({ ok: true, frames: await fireSelect2(sender.tab.id, msg.label) });
+        return;
+      }
+      if (msg.type === 'vbdlis-arm-file') {
+        // đính kèm file quét: cài móc trong trang (world MAIN) để nút “Tải lên” dùng file tiện ích đã đặt sẵn
+        const [r] = await chrome.scripting.executeScript({
+          target: { tabId: sender.tab.id, frameIds: [sender.frameId || 0] },
+          world: 'MAIN',
+          func: vbdlisArmFile,
+        });
+        sendResponse({ ok: true, result: r && r.result });
         return;
       }
       sendResponse({ ok: false, error: 'Lệnh không hợp lệ' });

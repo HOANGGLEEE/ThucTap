@@ -1,15 +1,48 @@
 // VBDLIS Điền Nhanh – bộ điền (chạy trong từng khung của trang VBDLIS)
 // Tìm ô theo NHÃN hiển thị trên màn hình (vd. "Số thửa", "Số giấy tờ"), không phụ thuộc id của trang.
-// Không bao giờ bấm nút Lưu. Chỉ bấm nút MỞ cửa sổ nhập: "+ Thêm thửa đất" (màn hình tiếp nhận) và
-// "Thêm → Cá nhân" / "Thêm → Thửa đất" (cửa sổ Nhập đơn đăng ký).
+// Bấm nút MỞ cửa sổ nhập: "+ Thêm thửa đất" (màn hình tiếp nhận) và "Thêm → Cá nhân" / "Thêm → Thửa đất"
+// (cửa sổ Nhập đơn đăng ký). Nút Lưu được bấm: "Lưu" của cửa sổ CHỦ SỬ DỤNG (bạn yêu cầu nhập chủ tự động), "Lưu" cửa sổ
+// THỬA ĐẤT khi bật “Tự động hết” – qua 2 lệnh markSave → clickMark; và các nút bảng điền gửi qua lệnh clickBtn
+// (Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Đóng – chỉ khi bật “Tự động hết”). Bộ điền không bao giờ bấm Kết ISO / Chuyển tiếp /
+// Thực thi / Trả hồ sơ: Chuyển tiếp + Thực thi (chuyển hồ sơ cho đúng tài khoản) do bảng điền tự bấm, có kiểm tra riêng.
 (() => {
-  const VERSION = 17;
+  const VERSION = 30;
+  // cửa sổ chủ sử dụng (cùng mẫu với bảng điền)
+  const CHU_WIN = /^((thong tin|them|moi|cap nhat|sua|chi tiet) )*(ca nhan|chu su dung|nguoi su dung|chu so huu)\b/;
+  const THUA_WIN = /^((them|moi|thong tin|chi tiet|cap nhat|sua) )*thua dat\b/;
+  // nút bộ điền KHÔNG BAO GIỜ bấm qua clickBtn / answerDialog (kể cả khi bật “Tự động hết”)
+  const NEVER_BTN = /^(ket iso|chuyen tiep|thuc thi|tra ho so|xoa|xoa ho so|huy ho so)$/;
+  // tab Trường – nút của màn hình: bạn tích nút nào thì “Điền” / “Điền ngay” bấm nút đó, theo thứ tự bạn đặt.
+  // Không khóa nút nào (bạn yêu cầu 22/11: “không có nút nào bị cấm tick”) – chỉ bấm khi BẠN bấm Điền; ▶ / 🤖 không dùng các nút này.
   if (window.__vbdlis && window.__vbdlis.v === VERSION) return;
   const TOKEN = Math.random().toString(36).slice(2, 8); // đánh dấu riêng cho lần nạp này (tránh nhầm dấu cũ)
   let lastFill = null; // kết quả lần điền gần nhất (cho bước kiểm tra lại)
   let seq = 0;
   let fillSeq = 0;
   let chain = Promise.resolve(); // các lệnh điền chạy lần lượt, không chồng nhau
+  // lần cuối BẠN gõ phím, hoặc bấm vào một ô nhập trên trang (không tính bảng điền) – để không giành con trỏ khi bạn đang gõ
+  // (bấm nút Lưu của cửa sổ trước không tính, để cửa sổ sau vẫn được đặt sẵn con trỏ)
+  let lastUserAct = 0;
+  const noteUser = (e) => {
+    if (!e.isTrusted) return;
+    const t = e.target;
+    if (t && t.id === 'vbdlis-dien-nhanh-host') return;
+    if (e.type === 'mousedown' && !(t && t.closest && t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], .select2-container')))
+      return;
+    lastUserAct = Date.now();
+  };
+  document.addEventListener('keydown', noteUser, true);
+  document.addEventListener('mousedown', noteUser, true);
+  // viền vàng tạm cho một nút: nhớ viền gốc một lần, lần tô sau thay hẹn giờ cũ (không bị dính viền)
+  const ring = (b, color, ms) => {
+    if (b.dataset.vbdlisRing === undefined) b.dataset.vbdlisRing = b.style.boxShadow || '';
+    b.style.boxShadow = `0 0 0 4px ${color}`;
+    clearTimeout(b.__vbdlisRingT);
+    b.__vbdlisRingT = setTimeout(() => {
+      b.style.boxShadow = b.dataset.vbdlisRing || '';
+      delete b.dataset.vbdlisRing;
+    }, ms);
+  };
 
   // ---------- Cấu hình các màn hình ----------
   // scope: 'page' = màn hình tiếp nhận (bỏ qua cửa sổ con), 'modal' = cửa sổ con đang mở trên cùng
@@ -169,7 +202,9 @@
       .trim();
   // so giá trị: giữ nguyên dấu tiếng Việt, chỉ bỏ khác biệt hoa/thường và khoảng trắng
   const normVal = (s) => String(s ?? '').normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // tốc độ tự động (bảng điền gửi kèm mỗi lệnh): Chậm / Rất chậm → chờ trang lâu hơn; Nhanh không làm bộ điền chờ ít đi
+  let SPEEDK = 1;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms * SPEEDK));
   const PANEL_HOST = 'vbdlis-dien-nhanh-host';
   const CANON_NUM = /^\d+(\.\d+)?$/; // số dùng dấu chấm thập phân, vd 56.5
 
@@ -242,9 +277,19 @@
     return z;
   };
 
+  // cửa sổ “ma”: Bootstrap đã bỏ lớp in / show (đang đóng) hoặc gần như trong suốt – trên màn hình không còn thấy
+  function modalPhantom(m) {
+    if (m.classList.contains('modal') && m.classList.contains('fade') && !m.classList.contains('in') && !m.classList.contains('show')) return true;
+    let op = 1;
+    for (let e = m.querySelector('.modal-dialog, .modal-content') || m; e && e !== document.documentElement; e = e.parentElement) {
+      const v = parseFloat(getComputedStyle(e).opacity);
+      if (!isNaN(v)) op *= v;
+    }
+    return op < 0.1;
+  }
   function openModals() {
     const ms = [...document.querySelectorAll(MODAL_SEL)].filter(
-      (m) => isVisible(m) && !m.closest('#' + PANEL_HOST) && [...m.querySelectorAll(CTRL)].some(usable)
+      (m) => isVisible(m) && !m.closest('#' + PANEL_HOST) && !modalPhantom(m) && [...m.querySelectorAll(CTRL)].some(usable)
     );
     return ms.filter((m) => !ms.some((o) => o !== m && o.contains(m))); // giữ lớp ngoài cùng
   }
@@ -353,8 +398,19 @@
     if (kind === 'text') return tag === 'INPUT' || tag === 'TEXTAREA';
     return true;
   };
-  // select bị thư viện (select2/chosen…) ẩn đi vẫn dùng được nếu khung chứa nó đang hiện
-  const usable = (c) => isVisible(c) || (c.tagName === 'SELECT' && isVisible(c.parentElement));
+  // select bị thư viện (select2/chosen…) ẩn đi vẫn dùng được nếu khung chứa nó đang hiện;
+  // ô tích / ô chọn kiểu “tô đẹp” (ô thật bị ẩn, hiện hình vẽ thay) cũng vậy
+  const usable = (c) =>
+    isVisible(c) || ((c.tagName === 'SELECT' || c.type === 'checkbox' || c.type === 'radio') && !!c.parentElement && isVisible(c.parentElement));
+  // ô tích theo chữ của chính nó (label[for], nhãn bọc ô, hoặc chữ ngay cạnh) – phải đúng MỘT ô
+  function checkByOwnText(scope, text) {
+    const k = textKey(text);
+    if (!k) return null;
+    const cs = [...scope.root.querySelectorAll('input[type=checkbox]')].filter(
+      (c) => usable(c) && !c.closest('#' + PANEL_HOST) && !scope.exclude.some((r) => r.contains(c)) && nearText(c, null) === k
+    );
+    return cs.length === 1 ? cs[0] : null;
+  }
 
   function firstUsableCtrl(s) {
     if (s.matches(CTRL)) return usable(s) ? s : null;
@@ -536,6 +592,8 @@
 
   // ---------- Nút ----------
   const normBtn = (s) => norm(s).replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+  // khóa nút của mẫu: bỏ số đếm TRONG NGOẶC cuối tên (vd. “Quá hạn xử lý (16)”); số không trong ngoặc (vd. “Tác vụ 2”) là một phần tên
+  const btnKeyOf = (s) => (/\(\s*\d+\s*\)\s*$/.test(s) ? normBtn(s).replace(/(\s\d+)+$/, '') : normBtn(s));
   const realLink = (el) => {
     if (el.tagName !== 'A') return false;
     if (el.matches('[data-toggle="modal"], [data-bs-toggle="modal"]')) return false;
@@ -553,6 +611,72 @@
         !mods.some((x) => x.contains(el))
     );
     return cands.filter((el) => !cands.some((o) => o !== el && el.contains(o))); // bỏ khung bọc ngoài
+  }
+  // các nút của màn hình / cửa sổ (tab Trường): theo thứ tự trên trang, bỏ khung bọc ngoài. key = chữ đã bỏ dấu
+  // (nút chỉ có biểu tượng: 'title:' + tên gợi ý), nth = lần thứ mấy chữ đó xuất hiện
+  function tplButtons(root, mods) {
+    // mọi nút: button, link (trừ link dữ liệu nằm trong dòng bảng, vd. ✎ số biên nhận), [role=button], .btn
+    const all = [...root.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"], .btn')].filter(
+      (el) =>
+        isVisible(el) &&
+        !el.closest('#' + PANEL_HOST) &&
+        !mods.some((x) => x.contains(el)) &&
+        !(el.tagName === 'A' && !el.matches('.btn, [role="button"]') && el.closest('tbody'))
+    );
+    const top = all.filter((el) => !all.some((o) => o !== el && el.contains(o)));
+    const seen = new Map();
+    const out = [];
+    for (const el of top) {
+      const text = String(el.value || el.textContent || '').replace(/\s+/g, ' ').trim();
+      const tip = String(el.getAttribute('title') || el.getAttribute('aria-label') || el.getAttribute('data-original-title') || '').replace(/\s+/g, ' ').trim();
+      // bỏ số đếm TRONG NGOẶC cuối tên (vd. “Quá hạn xử lý (16)”) – số đổi thì mẫu vẫn nhận ra nút.
+      // Số không trong ngoặc (vd. “Tác vụ 2”, “In mẫu 1”) là một phần tên nút – giữ (không lẫn “Tác vụ 2” với “Tác vụ 3”)
+      const nb = btnKeyOf(text);
+      let key = nb || (normBtn(tip) ? 'title:' + btnKeyOf(tip) : '');
+      let shown = text || tip;
+      if (!key) {
+        // nút chỉ có biểu tượng (vd. 🔍 fa-search): lấy theo tên biểu tượng
+        const ic = el.querySelector('i[class], span[class*="fa-"], span[class*="glyphicon"]');
+        const cls = ic ? [...ic.classList].find((c) => /^(fa|glyphicon|icon)-/.test(c) && !/^fa-(fw|lg|[2-5]x)$/.test(c)) : '';
+        if (cls) {
+          key = 'icon:' + cls;
+          shown = `(biểu tượng ${cls})`;
+        }
+      }
+      if (!key) continue; // không chữ, không tên, không biểu tượng → bỏ
+      const nth = seen.get(key) || 0;
+      seen.set(key, nth + 1);
+      out.push({ el, text: shown, key, nth });
+    }
+    return out;
+  }
+  // phần đầu tên cửa sổ trước chữ số đầu tiên (giống tplStem của bảng điền) – mẫu khớp cửa sổ khi tên còn lại chỉ khác phần số
+  const tplStemF = (k) => {
+    const s0 = String(k || '');
+    const st = s0.split(/\d/)[0].replace(/(\s|-|–|:|\||\(|kh)+$/g, '').trim();
+    return st.length >= 6 ? st : s0;
+  };
+  const tplWinMatch = (k, tk) => !!tk && (k === tk || tplStemF(k) === tk);
+  // khóa màn hình chính (không có cửa sổ con) = địa chỉ trang (mỗi màn hình VBDLIS một địa chỉ) – mẫu mỗi màn hình tách riêng
+  const pageHeadingKey = () => 'path:' + (location.pathname.replace(/\/+$/, '') + (location.hash || '').split('?')[0]).toLowerCase();
+  // tên màn hình để hiện cho bạn: tiêu đề có tên quen thuộc (vd. “Danh sách hồ sơ thụ lý”), không thì tiêu đề đầu tiên
+  function pageHeadingName() {
+    const known = /^(danh sach ho so thu ly|tiep nhan ho so|xu ly cong viec)$/;
+    let first = '';
+    for (const el of document.querySelectorAll('h1, h2, h3, .page-title, .content-header, header span, .main-header span, .navbar span, .title')) {
+      if (el.closest('#' + PANEL_HOST) || el.closest('.modal, [role="dialog"]') || !isVisible(el)) continue;
+      const raw = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      if (raw.length < 4 || raw.length > 60) continue;
+      if (known.test(norm(raw))) return raw;
+      if (!first) first = raw;
+    }
+    return first || location.pathname;
+  }
+  // màn hình Tiếp nhận hồ sơ (có nhãn “Người nộp hồ sơ” đang hiện)
+  const isReception = () => findLabels(getScope('page'), 'Người nộp hồ sơ').some(isVisible);
+  // ghi chú cho bạn (không khóa): 'link' = đường link sang trang khác (bấm là trang chuyển, các nút sau không bấm được nữa)
+  function tplBtnLock(b) {
+    return realLink(b.el) ? 'link' : '';
   }
   // Nút mở cửa sổ nhập (vd. "+ Thêm thửa đất"): phải là nút duy nhất (không phải đường link sang trang khác)
   function findOpener(texts) {
@@ -681,7 +805,20 @@
         if (!m || !/^nhap don dang ky\b/.test(titleKey(modalTitle(m)))) return { ...base, ok: false };
         // jstree đang nạp dữ liệu: nút “Loading …” (li.jstree-loading)
         const loading = !!m.querySelector('#treeChuSuDung .jstree-loading, #treeTaiSan .jstree-loading');
-        return { ...base, ok: true, loading, chu: treeNodes(m, 'treeChuSuDung'), thua: treeNodes(m, 'treeTaiSan') };
+        // ô “Mã đơn”: trang điền sẵn số biên nhận của hồ sơ (vd. “KH 2959.07777.255.47-245.142…”) – nhận hồ sơ theo ô này
+        // khi cây chủ / thửa còn trống. Tìm theo nhãn; không thấy thì ô nào trong cửa sổ có giá trị dạng số biên nhận.
+        let maDon = '';
+        try {
+          const sc = { root: m, exclude: [], name: scopeName(m), title: modalTitle(m) };
+          const lab = findLabels(sc, 'Mã đơn')[0];
+          const mc = lab ? findControl(lab, 'text', sc) : null;
+          if (mc && /KH\s*2959\.07777\.\d/i.test(mc.value || '')) maDon = String(mc.value).trim();
+        } catch (e) {}
+        if (!maDon) {
+          const v = [...m.querySelectorAll('input')].map((i) => String(i.value || '').trim()).filter((x) => /^KH\s*2959\.07777\.\d/i.test(x));
+          if (new Set(v).size === 1) maDon = v[0];
+        }
+        return { ...base, ok: true, loading, maDon, chu: treeNodes(m, 'treeChuSuDung'), thua: treeNodes(m, 'treeTaiSan') };
       }
       case 'dialogState': {
         // hộp hỏi / thông báo của trang chỉ có nút, không có ô nhập (vd. “Cập nhật địa chỉ tài sản: Đồng ý / Không”)
@@ -728,13 +865,129 @@
         if (!tm) return { ...base, ok: false };
         const b = buttonsByText(msg.texts || ['Lưu'], tm, [])[0];
         if (!b) return { ...base, ok: false };
+        // bạn đang gõ / bấm trên trang (3 giây gần đây), hoặc đang mở danh sách chọn → không giành con trỏ
+        const ae = document.activeElement;
+        if (Date.now() - lastUserAct < 3000 || (ae && ae.closest && ae.closest('.select2-container, .select2-dropdown')))
+          return { ...base, ok: false, busy: true };
         try {
           b.focus({ preventScroll: true });
         } catch (e) {}
-        const prev = b.style.boxShadow;
-        b.style.boxShadow = '0 0 0 4px #f59e0b';
-        setTimeout(() => (b.style.boxShadow = prev), 15000);
+        ring(b, '#f59e0b', 15000);
         return { ...base, ok: document.activeElement === b };
+      }
+      case 'markSave': {
+        // nhập chủ tự động: cửa sổ trên cùng phải đúng là cửa sổ CHỦ SỬ DỤNG và có đúng 1 nút “Lưu” → đánh dấu nút đó.
+        // Lệnh clickMark sau mới bấm (bảng điền thấy đúng 1 khung đánh dấu được thì mới gửi) – không bấm 2 nơi.
+        const tm = topModal();
+        if (!tm) return { ...base, ok: false };
+        const winRe = msg.win === 'chu' ? CHU_WIN : msg.win === 'thua' ? THUA_WIN : null;
+        if (!winRe || !winRe.test(titleKey(modalTitle(tm))) || /^tim\b/.test(titleKey(modalTitle(tm))))
+          return { ...base, ok: false, why: `cửa sổ trên cùng không phải cửa sổ ${msg.win === 'thua' ? 'thửa đất' : 'chủ sử dụng'}` };
+        const bs = buttonsByText(['Lưu'], tm, []);
+        if (bs.length !== 1) return { ...base, ok: false, why: bs.length ? 'cửa sổ có nhiều nút Lưu' : 'không thấy nút Lưu' };
+        // ngay trước khi bấm: đọc lại các ô vừa điền của cửa sổ này (chỉ đọc) – trang tự xóa / đổi ô nào thì KHÔNG bấm, để bạn xem
+        const mine = ((lastFill && lastFill.items) || []).filter((x) => x.c && x.c.isConnected && tm.contains(x.c));
+        if (!mine.length) return { ...base, ok: false, why: 'không kiểm lại được các ô vừa điền' };
+        const changed = mine.filter((x) => x.res && x.res.ok && !sameValue(x.c.value, x.v, x.f.numeric));
+        if (changed.length) return { ...base, ok: false, why: 'trang đã đổi ô ' + changed.map((x) => x.res.name || x.f.name).join(', ') };
+        document.querySelectorAll('[data-vbdlis-save]').forEach((x) => x.removeAttribute('data-vbdlis-save'));
+        const id = `${TOKEN}-${++seq}`;
+        bs[0].setAttribute('data-vbdlis-save', id);
+        return { ...base, ok: true, id };
+      }
+      case 'clickMark': {
+        // bấm nút vừa đánh dấu (chỉ khung có đúng dấu đó); dấu dùng một lần
+        let hit = null;
+        document.querySelectorAll('[data-vbdlis-save]').forEach((x) => {
+          if (!hit && x.getAttribute('data-vbdlis-save') === String(msg.id || '')) hit = x;
+          x.removeAttribute('data-vbdlis-save');
+        });
+        if (!hit || !hit.isConnected || hit.disabled || !isVisible(hit)) return { ...base, ok: false };
+        hit.click();
+        return { ...base, ok: true };
+      }
+      case 'clickBtn': {
+        // “Tự động hết” (bạn bật): bấm MỘT nút theo chữ – trong cửa sổ trên cùng (inModal, tên cửa sổ phải khớp msg.win)
+        // hoặc trên màn hình chính (không có cửa sổ con nào mở). Thấy 0 hoặc ≥ 2 nút → không bấm.
+        const texts = (msg.texts || []).filter((t) => !NEVER_BTN.test(normBtn(t)));
+        if (!texts.length) return { ...base, ok: false, why: 'nút không được phép bấm' };
+        const tm = topModal();
+        let bs;
+        if (msg.inModal) {
+          if (!tm) return { ...base, ok: false, why: 'không có cửa sổ nào đang mở' };
+          if (msg.win && !new RegExp(msg.win).test(titleKey(modalTitle(tm)))) return { ...base, ok: false, why: `cửa sổ trên cùng là ${scopeName(tm)}` };
+          bs = buttonsByText(texts, tm, []);
+        } else {
+          if (tm) return { ...base, ok: false, why: `đang mở ${scopeName(tm)}` };
+          bs = buttonsByText(texts, document.body, openModals()).filter((b) => !realLink(b));
+        }
+        if (bs.length !== 1) return { ...base, ok: false, none: !bs.length, why: bs.length ? `thấy ${bs.length} nút “${texts[0]}”` : `không thấy nút “${texts[0]}”` };
+        if (NEVER_BTN.test(normBtn(bs[0].value || bs[0].textContent))) return { ...base, ok: false, why: 'nút không được phép bấm' };
+        noNav(bs[0]);
+        bs[0].click();
+        return { ...base, ok: true };
+      }
+      case 'tplClick': {
+        // tab Trường: bấm MỘT nút bạn đã tích. Bước 1 (dry): tìm đúng cửa sổ + đúng nút (id / chữ + thứ tự), đánh dấu nút bằng token;
+        // bảng điền thấy đúng 1 nút ở đúng 1 khung mới gửi bước 2 (bấm nút mang token đó) – không bấm nhầm nút trùng chữ / khung khác.
+        if (!msg.dry) {
+          const el = msg.token ? document.querySelector(`[data-vbdlis-tplbtn="${CSS.escape(msg.token)}"]`) : null;
+          if (!el) return null; // khung khác
+          el.removeAttribute('data-vbdlis-tplbtn');
+          if (!isVisible(el) || el.disabled) return { ...base, ok: false, why: 'nút vừa ẩn / mờ' };
+          const link = realLink(el);
+          el.click(); // đường link: để trang chuyển như khi bạn bấm
+          return { ...base, ok: true, link };
+        }
+        document.querySelectorAll('[data-vbdlis-tplbtn]').forEach((x) => x.removeAttribute('data-vbdlis-tplbtn'));
+        const tm = topModal();
+        if (msg.scope === 'modal') {
+          if (!tm) return { ...base, found: 0, why: 'cửa sổ của mẫu không còn mở' };
+          if (msg.titleKey && !tplWinMatch(titleKey(modalTitle(tm)), msg.titleKey)) return { ...base, found: 0, why: `cửa sổ trên cùng là ${scopeName(tm)}` };
+        } else {
+          if (tm) return { ...base, found: 0, why: `đang mở ${scopeName(tm)}` };
+          if (msg.base === 'bienNhan' ? !isReception() : msg.titleKey && pageHeadingKey() !== msg.titleKey)
+            return { ...base, found: 0, why: 'đang ở màn hình khác màn hình của mẫu' };
+        }
+        const inWin = msg.scope === 'modal';
+        const list = tplButtons(inWin ? tm : document.body, inWin ? [] : openModals());
+        const want = msg.btn || {};
+        let hit = want.id ? list.filter((b) => b.el.id === want.id && b.key === want.key) : [];
+        if (hit.length !== 1) hit = list.filter((b) => b.key === want.key && b.nth === (want.nth || 0));
+        // mẫu lưu ở bản trước (khóa bỏ cả số không trong ngoặc, vd. “Tác vụ 2” → “tac vu”): tìm theo ĐÚNG chữ của nút đã tích (chỉ 1 nút).
+        // Khóa của bản này (khóa = khóa tính lại từ chữ nút) mà nút vắng → không bấm nút khác cùng chữ
+        const wk = String(want.key || '');
+        if (!hit.length && want.text && !/^icon:/.test(wk) && wk !== btnKeyOf(want.text) && wk !== 'title:' + btnKeyOf(want.text)) {
+          const byText = list.filter((b) => normBtn(b.text) === normBtn(want.text));
+          if (byText.length === 1) hit = byText;
+        }
+        if (hit.length !== 1) return { ...base, found: hit.length, why: hit.length ? `thấy ${hit.length} nút “${want.text || want.key}”` : `không thấy nút “${want.text || want.key}”` };
+        const b = hit[0];
+        if (b.el.disabled) return { ...base, found: 1, why: 'nút đang mờ (chưa bấm được)' };
+        b.el.setAttribute('data-vbdlis-tplbtn', String(msg.token || ''));
+        return { ...base, found: 1, ok: true, text: b.text };
+      }
+      case 'answerDialog': {
+        // “Tự động hết”: trả lời hộp hỏi ĐÃ BIẾT của trang (vd. “Cập nhật địa chỉ tài sản” → Đồng ý,
+        // “Giấy tờ tùy thân đã tồn tại…” → Đồng ý). Hộp lạ → không bấm, trả về chữ của hộp để bảng điền dừng chờ bạn.
+        const ds = [...document.querySelectorAll(MODAL_SEL)].filter(
+          (m) => isVisible(m) && !m.closest('#' + PANEL_HOST) && !m.querySelector(CTRL) && [...m.querySelectorAll('button, .btn')].some(isVisible) && (m.textContent || '').length < 1500
+        );
+        const top = ds.filter((m) => !ds.some((o) => o !== m && o.contains(m)));
+        if (!top.length) return { ...base, ok: false, open: false };
+        const d = top[top.length - 1];
+        const text = norm(d.textContent);
+        const rule = (msg.rules || []).find((r) => new RegExp(r.re).test(text));
+        const title = modalTitle(d) || 'hộp thông báo của trang';
+        const raw = (d.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 200);
+        if (!rule) return { ...base, ok: false, open: true, title, text: raw };
+        // rule.btn: một chữ hoặc danh sách chữ nút (vd. Đồng ý / Có / OK) – phải thấy ĐÚNG MỘT nút
+        const labels = [].concat(rule.btn || []);
+        const b = buttonsByText(labels, d, []).filter((x) => !NEVER_BTN.test(normBtn(x.value || x.textContent)));
+        if (b.length !== 1) return { ...base, ok: false, open: true, title, text: `${raw} (không thấy, hoặc thấy nhiều nút “${labels.join(' / ')}”)` };
+        const said = (b[0].value || b[0].textContent || '').replace(/\s+/g, ' ').trim();
+        b[0].click();
+        return { ...base, ok: true, open: true, title, btn: said };
       }
       case 'highlight': {
         const tm = msg.inModal ? topModal() : null;
@@ -742,9 +995,7 @@
         const b = (tm ? buttonsByText(msg.texts || [], tm, []) : buttonsByText(msg.texts || [], document.body, openModals()))[0];
         if (!b) return { ...base, ok: false };
         b.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        const prev = b.style.boxShadow;
-        b.style.boxShadow = `0 0 0 4px ${msg.color || '#f59e0b'}`;
-        setTimeout(() => (b.style.boxShadow = prev), 10000);
+        ring(b, msg.color || '#f59e0b', 10000);
         return { ...base, ok: true };
       }
       default:
@@ -875,17 +1126,20 @@
     let screen;
     if (!m) {
       screen = 'màn hình Tiếp nhận hồ sơ';
+      const t = readThuaTable();
+      const opener = findOpener(SECTIONS.thua.opener).btn;
+      const lhs = buttonsByText(['Lưu hồ sơ'], document.body, openModals()).length;
+      // chỉ coi là màn hình tiếp nhận khi thấy thứ riêng của nó (bảng thửa, nút “Thêm thửa đất” / “Lưu hồ sơ”);
+      // không thì đây là trang khác (danh sách hồ sơ…) hoặc khung phụ, không phải giao diện đổi
+      if (!t.found && !opener && !lhs) return { frame: location.href, screen, known: false, items: [] };
       const scope = getScope('page');
       fields(['donVi', 'quyTrinh', 'bienNhan'], scope);
       fields(['giayToPage'], scope);
       items[items.length - 1].optional = true;
-      const t = readThuaTable();
       thing('Bảng thửa (cột Số thửa, Số tờ)', t.found, false, 'không thấy bảng có cột Số thửa / Số tờ');
       thing('Cột Diện tích trong bảng thửa', t.found && t.hasArea, false, 'bảng thửa không có cột Diện tích');
-      thing('Nút “Thêm thửa đất”', findOpener(SECTIONS.thua.opener).btn, false);
-      thing('Nút “Lưu hồ sơ” (tiện ích chỉ tô vàng)', buttonsByText(['Lưu hồ sơ'], document.body, openModals()).length, false);
-      // không thấy gì của màn hình tiếp nhận → đây là trang khác (danh sách hồ sơ…) hoặc khung phụ, không phải giao diện đổi
-      if (!items.some((x) => x.ok)) return { frame: location.href, screen, known: false, items: [] };
+      thing('Nút “Thêm thửa đất”', opener, false);
+      thing('Nút “Lưu hồ sơ” (tiện ích chỉ tô vàng)', lhs, false);
     } else if (/^nhap don dang ky\b/.test(key)) {
       screen = 'cửa sổ “Nhập đơn đăng ký”';
       const scope = getScope('modal');
@@ -907,8 +1161,37 @@
   }
 
   // ---------- Điền ----------
+  // Mẫu trường bạn chọn ở tab “Trường”: { tpl: true, base: 'chu' | 'thua' | 'donDK' | 'bienNhan' | '', keys: [các ô dữ liệu TB được tích],
+  //   extra: [{ key, label, nth, kind }] (ô lấy giá trị mẫu), scope: 'modal' | 'page', titleKey } → một màn hình điền như SECTIONS
+  function tplSection(t) {
+    const b = t.base && SECTIONS[t.base];
+    const keys = new Set(t.keys || []);
+    const baseFields = !b ? [] : t.base === 'bienNhan' ? [...SECTIONS.donVi.fields, ...SECTIONS.quyTrinh.fields, ...b.fields] : b.fields;
+    const fields = [
+      ...baseFields.filter((f) => keys.has(f.key)),
+      ...(t.extra || []).map((x) => ({
+        key: x.key,
+        name: x.label + (x.nth ? ` (${x.nth + 1})` : ''),
+        labels: [x.label],
+        nth: x.nth || 0,
+        kind: x.kind === 'checkbox' ? 'checkbox' : x.kind === 'select' ? 'select' : x.kind === 'text' ? 'text' : 'any',
+        exact: true,
+        force: false,
+      })),
+    ];
+    // mẫu bạn bấm “Điền” / 🤖 chạy mẫu (strict): ô đã tích mà màn hình không có nhãn → báo ✗ (không bỏ qua như ô “có thể không có”)
+    if (t.strict) fields.forEach((x, i) => (fields[i] = { ...x, optional: false }));
+    if (b) return { ...b, fields };
+    const tk = String(t.titleKey || '');
+    return {
+      scope: t.scope === 'page' ? 'page' : 'modal',
+      expect: t.scope === 'page' || !tk ? undefined : { test: (k) => tplWinMatch(k, tk) },
+      fields,
+    };
+  }
+
   async function fill(sectionKey, values) {
-    const sec = SECTIONS[sectionKey];
+    const sec = sectionKey && typeof sectionKey === 'object' && sectionKey.tpl ? tplSection(sectionKey) : SECTIONS[sectionKey];
     const base = { frame: location.href };
     if (!sec) return { ...base, noScope: true, results: [] };
     let scope = getScope(sec.scope);
@@ -972,6 +1255,12 @@
           direct = findByPlaceholder(scope, L, f.kind);
           if (direct) break;
         }
+        // ô tích chỉ có chữ của chính nó (vd. “Có quyền sử dụng đất”, “Đăng ký lần đầu”)
+        if (!direct && f.kind === 'checkbox' && !f.checkText)
+          for (const L of f.labels) {
+            direct = checkByOwnText(scope, L);
+            if (direct) break;
+          }
         if (!direct) {
           if (!f.optional)
             results.push({ key: f.key, name: f.name, value: shown, ok: false, msg: 'không thấy nhãn này trên màn hình' });
@@ -984,7 +1273,7 @@
         const c = lab
           ? f.kind === 'checkbox' && f.checkText
             ? findCheckByText(lab, f.checkText, scope)
-            : findControl(lab, f.kind, scope)
+            : findControl(lab, f.kind, scope) || (f.kind === 'checkbox' ? checkByOwnText(scope, lab.textContent) : null)
           : direct;
         if (!c) {
           const why = f.checkText ? `không thấy (hoặc thấy nhiều) ô tích “${f.checkText}” cạnh nhãn` : 'thấy nhãn nhưng không thấy ô nhập đúng loại';
@@ -1140,27 +1429,95 @@
     const scope = m ? { root: m, exclude: [] } : { root: document.body, exclude: [] };
     const els = [...scope.root.querySelectorAll(LABEL_SEL)].filter((el) => {
       const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      if (!t || t.length > 40 || (norm(t).match(/[a-z]/g) || []).length < 2) return false; // bỏ "*", "➜"…
+      if (!t || t.length > 80 || (norm(t).match(/[a-z]/g) || []).length < 2) return false; // bỏ "*", "➜"…
       if (el.closest('#' + PANEL_HOST) || el.closest('button, option, select')) return false;
-      // bỏ khối bao quanh ô nhập (chữ của nó là chữ trong danh sách chọn), trừ nhãn bọc ô tích
-      if ([...el.querySelectorAll(CTRL)].some((c) => c.type !== 'checkbox' && c.type !== 'radio')) return false;
+      // bỏ khối bao quanh ô nhập (chữ của nó là chữ trong danh sách chọn), trừ nhãn bọc ô tích;
+      // khối chứa từ 2 ô trở lên (vd. hàng có 2 ô tích “Đồng sử dụng”, “Đăng ký lần đầu”) là khung, không phải nhãn
+      const inner = [...el.querySelectorAll(CTRL)];
+      if (inner.length > 1 || inner.some((c) => c.type !== 'checkbox' && c.type !== 'radio')) return false;
       return isVisible(el);
     });
     const deep = els.filter((el) => !els.some((o) => o !== el && el.contains(o) && norm(o.textContent) === norm(el.textContent)));
     const byCtrl = new Map(); // ô → nhãn gần nhất phía trước
     for (const el of deep) {
-      const c = findControl(el, 'any', scope);
-      if (c) byCtrl.set(c, el);
+      // 'any' không nhận ô tích → thử thêm ô tích (vd. “Có quyền sử dụng đất”, “Đồng sử dụng”, “Đăng ký lần đầu”)
+      const c = findControl(el, 'any', scope) || findControl(el, 'checkbox', scope);
+      if (c && !byCtrl.has(c)) byCtrl.set(c, el);
     }
+    // ô tích còn lại: chữ nằm NGAY SAU ô (không có nhãn đứng trước) → lấy chữ đó làm tên trường
+    const rawNear = (c) => {
+      if (c.id) {
+        const l = document.querySelector(`label[for="${CSS.escape(c.id)}"]`);
+        if (l && l.textContent.trim()) return l;
+      }
+      const w = c.closest('label');
+      if (w && w.textContent.trim()) return w;
+      for (let x = c.nextElementSibling; x; x = x.nextElementSibling) {
+        if (x.matches(CTRL) || x.querySelector(CTRL)) break;
+        if ((x.textContent || '').trim()) return x;
+      }
+      return null;
+    };
+    for (const c of scope.root.querySelectorAll('input[type=checkbox]')) {
+      if (byCtrl.has(c) || !usable(c) || c.closest('#' + PANEL_HOST)) continue;
+      const el = rawNear(c);
+      const t = el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+      if (el && t && t.length <= 80 && (norm(t).match(/[a-z]/g) || []).length >= 2) byCtrl.set(c, el);
+    }
+    // màn hình này ứng với phần nào của tiện ích (để biết ô nào lấy được từ dữ liệu TB)
+    const tk = m ? titleKey(modalTitle(m)) : '';
+    const recep = !m && isReception();
+    const secKey = !m ? (recep ? 'bienNhan' : '') : /^tim\b/.test(tk) ? '' : ['donDK', 'chu', 'thua', 'giayTo'].find((k) => SECTIONS[k].expect.test(tk)) || '';
+    const pageTk = !m && !recep ? pageHeadingKey() : '';
+    const known = (label) => {
+      if (!secKey) return null;
+      const n = norm(label);
+      const secs = secKey === 'bienNhan' ? ['bienNhan', 'donVi', 'quyTrinh'] : [secKey];
+      for (const s of secs) for (const f of SECTIONS[s].fields) if (f.labels.some((L) => norm(L) === n)) return { key: f.key, sec: s, name: f.name };
+      return null;
+    };
+    const kindOf = (c) => (c.tagName === 'SELECT' ? 'select' : c.type === 'checkbox' ? 'checkbox' : c.type === 'radio' ? 'radio' : 'text');
+    const fullVal = (c) =>
+      c.tagName === 'SELECT'
+        ? String((c.selectedIndex >= 0 && c.options[c.selectedIndex] && c.options[c.selectedIndex].text) || '').replace(/\s+/g, ' ').trim()
+        : c.type === 'checkbox' || c.type === 'radio'
+          ? !!c.checked
+          : String(c.value || '');
+    const sc = { root: scope.root, exclude: m ? [] : openModals(), name: scopeName(m), title: m ? modalTitle(m) : '' };
     const items = [...byCtrl.entries()]
       .sort((a, b) => (a[0].compareDocumentPosition(b[0]) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
       .slice(0, 150)
-      .map(([c, el]) => ({ label: el.textContent.replace(/\s+/g, ' ').trim(), control: describe(c), value: valOf(c) }));
-    return { frame: location.href, scopeName: scopeName(m), items };
+      .map(([c, el]) => {
+        const label = el.textContent.replace(/\s+/g, ' ').trim();
+        // lần thứ mấy nhãn này xuất hiện (nhãn trùng, vd. 2 ô “Diện tích”) – điền đúng ô đó
+        const labs = findLabels(sc, label);
+        const nth = Math.max(0, labs.findIndex((l) => l === el || l.contains(el) || el.contains(l)));
+        const k = known(label);
+        const kind = kindOf(c);
+        return {
+          label,
+          nth,
+          control: describe(c),
+          value: valOf(c),
+          kind,
+          full: fullVal(c),
+          locked: !!(c.disabled || (c.readOnly && kind === 'text')),
+          opts: c.tagName === 'SELECT' ? [...c.options].slice(0, 40).map((o) => o.text.replace(/\s+/g, ' ').trim()) : undefined,
+          key: k ? k.key : '',
+          sec: k ? k.sec : '',
+          kname: k ? k.name : '',
+        };
+      });
+    // các nút của màn hình / cửa sổ (bạn yêu cầu 22/11: “lấy cả nút, tất cả các button”) – tích được hết
+    const buttons = tplButtons(scope.root, m ? [] : openModals())
+      .slice(0, 150)
+      .map((b) => ({ text: b.text, key: b.key, nth: b.nth, id: b.el.id || '', lock: tplBtnLock(b), off: !!b.el.disabled }));
+    return { frame: location.href, scopeName: m ? scopeName(m) : pageTk ? `màn hình “${pageHeadingName()}”` : scopeName(m), title: m ? modalTitle(m) : '', titleKey: m ? tk : pageTk, secKey, scope: m ? 'modal' : 'page', items, buttons };
   }
 
   function run(msg) {
     if (!msg) return null;
+    SPEEDK = Math.max(1, Math.min(4, Number(msg.speed) || 1));
     if (msg.type === 'vbdlis-scan') return scan();
     if (msg.type === 'vbdlis-fill') {
       // __vbdlisActive: để bộ ghi thao tác biết thay đổi nào là do tiện ích điền (không phải người dùng gõ)

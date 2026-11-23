@@ -8,3 +8,5 @@ TB */
 *.zip
 *.xlsx
 *.skill
+# Cấu hình riêng trên máy (tài khoản chuyển tiếp) – KHÔNG đưa lên git
+vbdlis-dien-nhanh/cau-hinh.local.json

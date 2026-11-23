@@ -35,6 +35,63 @@
   .jstree{border:1px solid #ddd;min-height:40px;margin-top:6px;background:#fff;padding:4px}
   a.btn{display:inline-block;padding:3px 8px;border:1px solid #bbb;border-radius:3px;background:#f8f8f8;cursor:pointer}
   .checkbox{display:flex;gap:4px;align-items:center}
+  /* hồ sơ đã lưu: thanh nút dưới (ảnh 1) – cửa sổ Chọn người xử lý tác vụ tiếp theo (ảnh 3, 6); biểu tượng vẽ bằng CSS để không lẫn vào chữ của nút */
+  #mockThanhHoSo{display:none;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #ddd;padding:8px 12px;margin:0 0 10px}
+  #mockThanhHoSo a[id^="lnkVe"]{color:#337ab7;text-decoration:none;margin-right:16px}
+  #mockThanhHoSo a[id^="lnkVe"]::before{content:'⮌ '}
+  #mockThanhHoSo .btn{color:#fff;border:0;padding:6px 10px;border-radius:3px;font-size:12px;text-decoration:none}
+  #mockThanhHoSo .btn-danger{background:#d9534f}
+  #mockThanhHoSo .btn-info{background:#3498db}
+  #mockThanhHoSo .btn-success, #mChonNguoi .btn-success{background:#26b99a;color:#fff;border:0;padding:6px 12px;border-radius:3px}
+  #mChonNguoi .close{float:right;border:0;background:none;font-size:18px;color:#999;cursor:pointer}
+  #mChonNguoi .fa-user::before{content:'👤 '}
+  #mChonNguoi .fa-refresh::before{content:'⟳ '}
+  #mChonNguoi th{position:sticky;top:0}
+  #mChonNguoi th:first-child{width:46px}
+  #mChonNguoi td{text-align:left}
+  #mChonNguoi td:first-child{text-align:center}
+  #mChonNguoi tbody tr{cursor:pointer}
+  /* danh sách hồ sơ thụ lý (ảnh 7, 8): chỉ hiện ở view 'dsthuly' – form tiếp nhận + khung Số biên nhận thử ẩn; biểu tượng vẽ bằng CSS để không lẫn vào chữ */
+  #mockDsThuLy{display:none;background:#fff;border:1px solid #ddd;margin:0 0 10px}
+  /* thanh trái (ảnh 17): mục “Xử lý công việc” → Danh sách hồ sơ thụ lý */
+  #mockSidebar{position:fixed;left:0;top:140px;width:74px;background:#2a3f54;padding:6px 0;z-index:5;border-radius:0 6px 6px 0}
+  #mockSidebar a{display:block;color:#fff;font-size:11px;text-align:center;padding:6px 4px;text-decoration:none}
+  #mockSidebar a.cur{background:#1abb9c}
+  body[data-mock-view="dsthuly"] #mockDsThuLy{display:block}
+  body[data-mock-view="dsthuly"] > fieldset, body[data-mock-view="dsthuly"] .ttHoSo{display:none}
+  #mockDsThuLy header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #ddd;font-size:15px;color:#444}
+  #mockDsThuLy .mockDsTieuDe::before{content:'☰ ';color:#2a3f54}
+  #mockDsThuLy .user-info{font-size:12px;font-weight:bold}
+  #mockDsThuLy .mockAvatar{display:inline-block;width:20px;height:20px;border-radius:50%;background:#2ecc71;color:#fff;text-align:center;line-height:20px;margin-right:4px}
+  #mockDsThuLy .mockDsKhung{display:flex;align-items:stretch}
+  #mockDsThuLy .mockDsChinh{flex:1;min-width:0;padding:8px}
+  #mockDsThuLy .mockDsPhai{width:290px;flex:none;border-left:1px solid #ddd;background:#f7f7f7;padding:8px}
+  #mockDsThuLy .mockDsPhaiTieuDe{font-weight:bold;color:#2a3f54;margin-bottom:6px}
+  #mockDsThuLy .mockDsPhaiTieuDe::before{content:'ⓘ '}
+  #mockDsThuLy .mockDsBar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+  #mockDsThuLy .mockDsBar input{width:260px}
+  #mockDsThuLy .btn-group{display:inline-flex}
+  #mockDsThuLy .mockDsXuLy > a:first-child::before{content:'⚙ ';color:#26b99a}
+  #mockDsThuLy .mockCaret::after{content:' ▾'}
+  #mockDsThuLy .mockDsTabs{margin-bottom:6px}
+  #mockDsThuLy .mockDsTabs a{margin-right:12px;color:#337ab7;text-decoration:none;cursor:pointer}
+  #mockDsThuLy td{text-align:left;vertical-align:top;line-height:1.7}
+  #mockDsRows tr{cursor:pointer}
+  #mockDsRows tr.selected{background:#1b7fbd;color:#fff}
+  #mockDsRows tr.selected a{color:#fff}
+  #mockDsRows .lnkHoSo{font-weight:bold;color:#337ab7;text-decoration:none}
+  #mockDsRows .mockDsPlay{color:#26b99a;text-align:center;vertical-align:middle}
+  #mockDsRows .mockHen{color:#f0ad4e;font-weight:bold}
+  #mockDsThuLy .ttRow{display:flex;gap:8px;margin:6px 0}
+  #mockDsThuLy .ttLabel{width:105px;flex:none;color:#555}
+  #mockDsThuLy .ttValue{flex:1;min-width:0;white-space:pre-wrap;word-break:break-word}
+  /* Kết ISO, Trả hồ sơ (ảnh 10); hộp hỏi kiểu jconfirm: nút vàng (ĐỒNG Ý / Đồng ý) */
+  #mKetISO .fa-check-square-o::before{content:'☑ '}
+  #mTraHoSo .fa-ban::before{content:'⊘ '}
+  #mKetISO .fa-save::before, #mTraHoSo .fa-save::before{content:'💾 '}
+  #mTraHoSo .fa-step-backward::before{content:'⏮ '}
+  #mKetISO .btn-primary, #mTraHoSo .btn-primary{background:#2a3f54;color:#fff;border:0;padding:6px 12px;border-radius:3px}
+  .jconfirm .btn-orange{background:#f0ad4e;color:#fff;border:0;padding:6px 14px;border-radius:3px;font-weight:bold}
 </style>
 </head>
 <body>
@@ -51,7 +108,43 @@
   <button onclick="mockLuuHoSo()">Giả lập: người dùng bấm Lưu hồ sơ</button>
   <button onclick="mockLuuDK()">Giả lập: Lưu thông tin đăng ký</button>
   <button onclick="mockHoanTat()">Giả lập: Hoàn tất</button>
+  <button onclick="mockHoSoQuet()">Mở: Hồ sơ quét (đính kèm file)</button>
+  <button onclick="openLuuKho()">Mở: Lưu kho hồ sơ quét</button>
+  <button onclick="mockCapNhatHsq()">Giả lập: người dùng bấm Cập nhật (hồ sơ quét)</button>
+  <span class="ttHoSo">(khung Thông tin hồ sơ) <span>Số biên nhận</span> <b id="mockDossier">KH 2959.07777.254.10</b></span>
 </p>
+<p>
+  <button onclick="mockHoSoDaLuu()">Giả lập: hồ sơ đã lưu (Xử lý hồ sơ)</button>
+  <button onclick="mockLanhDaoTraVe()">Giả lập: lãnh đạo trả về (danh sách thụ lý)</button>
+  <button onclick="mockKetISO()">Giả lập: người dùng Kết ISO</button>
+  <button id="mockNutTaiLai" onclick="mockFlags({ reload: !window.__mockReload })">Bật/Tắt tải lại trang</button>
+  <button id="mockNutTuBam" onclick="mockFlags({ choTuBam: !window.__mockChoTuBam })">Bật/Tắt cho tự bấm</button>
+  <button id="mockNutCayThat" onclick="mockFlags({ cayThat: !window.__mockCayThat })">Bật/Tắt cây kiểu thật</button>
+  <button onclick="mockReset()">Xóa trạng thái giả lập (mockReset)</button>
+</p>
+<!-- ============ DANH SÁCH HỒ SƠ THỤ LÝ (giống ảnh 7, 8 – 22/11): chỉ hiện ở view 'dsthuly' (form tiếp nhận ẩn) ============ -->
+<!-- nút “Xử lý hồ sơ” KHÔNG có id (tiện ích phải tìm theo chữ) + nút ▾ riêng; các nút khác chỉ ghi nhật ký. Bảng: dòng hồ sơ KHÁC (mồi nhử) + dòng hồ sơ đang làm.
+     Bấm vào dòng (chỗ nào cũng được, trừ link ✎ số biên nhận) = chọn dòng (lớp selected, nền xanh) + khung phải “Thông tin hồ sơ”; link ✎ số biên nhận = BẪY -->
+<nav id="mockSidebar"><a href="javascript:;" onclick="bamNutPhu(event, 'Tiếp nhận hồ sơ ▾')">Tiếp nhận hồ sơ ▾</a><a href="javascript:;" id="mockNavXLCV" onclick="mockXuLyCongViec(event)"><i class="fa fa-cog"></i> Xử lý công việc</a><a href="javascript:;" onclick="bamNutPhu(event, 'Quản lý sổ ▾')">Quản lý sổ ▾</a></nav>
+<div id="mockDsThuLy">
+  <header class="main-header"><span class="mockDsTieuDe">Danh sách hồ sơ thụ lý</span><span class="user-info"><span class="mockAvatar">B</span> <span id="mockTaiKhoan"></span></span></header>
+  <div class="mockDsKhung">
+    <div class="mockDsChinh">
+      <div class="mockDsBar">
+        <span class="btn-group"><input type="text" id="txtTimHoSo" placeholder="Số biên nhận"><a href="javascript:;" class="btn" title="Tìm kiếm" onclick="dsTimKiem(event)">🔍</a><a href="javascript:;" class="btn" title="Lọc" onclick="bamNutPhu(event, 'Lọc')">⏷</a></span>
+        <span class="btn-group mockDsXuLy"><a href="javascript:;" class="btn btn-default" onclick="dsXuLyHoSo(event)">Xử lý hồ sơ</a><a href="javascript:;" class="btn btn-default dropdown-toggle" onclick="bamNutPhu(event, 'nút ▾ cạnh Xử lý hồ sơ')">▾</a></span>
+        <a href="javascript:;" class="btn btn-default mockCaret" onclick="bamNutPhu(event, 'Thông tin hồ sơ')">Thông tin hồ sơ</a>
+        <a href="javascript:;" class="btn btn-default" onclick="bamNutPhu(event, 'Chờ bổ sung')">Chờ bổ sung</a>
+        <a href="javascript:;" class="btn btn-default mockCaret" onclick="bamNutPhu(event, 'In biên nhận')">In biên nhận</a>
+        <span class="btn-group"><a href="javascript:;" class="btn btn-default" onclick="bamNutPhu(event, 'Tải biên nhận')">Tải biên nhận</a><a href="javascript:;" class="btn btn-default dropdown-toggle" onclick="bamNutPhu(event, 'nút ▾ cạnh Tải biên nhận')">▾</a></span>
+      </div>
+      <div class="mockDsTabs"><a onclick="bamNutPhu(event, 'tab Tất cả')">Tất cả</a><a onclick="bamNutPhu(event, 'tab Quá hạn xử lý')">Quá hạn xử lý (16)</a><a onclick="bamNutPhu(event, 'tab Quá hạn trả hồ sơ')">Quá hạn trả hồ sơ (0)</a><a onclick="bamNutPhu(event, 'tab Sắp hết hạn xử lý')">Sắp hết hạn xử lý (0)</a><a onclick="bamNutPhu(event, 'tab Đang chờ bổ sung')">Đang chờ bổ sung (24)</a><a onclick="bamNutPhu(event, 'tab Đang chuyển thuế')">Đang chuyển thuế (4)</a></div>
+      <table id="tblDsThuLy"><thead><tr><th>#</th><th>Thông tin hồ sơ</th><th>Thông tin biên nhận</th><th>Thông tin luân chuyển</th><th>Thông tin người nộp</th></tr></thead><tbody id="mockDsRows"></tbody></table>
+      <div style="margin-top:8px;color:#555">Hiển thị từ 1 đến 2 trong tổng số 2 hồ sơ tiếp nhận</div>
+    </div>
+    <div class="mockDsPhai"><div class="mockDsPhaiTieuDe">Thông tin hồ sơ</div><div id="mockTTHS"></div></div>
+  </div>
+</div>
 
 <fieldset><legend>Đơn vị hành chính</legend>
   <div class="row">
@@ -98,7 +191,12 @@
   <div class="row"><div class="col"><div class="ctl"><input type="text" id="txtTenTL" placeholder="Tên tài liệu muốn thêm"><button type="button">+</button></div></div></div>
 </fieldset>
 
-<p style="text-align:right"><button type="button" class="btn" id="btnLuuHoSo" onclick="log('!!! NÚT LƯU HỒ SƠ ĐÃ BỊ BẤM !!!')">💾 Lưu hồ sơ</button></p>
+<p style="text-align:right"><button type="button" class="btn" id="btnLuuHoSo" onclick="mockBamLuu('hs', event)">💾 Lưu hồ sơ</button></p>
+<!-- ============ HỒ SƠ ĐÃ LƯU (giống ảnh 1): cùng form, nút Lưu hồ sơ ẩn; thanh dưới: Xử lý hồ sơ / In biên nhận / Tải biên nhận / Cập nhật hồ sơ (BẪY) ============ -->
+<div id="mockThanhHoSo">
+  <div><a id="lnkVeXuLyHoSo" href="javascript:;" onclick="veXuLyHoSo(event)">Về trang xử lý hồ sơ</a><a id="lnkVeTiepNhan" href="javascript:;" onclick="veTiepNhan(event)">Về trang tiếp nhận hồ sơ</a></div>
+  <div><a id="btnXuLyHoSo" class="btn btn-danger" href="javascript:;" onclick="bamXuLyHoSo(event)">Xử lý hồ sơ</a> <a class="btn btn-info" href="javascript:;" onclick="bamNutPhu(event, 'In biên nhận')">In biên nhận</a> <a class="btn btn-info" href="javascript:;" onclick="bamNutPhu(event, 'Tải biên nhận')">Tải biên nhận</a> <button type="button" id="btnCapNhatHoSo" class="btn btn-success" onclick="log('!!! NÚT CẬP NHẬT HỒ SƠ ĐÃ BỊ BẤM !!!')">Cập nhật hồ sơ</button></div>
+</div>
 
 <div id="log"></div>
 
@@ -173,7 +271,7 @@
       </div>
     </fieldset>
   </div>
-  <div class="modal-footer"><button id="cnLuu" onclick="luuCaNhanDon()">Lưu</button> <button onclick="closeM()">Đóng</button></div>
+  <div class="modal-footer"><button id="cnLuu" onclick="luuCaNhanDon(event)">Lưu</button> <button onclick="closeM()">Đóng</button></div>
 </div></div>
 
 <!-- ============ THÔNG TIN THỬA ĐẤT ============ -->
@@ -200,6 +298,7 @@
           <option value="BHK">BHK (Đất bằng trồng cây hàng năm khác)</option>
           <option value="NTS">NTS (Đất nuôi trồng thủy sản)</option>
           <option value="ONT">ONT (Đất ở tại nông thôn)</option>
+          <option value="CLN">CLN (Đất trồng cây lâu năm)</option>
         </select></div></div>
         <div class="col"><label>Diện tích<span class="req">*</span>:</label><div class="ctl"><input type="text" id="tDienTich2" class="area"></div></div>
         <div class="col"><label>Số thứ tự:</label><div class="ctl"><input type="text" value="1"></div></div>
@@ -242,6 +341,70 @@
   </div>
   <div class="modal-footer"><button>Lưu</button> <button onclick="closeM()">Đóng</button></div>
 </div></div>
+<!-- ============ HỒ SƠ QUÉT – danh sách tập tin (giống VBDLIS thật: mỗi dòng có ô chọn file ẩn + Chọn tập tin / Tải lên) ============ -->
+<div class="modal" id="mHoSoQuet"><div class="modal-dialog">
+  <div class="modal-header"><h4 class="modal-title">Hồ sơ quét</h4></div>
+  <div class="modal-body">
+    <fieldset><legend>Danh sách tập tin</legend>
+      <a id="btnAddFileHoSoQuet" class="btn" href="">Thêm tập tin</a> <a id="btnOpenFormChonFileHoSoQuet" class="btn" href="">Chọn tập tin</a>
+      <table id="tbDanhSachFile"><thead><tr><th>Mô tả</th><th>Trích yếu</th><th>Loại hồ sơ quét</th><th>Giấy tờ nguồn gốc</th><th>Hồ sơ cũ</th><th>Tập tin đính kèm</th><th>Chức năng</th></tr></thead><tbody></tbody></table>
+    </fieldset>
+  </div>
+  <div class="modal-footer"><button type="submit" id="btnCapNhatHoSoQuet" onclick="mockCapNhatHsq(event)">Cập nhật</button> <a class="btn" onclick="closeM()">Thoát</a></div>
+</div></div>
+
+<!-- ============ LƯU KHO HỒ SƠ QUÉT (giống bản ghi trang thật: Mã đơn, cây Thông tin đăng ký, danh sách hồ sơ quét, nút +) ============ -->
+<div class="modal" id="mLuuKho" role="dialog"><div class="modal-dialog">
+  <div class="VModule" vmodule-name="luukhohosoquetv2"><div class="panel panel-info">
+    <div class="panel-heading modal-header"><button class="close" onclick="dongLuuKho()">×</button><h1 class="panel-title modal-title" style="font-size:14px;margin:0">Lưu kho hồ sơ quét</h1></div>
+    <div class="panel-body modal-body"><div style="display:flex;gap:10px;align-items:flex-start">
+      <div style="flex:1"><b>Danh sách đơn đăng ký</b><div id="lstDonDangKy"></div></div>
+      <div style="flex:2"><b>Thông tin đăng ký</b><div id="treeThongTinDangKy" class="jstree"><ul></ul></div></div>
+      <div style="flex:1"><b>Thông tin hồ sơ quét</b> <a href="javascripts:;" class="btn btn-success" id="btnAddHoSoQuet" title="Thêm mới">+</a><div id="lstHoSoQuet"></div></div>
+    </div></div>
+    <div class="panel-footer modal-footer"><a class="btn btn-default" href="" data-dismiss="modal">Đóng</a></div>
+  </div></div>
+</div></div>
+<!-- ============ CẬP NHẬT DỮ LIỆU PHÁP LÝ (tác vụ 2 – giống bản ghi thật) ============ -->
+<div class="modal" id="mCNDLPL" role="dialog"><div class="modal-dialog"><div class="panel panel-info">
+  <div class="panel-heading modal-header"><button class="close" onclick="dongCNDLPL()">×</button><h4 class="modal-title">Cập nhật dữ liệu pháp lý</h4></div>
+  <div class="panel-body modal-body">
+    <div><b>Biến động:</b> CẤP GIẤY LẦN ĐẦU</div>
+    <div style="display:flex;gap:12px"><div style="flex:3"><div id="chi_tiet_gcn_wapper"><ul class="nav nav-tabs" style="display:flex;gap:6px;list-style:none;padding:0">
+      <li class="active" title="Thông tin giấy TBD"><a href="#panelGiayChungNhanTBD" data-toggle="tab">Thông tin trước biến động</a></li>
+      <li title="Thông tin biến động"><a href="#panelThongTinBienDong" data-toggle="tab">Thông tin biến động</a></li>
+      <li title="Thông tin giấy SBD"><a href="#paneGiayChungNhanSBD" data-toggle="tab">Thông tin sau biến động</a></li>
+      <li title="Nội dung in xác nhận"><a href="#panelNoiDungInXacNhan" data-toggle="tab">Nội dung in xác nhận</a></li>
+      <li title="Danh sách ghi chú chuyển tiếp"><a href="#panelDanhSachGhiChuChuyenTiep" data-toggle="tab">Danh sách ghi chú chuyển tiếp</a></li>
+    </ul><div class="tab-content">
+      <div id="panelGiayChungNhanTBD" class="tab-pane active"><div class="jstree"><ul><li class="jstree-node"><a class="jstree-anchor" href="#">Không có thông tin</a></li></ul></div></div>
+      <div id="panelThongTinBienDong" class="tab-pane" style="display:none"><div class="jstree"><ul><li><a class="jstree-anchor" href="#">Không có thông tin</a></li></ul></div></div>
+      <div id="paneGiayChungNhanSBD" class="tab-pane" style="display:none"><div id="treeGiayChungNhanSBD" class="jstree"><ul></ul></div></div>
+      <div id="panelNoiDungInXacNhan" class="tab-pane" style="display:none"></div>
+      <div id="panelDanhSachGhiChuChuyenTiep" class="tab-pane" style="display:none"></div>
+    </div></div></div>
+    <div style="flex:2"><label>Ngày giờ cập nhật dữ liệu pháp lý*</label><input type="text" name="ngayGioCapNhatDuLieuPhapLy" value="22/11/2026 10:46"><label>Ghi chú</label><textarea name="ghiChu"></textarea></div></div>
+  </div>
+  <div class="panel-footer modal-footer"><form onsubmit="return false" style="display:inline"><button type="submit" class="btn btn-primary" id="btnCapNhatDuLieuPhapLy">Thực hiện</button></form> <a class="btn btn-default" href="" data-dismiss="modal" onclick="dongCNDLPL(); return false;">Đóng</a></div>
+</div></div></div>
+<!-- ============ THÔNG TIN HỒ SƠ QUÉT (mở từ “Thêm tập tin” – ô có name như trang thật) ============ -->
+<div class="modal" id="mTTHSQ"><div class="modal-dialog" style="width:700px"><div class="panel panel-info">
+  <div class="panel-heading modal-header"><button class="close" onclick="dongTTHSQ()">×</button><h4 class="modal-title">Thông tin hồ sơ quét</h4></div>
+  <div class="panel-body modal-body">
+    <div class="row">
+      <div class="col"><label>Loại giấy tờ</label><div class="ctl"><select class="form-control" name="loaiHoSoQuet"><option value="1">Giấy tờ hồ sơ</option><option value="2">Giấy chứng nhận</option><option value="3">Đơn đăng ký</option><option value="4">Thông báo xác nhận kết quả đăng ký</option></select></div></div>
+      <div class="col"><label><input type="checkbox" name="laGiayToVeNguonGoc"> Là giấy tờ nguồn gốc</label></div>
+    </div>
+    <div class="row">
+      <div class="col" id="ttGcnWrap" style="display:none"><label>Mô tả</label><div class="ctl"><select class="form-control" name="giayChungNhanId"><option>Chọn giấy chứng nhận</option></select></div></div>
+      <div class="col"><label>Mô tả</label><div class="ctl"><input type="text" class="form-control" name="moTa"></div></div>
+      <div class="col"><label>Tên giấy tờ</label><div class="ctl"><input type="text" class="form-control" name="tenGiayTo"></div></div>
+    </div>
+    <div class="row"><div class="col"><label>Trích yếu</label><div class="ctl"><textarea class="form-control" name="trichYeu"></textarea></div></div></div>
+  </div>
+  <div class="panel-footer modal-footer"><span id="ttHsqErr" style="color:red"></span> <button class="btn btn-primary" id="btnLuuHoSoQuet" onclick="luuTTHSQ()">Lưu</button> <button class="btn btn-default" onclick="dongTTHSQ()">Đóng</button></div>
+</div></div></div>
+
 <!-- ============ HỘP HỎI SAU KHI LƯU THỬA (giống thật, không có ô nhập) ============ -->
 <div class="modal" id="mXacNhanDC"><div class="modal-dialog" style="width:420px">
   <div class="modal-header"><button type="button" class="close" onclick="dongDC(false)">×</button><h4 class="modal-title">Cập nhật địa chỉ tài sản</h4></div>
@@ -277,7 +440,7 @@
       <div id="treeTaiSan" class="jstree"><ul></ul></div>
     </fieldset>
   </div>
-  <div class="modal-footer"><button id="btnLuuDangKy" onclick="log('!!! NÚT LƯU THÔNG TIN ĐĂNG KÝ ĐÃ BỊ BẤM !!!')">Lưu thông tin đăng ký</button> <a class="btn" id="btnHoanTat" onclick="log('!!! NÚT HOÀN TẤT ĐÃ BỊ BẤM !!!')">Hoàn tất</a> <a class="btn" onclick="closeM()">Đóng</a></div>
+  <div class="modal-footer"><button id="btnLuuDangKy" onclick="mockBamLuu('lt', event)">Lưu thông tin đăng ký</button> <a class="btn" id="btnHoanTat" onclick="mockBamLuu('ht', event)">Hoàn tất</a> <a class="btn" onclick="dongDon(event)">Đóng</a></div>
 </div></div>
 <!-- ============ QUY TRÌNH XỬ LÝ (vẫn mở, nằm dưới cửa sổ Nhập đơn đăng ký) ============ -->
 <div class="modal" id="mQuyTrinh" style="z-index:1050"><div class="modal-dialog" style="width:700px">
@@ -285,11 +448,50 @@
   <div class="modal-body">
     <div class="row"><div class="col"><div class="ctl"><input type="text" id="qtTimTacVu" placeholder="Nhập tên tác vụ cần tìm..."></div></div></div>
     <table><thead><tr><th>STT</th><th>Công việc</th><th>Thời gian xử lý</th><th>Thao tác</th><th>Đã xử lý</th></tr></thead>
-    <tbody><tr><td>1</td><td>Chuyên viên</td><td>8 giờ</td><td><a class="btn" id="btnXuLyTacVu" onclick="openDonTuQuyTrinh()">Xử lý tác vụ</a></td><td><input type="checkbox"></td></tr></tbody></table>
+    <tbody id="bindQuyTrinhXuLy">
+      <tr><td>1</td><td>Giấy tờ đính kèm</td><td>24 giờ</td><td><a class="btnXuLyTacVu" data-actioncode="GiayToDinhKem" onclick="log('(trang mở Giấy tờ đính kèm)')">Xử lý tác vụ</a></td><td><input type="checkbox" data-actioncode="GiayToDinhKem" checked></td></tr>
+      <tr><td>2</td><td>Cập nhật dữ liệu pháp lý</td><td>0 giờ</td><td><a class="btnXuLyTacVu" data-actioncode="CapNhatDuLieuPhapLy" onclick="openCNDLPL()">Xử lý tác vụ</a></td><td><input type="checkbox" data-actioncode="CapNhatDuLieuPhapLy"></td></tr>
+      <tr><td>3</td><td>Lưu kho hồ sơ quét</td><td>0 giờ</td><td><a class="btnXuLyTacVu" data-actioncode="LuuKhoHoSoQuet" onclick="openLuuKho()">Xử lý tác vụ</a></td><td><input type="checkbox" data-actioncode="LuuKhoHoSoQuet"></td></tr>
+      <tr><td>4</td><td>Kết ISO</td><td>0 giờ</td><td><a class="btnXuLyTacVu" data-actioncode="KetISO" onclick="moKetISO(event)">Xử lý tác vụ</a></td><td><input type="checkbox" data-actioncode="KetISO"></td></tr>
+      <tr><td>5</td><td>Nhập đăng ký</td><td>0 giờ</td><td><a class="btn btnXuLyTacVu" id="btnXuLyTacVu" data-actioncode="NhapDangKy" onclick="openDonTuQuyTrinh()">Xử lý tác vụ</a></td><td><input type="checkbox" data-actioncode="NhapDangKy" checked></td></tr>
+    </tbody></table>
   </div>
-  <div class="modal-footer"><button class="btn">Chuyển tiếp</button> <button class="btn" onclick="closeM()">Đóng</button></div>
+  <div class="modal-footer"><button class="btn btnWorkflowCommand" onclick="bamChuyenTiep(event)">Chuyển tiếp</button> <button class="btn" onclick="closeM()">Đóng</button></div>
 </div></div>
 </div>
+<!-- ============ CHỌN NGƯỜI XỬ LÝ TÁC VỤ TIẾP THEO (sau “Chuyển tiếp” – giống ảnh 3, 6; tài khoản và họ tên đều GIẢ) ============ -->
+<div class="modal" id="mChonNguoi" style="z-index:1150"><div class="modal-dialog" style="width:840px">
+  <div class="modal-header"><button type="button" class="close" onclick="dongChonNguoi(event)">×</button><h4 class="modal-title"><i class="fa fa-user"></i> Chọn người xử lý tác vụ tiếp theo</h4></div>
+  <div class="modal-body">
+    <select class="form-control" style="margin-bottom:8px"></select>
+    <input type="text" class="form-control" placeholder="Nhập tên cán bộ, tên user..." style="margin-bottom:8px">
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:6px;flex-wrap:wrap"><b>Cấp:</b>
+      <label><input type="radio" name="capDonVi" value="tatca" checked> Tất cả</label>
+      <label><input type="radio" name="capDonVi" value="tinh"> Tỉnh/Tp</label>
+      <label><input type="radio" name="capDonVi" value="huyen"> Quận/huyện</label>
+      <label><input type="radio" name="capDonVi" value="xa"> Phường/xã</label>
+      <label><input type="radio" name="capDonVi" value="cungdv"> Cùng đơn vị</label>
+      <label style="margin-left:auto"><input type="checkbox" name="chuyenDonViKhac"> Chuyển đơn vị khác</label>
+    </div>
+    <div style="max-height:170px;overflow:auto;border:1px solid #ddd"><table><thead><tr><th>STT</th><th>Tên tài khoản</th><th>Họ &amp; Tên</th><th>Đơn vị</th></tr></thead><tbody></tbody></table></div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px"><label><b>Ngày giờ chuyển tiếp</b><span class="req">*</span></label><a href="javascript:;" onclick="taiLaiCanBo(event)"><i class="fa fa-refresh"></i> Tải lại danh sách tài khoản</a></div>
+    <input type="text" name="ngayGioChuyenTiep" readonly style="background:#eee">
+    <label style="display:block;margin-top:8px"><b>Ghi chú:</b></label><textarea name="ghiChu" rows="4" placeholder="Thông tin ghi chú, lời nhắc..."></textarea>
+  </div>
+  <div class="modal-footer"><button type="button" id="btnExecuteCommand" class="btn btn-success" onclick="bamThucThi(event)">Thực thi</button> <button type="button" class="btn btn-default" onclick="dongChonNguoi(event)">Đóng</button></div>
+</div></div>
+<!-- ============ KẾT ISO (tác vụ 4 – NGƯỜI DÙNG tự làm: Thực hiện → “Bạn có chắc chắn muốn kết ISO?” Đồng ý; tiện ích bấm vào là BẪY) ============ -->
+<div class="modal" id="mKetISO"><div class="modal-dialog" style="width:520px">
+  <div class="modal-header"><button type="button" class="close" onclick="dongKetISO(event)">×</button><h4 class="modal-title"><i class="fa fa-check-square-o"></i> Kết ISO</h4></div>
+  <div class="modal-body"><label style="display:block;margin-bottom:4px"><b>Ghi chú</b></label><textarea name="ghiChuKetISO" rows="3"></textarea></div>
+  <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="thucHienKetISO(event)"><i class="fa fa-save"></i> Thực hiện</button> <button type="button" class="btn btn-default" onclick="dongKetISO(event)">Đóng</button></div>
+</div></div>
+<!-- ============ TRẢ HỒ SƠ (ảnh 10): Ghi chú + Thực hiện / Đóng; Thực hiện → “Bạn có chắc chắn muốn trả hồ sơ này?” Đồng ý / Hủy ============ -->
+<div class="modal" id="mTraHoSo"><div class="modal-dialog">
+  <div class="modal-header"><button type="button" class="close" onclick="dongTraHoSo(event)">×</button><h4 class="modal-title"><i class="fa fa-ban"></i> Trả hồ sơ</h4></div>
+  <div class="modal-body"><label style="display:block;margin-bottom:4px"><b>Ghi chú</b></label><textarea name="ghiChu" rows="5"></textarea></div>
+  <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="thucHienTraHoSo(event)"><i class="fa fa-save"></i> Thực hiện</button> <button type="button" class="btn btn-default" onclick="dongTraHoSo(event)"><i class="fa fa-step-backward"></i> Đóng</button></div>
+</div></div>
 <!-- ============ HỘP HỎI KIỂU jconfirm (không có ô nhập) ============ -->
 <div class="jconfirm" id="jcGiayTo" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.2)"><div class="jconfirm-box" role="dialog" style="width:436px;margin:200px auto;background:#fff;padding:12px;border-radius:4px">
   <div class="jconfirm-title-c"><span class="jconfirm-title">Thông báo</span></div>
@@ -303,7 +505,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/autonumeric/4.6.0/autoNumeric.min.js"></script>
 <script>
-  const log = (t) => { const l = document.getElementById('log'); l.textContent += t + '\n'; l.scrollTop = 1e9; };
+  // giữ qua tải lại trang (sessionStorage của thẻ): '__mockLog' nhật ký, '__mockHoSo' hồ sơ, '__mockFlags' cờ, '__mockMem' chrome.storage giả.
+  // mockReset() xóa hết rồi tải lại trang.
+  const ssDoc = (k) => { try { const v = sessionStorage.getItem(k); return v == null ? null : JSON.parse(v); } catch (e) { return null; } };
+  const ssGhi = (k, v) => { if (window.__mockDangReset) return; try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) { console.warn('[mock] không ghi được sessionStorage', k, e); } };
+  let hgLog = 0;
+  const ghiLog = () => { clearTimeout(hgLog); hgLog = 0; const t = document.getElementById('log').textContent; ssGhi('__mockLog', t.length > 300000 ? t.slice(-300000) : t); };
+  const log = (t) => { const l = document.getElementById('log'); l.textContent += t + '\n'; l.scrollTop = 1e9; if (!hgLog) hgLog = setTimeout(ghiLog, 300); };
   function openThemThua(){
     ['ttSoThua','ttSoTo','ttSoThuaCu','ttSoToCu','ttDienTich'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('ttDiaChi').value = 'Phường Việt Yên, Thành phố Bắc Ninh';
@@ -342,7 +550,9 @@
   const fmtNum = (v) => String(v).replace(/[^\d]/g, '');
   const fmtArea = (v) => { const n = parseFloat(String(v).replace(/[^\d.]/g, '')); return isNaN(n) ? ' m²' : n.toLocaleString('en-US') + ' m²'; };
   // Nhập đơn đăng ký
-  function openDon(){ window.__fromDon = false; openM('mDon'); }
+  function openDon(){ window.__fromDon = false; window.__donTuQT = false; openM('mDon'); }
+  // lưu xong cửa sổ chủ / thửa: trở lại đơn (đơn mở từ Quy trình xử lý thì Quy trình vẫn nằm bên dưới, như trang thật)
+  function moLaiDon(){ openM('mDon'); if (window.__donTuQT) document.getElementById('mQuyTrinh').classList.add('show'); }
   function resetThua(){
     ['tSoThua','tSoTo','tDienTichPL','tSoThuaCu','tSoToCu','tDiaChi','tDienTich3','tThoiHan'].forEach(id => document.getElementById(id).value = '');
     ['#tDienTich','#tDienTich2'].forEach(s => { const a = AutoNumeric.getAutoNumericElement(s); if (a) a.clear(); });
@@ -356,24 +566,40 @@
     if (!window.__fromDon) { log('(người dùng bấm Lưu – Thông tin thửa đất)'); closeM(); return; }
     const v = (id) => document.getElementById(id).value.trim();
     const dt = AutoNumeric.getAutoNumericElement('#tDienTich').getNumber();
-    // giống VBDLIS thật (jstree): nhóm “Thửa đất lịch sử -…” → thửa “22 (231) - Diện tích: …” → con “LUC: - Số thứ tự:1 - Diện tích:… - Thời hạn: …”
-    mockTreeAdd('treeTaiSan', 'Thửa đất lịch sử -1790000000060_', mockNode(`${v('tSoThua')} (${v('tSoTo')}) - Diện tích: ${dt} m² - Địa chỉ: ${v('tDiaChi')}`, mockNode(`${$('#tMDSD').val() || '?'}: - Số thứ tự:1 - Diện tích:${dt} m² - Thời hạn: ${v('tThoiHan')}`)));
+    if (window.__mockCayThat) {
+      // giống VBDLIS thật (ảnh 22/11): MỘT nút gốc “Thửa đất lịch sử -<mã>_ 22 (231) - Diện tích: … - Địa chỉ: …”
+      // → con “LUC: - Số thứ tự:1 - Diện tích:… - Thời hạn sử dụng: …” → cháu “<nguồn gốc> - Diện tích: …” (chưa chọn nguồn gốc thì không có cháu)
+      const dtMd = AutoNumeric.getAutoNumericElement('#tDienTich2').getNumber() || dt;
+      const ng = document.getElementById('tNguonGoc'), ngTen = ng.value ? ng.options[ng.selectedIndex].text : '';
+      const dtNg = parseFloat(v('tDienTich3').replace(/[^\d.]/g, '')) || dtMd;
+      themNutGoc('treeTaiSan', mockNode(`Thửa đất lịch sử -${maNut()}_ ${v('tSoThua')} (${v('tSoTo')}) - Diện tích: ${dt} m² - Địa chỉ: ${v('tDiaChi')}`,
+        mockNode(`${$('#tMDSD').val() || '?'}: - Số thứ tự:1 - Diện tích:${dtMd} m² - Thời hạn sử dụng: ${v('tThoiHan')}`, ngTen ? mockNode(`${ngTen} - Diện tích: ${dtNg} m²`) : '')));
+    } else {
+      // kiểu cũ (jstree): nhóm “Thửa đất lịch sử -…” → thửa “22 (231) - Diện tích: …” → con “LUC: - Số thứ tự:1 - Diện tích:… - Thời hạn: …”
+      mockTreeAdd('treeTaiSan', 'Thửa đất lịch sử -1790000000060_', mockNode(`${v('tSoThua')} (${v('tSoTo')}) - Diện tích: ${dt} m² - Địa chỉ: ${v('tDiaChi')}`, mockNode(`${$('#tMDSD').val() || '?'}: - Số thứ tự:1 - Diện tích:${dt} m² - Thời hạn: ${v('tThoiHan')}`)));
+    }
     log('(người dùng bấm Lưu – thêm thửa ' + v('tSoThua') + '/' + v('tSoTo') + ' vào đơn)');
-    window.__fromDon = false; openM('mDon');
+    window.__fromDon = false; moLaiDon();
   }
-  function luuCaNhanDon(){
-    if (!window.__fromDon) { log('(người dùng bấm Lưu – Thông tin cá nhân)'); closeM(); return; }
-    log('(người dùng bấm Lưu – trang hỏi giấy tờ đã tồn tại)');
+  function luuCaNhanDon(ev){
+    const ai = ev && ev.isTrusted ? 'người dùng' : 'tiện ích';
+    window.__mockChuLuu = (window.__mockChuLuu || 0) + 1;
+    if (!window.__fromDon) { log('(' + ai + ' bấm Lưu – Thông tin cá nhân)'); closeM(); return; }
+    if (window.__mockGTTonTai === false) { log('(' + ai + ' bấm Lưu cửa sổ chủ)'); themChuVaoDon(); return; }
+    log('(' + ai + ' bấm Lưu – trang hỏi giấy tờ đã tồn tại)');
     document.getElementById('jcGiayTo').style.display = 'block';
   }
   function jcTraLoi(ok){
     document.getElementById('jcGiayTo').style.display = 'none';
     if (!ok) { log('(người dùng bấm Bỏ qua)'); return; }
+    themChuVaoDon();
+  }
+  function themChuVaoDon(){
     const v = (id) => document.getElementById(id).value.trim();
     const xung = document.getElementById('cnNam').checked ? 'Ông' : 'Bà';
-    mockTreeAdd('treeChuSuDung', 'Cá nhân -1790000000063_', mockNode(`${xung}: ${v('cnHoTen')} - Năm sinh:${v('cnNamSinh')} - Địa chỉ: ${v('cnDiaChi')} - Số CCCD:${v('cnSoGT')}`));
-    log('(người dùng bấm Đồng ý – thêm chủ ' + v('cnHoTen') + ' vào đơn)');
-    window.__fromDon = false; openM('mDon');
+    themChuCay(`${xung}: ${v('cnHoTen')} - Năm sinh:${v('cnNamSinh')} - Địa chỉ: ${v('cnDiaChi')} - Số CCCD:${v('cnSoGT')}`);
+    log('(trang thêm chủ ' + v('cnHoTen') + ' vào đơn)');
+    window.__fromDon = false; moLaiDon();
   }
   // cây kiểu jstree của VBDLIS: li > a.jstree-anchor (+ ul.jstree-children)
   function mockNode(text, kids){ return `<li class="jstree-node"><i class="jstree-icon"></i><a class="jstree-anchor" href="#">${text}</a>${kids ? `<ul class="jstree-children">${kids}</ul>` : ''}</li>`; }
@@ -383,20 +609,53 @@
     if (!g) { ul.insertAdjacentHTML('beforeend', `<li class="jstree-node" data-g="1"><i class="jstree-icon"></i><a class="jstree-anchor" href="#">${group}</a><ul class="jstree-children"></ul></li>`); g = ul.querySelector(':scope > li[data-g]'); }
     g.querySelector(':scope > ul').insertAdjacentHTML('beforeend', html);
   }
+  // cây GIỐNG TRANG THẬT (ảnh 22/11 – cờ cayThat, mặc định BẬT): mỗi chủ / mỗi thửa là MỘT nút gốc, tên nhóm + mã 13 số đứng ngay trước:
+  //   “Cá nhân -1795335545562_:Bà: … - Năm sinh:1975 - Địa chỉ: … - Số CCCD:…”
+  //   “Thửa đất lịch sử -1795335551979_ 52 (255) - Diện tích: 140.1 m² - Địa chỉ: …”
+  //      └ “LUC: - Số thứ tự:1 - Diện tích:140.1 m² - Thời hạn sử dụng: 50 năm”
+  //          └ “Công nhận QSDĐ như giao đất không thu tiền sử dụng đất - Diện tích: 140.1 m²”
+  // cờ tắt (mockFlags({ cayThat: false })): kiểu cũ – nút nhóm “Cá nhân -…_” / “Thửa đất lịch sử -…_” chứa các mục
+  window.__mockCayThat = true;
+  let soMaNut = 0;
+  const maNut = () => String(Date.now() + soMaNut++); // mã 13 số như trang thật
+  // thêm nút gốc; cây đang là “Không có dữ liệu” (đơn mới) thì bỏ dòng đó trước
+  function themNutGoc(treeId, html){
+    const ul = document.querySelector('#' + treeId + ' > ul');
+    ul.querySelectorAll(':scope > li').forEach((li) => { if (/Không có dữ liệu/.test(li.textContent)) li.remove(); });
+    ul.insertAdjacentHTML('beforeend', html);
+  }
+  // t = “Bà: … - Năm sinh:… - Địa chỉ: … - Số CCCD:…”
+  function themChuCay(t){
+    if (window.__mockCayThat) themNutGoc('treeChuSuDung', mockNode(`Cá nhân -${maNut()}_:${t}`));
+    else mockTreeAdd('treeChuSuDung', 'Cá nhân -1790000000063_', mockNode(t));
+  }
   // đơn của hồ sơ vừa tiếp nhận: trang mang sẵn chủ + thửa từ bước tiếp nhận vào cây
+  // thửa: { soThua, soTo, dt, diaChi, mdsd (null = không có dòng mục đích), thoiHan, nguonGoc (cây kiểu thật; null = không có dòng nguồn gốc) }
   window.mockDonCo = function(chu, thua){
     document.querySelector('#treeChuSuDung > ul').innerHTML = '';
     document.querySelector('#treeTaiSan > ul').innerHTML = '';
-    (chu || []).forEach(p => mockTreeAdd('treeChuSuDung', 'Cá nhân -1790000000063_', mockNode(`${p.nam ? 'Ông' : 'Bà'}: ${p.hoTen} - Năm sinh:${p.namSinh} - Địa chỉ: ${p.diaChi || ''} - Số CCCD:${p.so}`)));
-    (thua || []).forEach(t => mockTreeAdd('treeTaiSan', 'Thửa đất lịch sử -1790000000060_', mockNode(`${t.soThua} (${t.soTo}) - Diện tích: ${t.dt} m² - Địa chỉ: ${t.diaChi || ''}`, t.mdsd === null ? '' : mockNode(`${t.mdsd || 'LUC'}: - Số thứ tự:1 - Diện tích:${t.dt} m² - Thời hạn: ${t.thoiHan || '50 năm'}`))));
+    (chu || []).forEach(p => themChuCay(`${p.nam ? 'Ông' : 'Bà'}: ${p.hoTen} - Năm sinh:${p.namSinh} - Địa chỉ: ${p.diaChi || ''} - Số CCCD:${p.so}`));
+    (thua || []).forEach(t => {
+      if (!window.__mockCayThat) return mockTreeAdd('treeTaiSan', 'Thửa đất lịch sử -1790000000060_', mockNode(`${t.soThua} (${t.soTo}) - Diện tích: ${t.dt} m² - Địa chỉ: ${t.diaChi || ''}`, t.mdsd === null ? '' : mockNode(`${t.mdsd || 'LUC'}: - Số thứ tự:1 - Diện tích:${t.dt} m² - Thời hạn: ${t.thoiHan || '50 năm'}`)));
+      const ng = t.nguonGoc === null ? '' : mockNode(`${t.nguonGoc || 'Công nhận QSDĐ như giao đất không thu tiền sử dụng đất'} - Diện tích: ${t.dt} m²`);
+      themNutGoc('treeTaiSan', mockNode(`Thửa đất lịch sử -${maNut()}_ ${t.soThua} (${t.soTo}) - Diện tích: ${t.dt} m² - Địa chỉ: ${t.diaChi || ''}`,
+        t.mdsd === null ? '' : mockNode(`${t.mdsd || 'LUC'}: - Số thứ tự:1 - Diện tích:${t.dt} m² - Thời hạn sử dụng: ${t.thoiHan || '50 năm'}`, ng)));
+    });
   };
+  // đơn vừa mở từ Xử lý tác vụ GIỐNG TRANG THẬT (ảnh 22/11): cây chủ / thửa trống “Không có dữ liệu”, ô Mã đơn có sẵn số biên nhận
+  function donMoi(ma){
+    ['treeChuSuDung', 'treeTaiSan'].forEach((id) => { document.querySelector('#' + id + ' > ul').innerHTML = '<li class="jstree-node jstree-leaf"><i class="jstree-icon"></i><a class="jstree-anchor" href="#">📁 Không có dữ liệu</a></li>'; });
+    document.getElementById('dMaDon').value = ma || '';
+    document.getElementById('chkdangKyLanDau').checked = false;
+  }
+  window.mockDonMoi = function(ma){ donMoi(ma); openDon(); };
   // thông báo kiểu toastr của VBDLIS (“Thành công” + “Lưu hồ sơ thành công”)
   function mockToast(title, msg, type){
     let c = document.getElementById('toast-container');
     if (!c) { c = document.createElement('div'); c.id = 'toast-container'; c.className = 'toast-top-right'; c.style.cssText = 'position:fixed;top:12px;left:12px;z-index:999999'; document.body.appendChild(c); }
     const t = document.createElement('div');
     t.className = 'toast toast-' + (type || 'success');
-    t.style.cssText = 'background:' + (type === 'info' ? '#2f96b4' : '#51a351') + ';color:#fff;padding:10px 14px;margin-bottom:6px;border-radius:4px;min-width:260px';
+    t.style.cssText = 'background:' + ({ info: '#2f96b4', error: '#bd362f', warning: '#f89406' }[type] || '#51a351') + ';color:#fff;padding:10px 14px;margin-bottom:6px;border-radius:4px;min-width:260px';
     t.innerHTML = `<div class="toast-title">${title}</div><div class="toast-message">${msg}</div>`;
     c.appendChild(t);
     setTimeout(() => t.remove(), 6000);
@@ -407,13 +666,737 @@
     mockToast('Thành công', 'Lưu hồ sơ thành công');
     setTimeout(() => mockToast('Thông báo', 'Bạn đã nhận được 1 yêu cầu xử lý hồ sơ có số biên nhận là ' + document.getElementById('txtSoBienNhan').value, 'info'), 300);
   };
-  window.mockLuuDK = function(){ log('(người dùng bấm Lưu thông tin đăng ký – giả lập)'); mockToast('Thành công', 'Cập nhật đơn đăng ký thành công'); };
-  window.mockHoanTat = function(){ log('(người dùng bấm Hoàn tất – giả lập)'); mockToast('Thành công', 'Lưu đơn đăng ký thành công'); };
+  // nút Lưu hồ sơ / Lưu thông tin đăng ký / Hoàn tất: là BẪY ("!!!") trừ khi thử “Tự động hết” (window.__mockChoTuBam = true)
+  window.__mockBam = { hs: 0, lt: 0, ht: 0 };
+  window.mockBamLuu = function(k, ev){
+    const ten = { hs: 'LƯU HỒ SƠ', lt: 'LƯU THÔNG TIN ĐĂNG KÝ', ht: 'HOÀN TẤT' }[k];
+    if (!window.__mockChoTuBam) { log('!!! NÚT ' + ten + ' ĐÃ BỊ BẤM !!!'); return; }
+    window.__mockBam[k]++;
+    log('(' + aiBam(ev) + ' bấm ' + ten + ' – Tự động hết)');
+    // Lưu hồ sơ (giống trang thật 22/11): trang hỏi “XÁC NHẬN THÊM MỚI HỒ SƠ” (ĐỒNG Ý / KHÔNG, không có ô nhập)
+    //   ĐỒNG Ý → báo thành công rồi ở lại hồ sơ vừa lưu (thanh Xử lý hồ sơ…; __mockReload: trang tải lại cả trang); KHÔNG → không lưu gì
+    if (k === 'hs') return setTimeout(() => mockConfirm('XÁC NHẬN THÊM MỚI HỒ SƠ', 'Bạn có thật sự muốn thêm mới hồ sơ hay không?', [
+      { text: 'ĐỒNG Ý', cls: 'btn-orange', fn: () => setTimeout(() => { mockLuuHoSo(); sauLuuHoSo(); }, 500) },
+      { text: 'KHÔNG', cls: 'btn-default', fn: (e) => log('(' + aiBam(e) + ' bấm Không – không lưu)') }
+    ]), 250);
+    if (k === 'lt') return setTimeout(() => { mockToast('Thành công', 'Cập nhật đơn đăng ký thành công'); chupDon(); }, 500);
+    // Hoàn tất (giống trang thật 22/11): báo thành công nhưng VẪN ở cửa sổ Nhập đơn đăng ký – phải tự bấm Đóng; trang không tự tích ô nào
+    setTimeout(() => {
+      mockToast('Thành công', 'Lưu đơn đăng ký thành công');
+      xongDon();
+      log('(trang vẫn ở Nhập đơn đăng ký – chờ bấm Đóng)');
+    }, 600);
+  };
+  window.mockLuuDK = function(){ log('(người dùng bấm Lưu thông tin đăng ký – giả lập)'); mockToast('Thành công', 'Cập nhật đơn đăng ký thành công'); chupDon(); };
+  window.mockHoanTat = function(){ log('(người dùng bấm Hoàn tất – giả lập)'); mockToast('Thành công', 'Lưu đơn đăng ký thành công'); xongDon(); };
+  // Hồ sơ quét: mở cửa sổ với các dòng cho sẵn; __mockUploadMode = 'click' (bấm Tải lên → mở hộp chọn file, chọn xong mới tải)
+  // hoặc 'change' (chọn file là trang tự tải lên)
+  window.__mockUploadMode = 'click';
+  window.mockHoSoQuet = function(rows){
+    const tb = document.querySelector('#tbDanhSachFile tbody');
+    tb.innerHTML = (rows || ['Đơn đăng ký', 'Thông báo xác nhận kết quả đăng ký']).map((r, i) => mockRowHtml('g' + i + '-' + Math.random().toString(36).slice(2, 8), r, r)).join('');
+    openM('mHoSoQuet');
+  };
+  function mockRowHtml(id, moTa, loai){
+      const r = loai;
+      return `<tr data-id="${id}"><td><span>${moTa}</span></td><td><span></span></td><td><span>${r}</span></td><td></td><td></td>` +
+        `<td><div><input type="file" data-id="${id}" style="display:none;"><a id="btnSelectFile" class="btn" data-id="${id}" style="display:inline-block">Chọn tập tin</a> ` +
+        `<a id="btnUploadFile" class="btn" data-id="${id}" style="display:inline-block">Tải lên</a> <a id="btnReviewFileHoSoQuet" class="btn" data-id="${id}" style="display:none">Xem tập tin</a> ` +
+        `<a id="btnDeleteFile" class="btn" data-id="${id}" style="display:none">Xóa tập tin</a> <span class="mockFileName"></span></div></td><td><a class="btn">Chỉnh sửa</a> <a class="btn">Xóa</a></td></tr>`;
+  }
+  // ===== Lưu kho hồ sơ quét (giống bản ghi trang thật) =====
+  // __mockHsq: ma = Mã đơn, thua = [[số thửa, số tờ, diện tích]…], recs = hồ sơ quét đã lưu [[tên loại…]…]
+  window.__mockHsq = { ma: 'KH 2959.07777.254.13', thua: [['13', '254', '1102.9']], recs: [] };
+  window.mockLuuKho = function(cfg){ Object.assign(window.__mockHsq, cfg || {}); veLuuKho(); };
+  function veLuuKho(){
+    const c = window.__mockHsq;
+    if (window.__mockSlowLuuKho) {
+      // như trang thật (master-detail): danh sách đơn hiện trước, cây + danh sách hồ sơ quét tải sau
+      document.querySelector('#treeThongTinDangKy > ul').innerHTML = '';
+      document.getElementById('lstHoSoQuet').innerHTML = '';
+      document.getElementById('lstDonDangKy').innerHTML = `<ul class="vbd-search-item list-group dondangky-item selected"><li class="list-group-item"><span class="name">Mã đơn</span><span class="value">${c.ma}</span></li></ul>`;
+      setTimeout(() => { window.__mockSlowLuuKho = false; veLuuKho(); window.__mockSlowLuuKho = true; }, 2500);
+      return;
+    }
+    document.getElementById('lstDonDangKy').innerHTML = `<ul class="vbd-search-item list-group dondangky-item selected"><li class="list-group-item title"><span class="value">Đơn đăng ký 50991148</span></li><li class="list-group-item"><span class="name">Mã đơn</span><span class="value">${c.ma}</span></li><li class="list-group-item"><span class="name">Đại diện khai trình</span><span class="value">(giả lập)</span></li></ul>`;
+    document.querySelector('#treeThongTinDangKy > ul').innerHTML =
+      `<li class="jstree-node"><a class="jstree-anchor"><b>Đơn đăng ký</b> || <b>50991148 - Phường Việt Yên</b> - Mã đơn: ${c.ma} - Số thứ tự hồ sơ: -/-</a><ul class="jstree-children">` +
+      `<li class="jstree-node"><a class="jstree-anchor"><b>Thửa đất và tài sản gắn liền với đất</b></a><ul class="jstree-children">` +
+      c.thua.map(([th, to, dt], i) => `<li class="jstree-node"><a class="jstree-anchor"><b>Thửa đất 376547${i}_0</b> ${th} (${to}) - Diện tích: ${dt} m² - Địa chỉ: TDP (giả lập)</a><ul class="jstree-children"><li class="jstree-node"><a class="jstree-anchor">CLN: - Số thứ tự:1 - Diện tích:${dt} m² - Thời hạn sử dụng: 50 năm</a></li></ul></li>`).join('') +
+      '</ul></li></ul></li>';
+    document.getElementById('lstHoSoQuet').innerHTML = c.recs.length
+      ? c.recs.map((kinds, i) => `<ul class="hosoquet-item" data-hosoquetid="38922${i}"><li class="list-group-item title"><span class="value">Hồ sơ quét 38922${i}</span></li><li class="list-group-item list-file"><span class="value">Danh sách tập tin</span></li>` + kinds.map((k) => `<li class="list-group-item filehosoquet"><span class="value"><span class="value green">${k}</span></span></li>`).join('') + '</ul>').join('')
+      : '<div class="empty" data-title="Không có hồ sơ quét">(Không có hồ sơ quét)</div>';
+  }
+  window.openLuuKho = function(){ veLuuKho(); closeM(); log('(trang mở Lưu kho hồ sơ quét)'); setTimeout(() => openM('mLuuKho'), 300); };
+  function dongLuuKho(){ closeM(); log('(Đóng Lưu kho hồ sơ quét)'); setTimeout(() => openM('mQuyTrinh'), 200); }
+  // + → cửa sổ Hồ sơ quét mới (bảng trống)
+  function hsqMoi(){
+    document.querySelector('#tbDanhSachFile tbody').innerHTML = '<tr class="odd"><td valign="top" colspan="7" class="dataTables_empty">Không tìm thấy tập tin nào</td></tr>';
+    closeM(); setTimeout(() => { openM('mHoSoQuet'); log('(trang mở Hồ sơ quét)'); }, 300);
+  }
+  function moTTHSQ(){
+    const m = document.getElementById('mTTHSQ');
+    m.querySelector('[name=loaiHoSoQuet]').value = '1';
+    ['moTa', 'tenGiayTo', 'trichYeu'].forEach((n) => (m.querySelector(`[name=${n}]`).value = ''));
+    document.getElementById('ttGcnWrap').style.display = 'none';
+    document.getElementById('ttHsqErr').textContent = '';
+    closeM(); setTimeout(() => openM('mTTHSQ'), 250);
+  }
+  function dongTTHSQ(){ closeM(); setTimeout(() => openM('mHoSoQuet'), 200); }
+  // “Lưu” nhỏ: thêm dòng vào danh sách tập tin (chưa lưu hồ sơ – hồ sơ chỉ lưu khi bấm Cập nhật)
+  function luuTTHSQ(){
+    const m = document.getElementById('mTTHSQ');
+    const sel = m.querySelector('[name=loaiHoSoQuet]');
+    const loai = sel.options[sel.selectedIndex].text;
+    const moTa = m.querySelector('[name=moTa]').value.trim();
+    if (sel.value === '1' || !moTa) { document.getElementById('ttHsqErr').textContent = 'Chọn loại giấy tờ và nhập mô tả'; log('(Lưu nhỏ: trang báo thiếu ô)'); return; }
+    window.__mockLuuNho = (window.__mockLuuNho || 0) + 1;
+    log('(Lưu nhỏ – thêm dòng ' + loai + ', mô tả “' + moTa + '”, tên “' + m.querySelector('[name=tenGiayTo]').value + '”)');
+    const tb = document.querySelector('#tbDanhSachFile tbody');
+    tb.querySelectorAll('.dataTables_empty').forEach((td) => td.closest('tr').remove());
+    tb.insertAdjacentHTML('beforeend', mockRowHtml('g' + tb.children.length + '-' + Math.random().toString(36).slice(2, 8), moTa, loai));
+    dongTTHSQ();
+  }
+  // NGƯỜI DÙNG bấm Cập nhật (giả lập): lưu hồ sơ quét → mở lại Lưu kho có hồ sơ quét mới + thông báo
+  window.mockCapNhatHsq = function(ev){
+    window.__mockCapNhat = (window.__mockCapNhat || 0) + 1;
+    log('(' + (ev && ev.isTrusted === false ? 'tiện ích' : 'người dùng') + ' bấm Cập nhật hồ sơ quét)');
+    const kinds = [...document.querySelectorAll('#tbDanhSachFile tbody tr')].filter((tr) => (tr.querySelector('.mockFileName') || {}).textContent).map((tr) => tr.children[2].textContent.trim());
+    window.__mockHsq.recs.push(kinds);
+    closeM();
+    veLuuKho();
+    setTimeout(() => { openM('mLuuKho'); mockNotify('Thành côngCập nhật thành công!'); }, 300);
+  };
+  function mockNotify(text){
+    let c = document.querySelector('.notifyjs-corner');
+    if (!c) { c = document.createElement('div'); c.className = 'notifyjs-corner'; c.style.cssText = 'position:fixed;top:12px;right:12px;z-index:999999'; document.body.appendChild(c); }
+    const w = document.createElement('div');
+    w.className = 'notifyjs-wrapper notifyjs-hidable';
+    w.innerHTML = '<div class="notifyjs-container" style="background:#dff0d8;padding:8px 12px;margin:4px;border:1px solid #d6e9c6"></div>';
+    w.firstChild.textContent = text; // một mẩu chữ duy nhất
+    c.appendChild(w);
+    setTimeout(() => w.remove(), 6000);
+  }
+  // hộp hỏi kiểu jconfirm (tiêu đề, nội dung, nút); b.fn(e) nhận sự kiện bấm (e.isTrusted: người dùng hay tiện ích)
+  function mockConfirm(title, content, buttons){
+    const o = document.createElement('div');
+    o.className = 'jconfirm mockjc';
+    o.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.2)';
+    o.innerHTML = `<div class="jconfirm-box" role="dialog" style="width:420px;margin:180px auto;background:#fff;padding:12px;border-radius:4px"><div class="jconfirm-title-c"><span class="jconfirm-title">${title}</span></div><div class="jconfirm-content">${content}</div><div class="jconfirm-buttons"></div></div>`;
+    const bx = o.querySelector('.jconfirm-buttons');
+    buttons.forEach((b) => { const el = document.createElement('button'); el.className = 'btn ' + (b.cls || ''); el.textContent = b.text; el.onclick = (e) => { o.remove(); log('(' + (e.isTrusted ? 'người dùng' : 'tiện ích') + ' bấm “' + b.text + '” – ' + title + ')'); b.fn && b.fn(e); }; bx.appendChild(el); });
+    document.body.appendChild(o);
+  }
+  // ===== Cập nhật dữ liệu pháp lý (tác vụ 2) =====
+  window.__mockAutoTick = true; // trang tự tích “Đã xử lý” sau khi xong (như bản ghi)
+  window.openCNDLPL = function(){
+    closeM(); log('(trang mở Cập nhật dữ liệu pháp lý)');
+    const t = document.querySelector('#treeGiayChungNhanSBD > ul');
+    t.innerHTML = '';
+    // về tab đầu
+    document.querySelectorAll('#chi_tiet_gcn_wapper .nav-tabs li').forEach((li, i) => li.classList.toggle('active', i === 0));
+    document.querySelectorAll('#chi_tiet_gcn_wapper .tab-pane').forEach((p, i) => (p.style.display = i === 0 ? '' : 'none'));
+    setTimeout(() => openM('mCNDLPL'), 300);
+    // cây của tab SBD tải chậm
+    setTimeout(() => { t.innerHTML = `<li class="jstree-node jstree-leaf" aria-selected="false"><i class="jstree-icon"></i><a class="jstree-anchor" href="#" id="j11_1_anchor"><b>Đơn đăng ký</b>|| <b>0 - Phường Việt Yên</b> - Mã đơn: ${window.__mockHsq.ma} - Số thứ tự hồ sơ: -/- - Ngày tiếp nhận: 22/11/2026 - Ngày đăng ký: -/-</a></li>`; }, 1200);
+  };
+  function dongCNDLPL(){ closeM(); setTimeout(() => openM('mQuyTrinh'), 200); }
+  function xongCNDLPL(){
+    closeM();
+    setTimeout(() => {
+      const k = document.querySelector('#bindQuyTrinhXuLy input[data-actioncode="CapNhatDuLieuPhapLy"]');
+      if (window.__mockAutoTick && k) {
+        k.checked = true; log('(trang tự tích Đã xử lý – Cập nhật dữ liệu pháp lý)');
+        // bảng 5 tác vụ của hồ sơ lãnh đạo trả về ('kqhs'): trang nhớ ô đã tích theo hồ sơ
+        if (window.__qtKind !== 'kq') { window.__mockHoSo.ticks.CapNhatDuLieuPhapLy = true; luuHoSoTT(); }
+      }
+      openM('mQuyTrinh');
+      mockNotify('Thành côngCập nhật dữ liệu pháp lý thành công');
+    }, 1500);
+  }
+  // src = ô có file (có thể là ô mới tạo, không nằm trong bảng); row = ô chọn file của dòng (mặc định chính src)
+  function mockUpload(src, row){
+    row = row || src;
+    const f = src.files && src.files[0];
+    if (!f) { log('(tải lên: chưa có file)'); return; }
+    window.__mockUploads = (window.__mockUploads || 0) + 1;
+    log('(trang tải lên ' + f.name + ' cho dòng ' + row.getAttribute('data-id') + ')');
+    setTimeout(() => {
+      const td = row.closest('td');
+      td.querySelector('#btnReviewFileHoSoQuet').style.display = 'inline-block';
+      td.querySelector('#btnDeleteFile').style.display = 'inline-block';
+      td.querySelector('.mockFileName').textContent = f.name;
+      mockToast('Thành công', 'Tải lên tập tin thành công');
+    }, 600);
+  }
+  // các kiểu nút “Tải lên” có thể gặp (window.__mockUploadMode):
+  //  'click'    – xóa giá trị cũ, gắn onchange rồi mở hộp chọn file của dòng (giống bản ghi trang thật)
+  //  'change'   – mở hộp chọn file của dòng; trang luôn nghe “change” của mọi ô file trong bảng và tự tải lên
+  //  'detached' – tạo ô chọn file MỚI (không data-id, không trong bảng), chọn xong tải lên cho dòng
+  //  'none'     – nút không làm gì (trang lạ) → tiện ích phải nhờ bạn
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('#btnUploadFile');
+    if (!a) return;
+    e.preventDefault();
+    const mode = window.__mockUploadMode;
+    const input = document.querySelector(`#tbDanhSachFile input[type=file][data-id="${a.getAttribute('data-id')}"]`);
+    log('(trang: Tải lên [' + mode + '] – ' + (e.isTrusted ? 'người dùng bấm' : 'tiện ích bấm') + ')');
+    if (mode === 'click') { input.value = ''; input.onchange = () => mockUpload(input); input.click(); }
+    else if (mode === 'change') { input.click(); }
+    else if (mode === 'detached') { const x = document.createElement('input'); x.type = 'file'; x.onchange = () => mockUpload(x, input); x.click(); }
+  });
+  document.addEventListener('change', (e) => {
+    if (window.__mockUploadMode === 'change' && e.target.matches && e.target.matches('#tbDanhSachFile input[type=file]')) mockUpload(e.target);
+  });
   // "Quy trình xử lý" → "Xử lý tác vụ": cửa sổ đơn mở đè lên, cửa sổ quy trình VẪN mở bên dưới
-  function openQuyTrinh(){ window.__fromDon = false; openM('mQuyTrinh'); }
-  function openDonTuQuyTrinh(){ document.getElementById('mDon').classList.add('show'); log('(trang mở Nhập đơn đăng ký, Quy trình xử lý vẫn mở bên dưới)'); }
+  // (nút thử “Mở: Quy trình xử lý” luôn là bảng 5 tác vụ cũ: Giấy tờ đính kèm, Cập nhật dữ liệu pháp lý, Lưu kho hồ sơ quét, Kết ISO, Nhập đăng ký –
+  //  ô Đã xử lý không theo hồ sơ; Chuyển tiếp ở bảng này là BẪY, trừ khi hồ sơ đang ở bước 'kq' và đã tích đủ 5 ô)
+  function openQuyTrinh(){ window.__fromDon = false; if (window.__qtKind !== 'kq') veQuyTrinh('kq'); openM('mQuyTrinh'); }
+  function openDonTuQuyTrinh(){ window.__donTuQT = true; document.getElementById('mDon').classList.add('show'); log('(trang mở Nhập đơn đăng ký, Quy trình xử lý vẫn mở bên dưới)'); }
   function openM(id){ closeM(); document.getElementById(id).classList.add('show'); document.getElementById('bd').classList.add('show'); }
   function closeM(){ document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show')); document.getElementById('bd').classList.remove('show'); }
+  // đóng MỘT cửa sổ, các cửa sổ khác giữ nguyên (hết cửa sổ thì tắt nền mờ)
+  function dongModal(id){ document.getElementById(id).classList.remove('show'); if (!document.querySelector('.modal.show')) document.getElementById('bd').classList.remove('show'); }
+
+  // ===== HỒ SƠ ĐÃ LƯU → XỬ LÝ HỒ SƠ → CHUYỂN TIẾP (giống 6 ảnh của bạn, 22/11) =====
+  // Lưu hồ sơ xong trang ở lại hồ sơ đó (view 'hoso'): nút Lưu hồ sơ ẩn, thanh dưới có Xử lý hồ sơ / In biên nhận / Tải biên nhận /
+  // Cập nhật hồ sơ (BẪY) + link Về trang xử lý hồ sơ / Về trang tiếp nhận hồ sơ. Hồ sơ đi qua các bước (stage):
+  //   'tn' vừa tiếp nhận: Quy trình chỉ có “Tiếp nhận hồ sơ” → tích Đã xử lý → Chuyển tiếp → chọn chuyên viên → Thực thi
+  //   'cv' ở chuyên viên: “Nhập đăng ký” + “Giấy tờ đính kèm” → nhập đơn, Lưu thông tin đăng ký, Hoàn tất, Đóng → tích cả 2 → Chuyển tiếp
+  //        → chọn lãnh đạo → Thực thi
+  //   'ld' đã chuyển lãnh đạo: Xử lý hồ sơ chỉ báo “Hồ sơ đã được chuyển cho người khác xử lý”
+  //   'kq', 'tra', 'done' (lãnh đạo trả về → Kết ISO → Trả kết quả → Trả hồ sơ): xem mục DANH SÁCH HỒ SƠ THỤ LÝ bên dưới
+  // window.__mockHoSo (giữ qua tải lại trang): view ('tiepnhan' | 'hoso' | 'dsthuly'), sbn (số biên nhận), stage, donDone (đơn đã Hoàn tất),
+  //   donInit (đơn đã mở lần đầu), ticks (ô Đã xử lý đã tích – theo hồ sơ), form (form tiếp nhận lúc lưu),
+  //   don (cây + ô của đơn lúc Lưu thông tin đăng ký / Hoàn tất), chon (dòng đang chọn ở danh sách thụ lý: '' | 'hs' | 'khac'),
+  //   ngayTN / vaoLuc / cbChuyen (chữ trên dòng danh sách), dem (bộ đếm)
+  window.__mockHoSo = { view: 'tiepnhan', sbn: '', stage: '', donDone: false, donInit: false, ticks: {}, form: null, don: null, chon: '' };
+  // tài khoản ĐÚNG phải chọn ở mỗi lần chuyển: tn = từ Tiếp nhận sang chuyên viên, cv = từ chuyên viên sang lãnh đạo,
+  // kq = sang bước “5. Trả kết quả” (tài khoản của CHÍNH người dùng – cũng là tài khoản đăng nhập hiện ở danh sách thụ lý); đổi bằng mockFlags({ dung })
+  window.__mockDung = { tn: 'bgi.chuyenvien03_vy', cv: 'bgi.lanhdao02_vy', kq: 'bgi.chuyenvien03_vy' };
+  window.__mockChuyen = 0; // số lần Thực thi chuyển thành công
+  window.__mockNham = 0;   // số lần chuyển nhầm người / nhầm bước
+  window.__mockTra = 0;    // số lần Trả hồ sơ thành công
+  window.__qtKind = 'kq';  // bảng đang có trong Quy trình xử lý: 'kq' 5 tác vụ cũ (nút thử) | 'kqhs' 5 tác vụ của hồ sơ | 'tn' | 'cv' | 'tra'
+  const aiBam = (ev) => (ev && ev.isTrusted ? 'người dùng' : 'tiện ích');
+  const SBN_MAC_DINH = 'KH 2959.07777.254.13';
+  const QT_5_TAC_VU = document.getElementById('bindQuyTrinhXuLy').innerHTML;
+  const QT_TRONG = document.querySelector('#qtTable tbody').innerHTML;      // “Vui lòng chọn ít nhất một quy trình”
+  const THUA_TRONG = document.querySelector('#thuaTable tbody').innerHTML;  // “Vui lòng chọn ít nhất một thửa đất”
+  const DOSSIER_GOC = document.getElementById('mockDossier').textContent;
+  const QT_CHUA_CHON = '<option value="">--Chọn quy trình---</option>';
+  // Phường/Xã đã chọn → trang nạp danh sách quy trình
+  function napQuyTrinh(){ $('#qtSelect').html(QT_CHUA_CHON + '<option value="2959">XA_KH2959. Đăng ký đất đai, tài sản gắn liền với đất, cấp Giấy chứng nhận lần đầu (Thực hiện KH 2959)</option><option value="9">Quy trình cập nhật dữ liệu (Chỉnh sửa, bổ sung dữ liệu bị sai)</option>'); }
+  function luuHoSoTT(){
+    const H = window.__mockHoSo;
+    H.dem = { chuyen: window.__mockChuyen || 0, nham: window.__mockNham || 0, tick: window.__mockTick || 0, bam: window.__mockBam, tra: window.__mockTra || 0 };
+    ssGhi('__mockHoSo', H);
+  }
+  // view 'tiepnhan' (form tiếp nhận) | 'hoso' (hồ sơ đã lưu, thanh Xử lý hồ sơ…) | 'dsthuly' (Danh sách hồ sơ thụ lý – CSS ẩn form tiếp nhận)
+  function veView(){
+    const H = window.__mockHoSo, hs = H.view === 'hoso', ds = H.view === 'dsthuly';
+    document.body.setAttribute('data-mock-view', H.view);
+    document.getElementById('btnLuuHoSo').style.display = hs || ds ? 'none' : '';
+    document.getElementById('mockThanhHoSo').style.display = hs ? 'flex' : 'none';
+    document.getElementById('mockDossier').textContent = hs ? H.sbn : DOSSIER_GOC;
+    if (ds) veDsThuLy();
+  }
+  // form tiếp nhận: chụp lúc lưu (trang tải lại vẫn hiện đúng hồ sơ) / đặt lại / làm trống
+  function chupForm(){
+    const v = (id) => document.getElementById(id).value;
+    return { phuong: $('#dvPhuong').val() || '', qt: $('#qtSelect').val() || '', qtHtml: document.querySelector('#qtTable tbody').innerHTML,
+      thuaHtml: document.querySelector('#thuaTable tbody').innerHTML, sbn: v('txtSoBienNhan'), nguoiNop: v('txtNguoiNop'), soGT: v('txtSoGiayToNN'),
+      diaChi: v('txtDiaChiNN'), diaChiTS: v('txtDiaChiTaiSan') };
+  }
+  function datForm(f){
+    const dat = (id, x) => { document.getElementById(id).value = x == null ? '' : x; };
+    // chỉ đổi chữ của select2 ('change.select2'), không chạy lại việc “trang nhận Phường/Xã” (sẽ ghi đè địa chỉ)
+    if (f.phuong) { $('#dvPhuong').val(f.phuong).trigger('change.select2'); napQuyTrinh(); }
+    if (f.qt) $('#qtSelect').val(f.qt).trigger('change.select2');
+    document.querySelector('#qtTable tbody').innerHTML = f.qtHtml || QT_TRONG;
+    document.querySelector('#thuaTable tbody').innerHTML = f.thuaHtml || THUA_TRONG;
+    dat('txtSoBienNhan', f.sbn); dat('txtNguoiNop', f.nguoiNop); dat('txtSoGiayToNN', f.soGT); dat('txtDiaChiNN', f.diaChi); dat('txtDiaChiTaiSan', f.diaChiTS);
+  }
+  function formTrong(){
+    // mọi ô chữ của trang tiếp nhận về giá trị gốc (trống; Địa chỉ tài sản như lúc mở trang)
+    document.querySelectorAll('body > fieldset input[type=text]:not([readonly])').forEach((el) => (el.value = el.defaultValue));
+    document.querySelector('#qtTable tbody').innerHTML = QT_TRONG;
+    document.querySelector('#thuaTable tbody').innerHTML = THUA_TRONG;
+    $('#dvPhuong').val('').trigger('change'); // select2 + trang nghe “change” (Phường trống → danh sách quy trình trống)
+  }
+  function taiLaiTrang(ms){ log('(trang tự tải lại)'); setTimeout(() => location.reload(), ms || 400); }
+  // hồ sơ vừa lưu: cùng trang, thanh nút đổi; hồ sơ ở bước 'tn'
+  function sangHoSo(sbn, taiLai){
+    const o = document.getElementById('txtSoBienNhan');
+    if (!o.value.trim()) o.value = sbn;
+    window.__mockHoSo = { view: 'hoso', sbn, stage: 'tn', donDone: false, donInit: false, ticks: {}, form: chupForm(), don: null, chon: '', ngayTN: ngayGioNay() };
+    luuHoSoTT();
+    if (taiLai) return taiLaiTrang();
+    veView();
+    log('(trang ở lại hồ sơ ' + sbn + ': Xử lý hồ sơ / In biên nhận / Tải biên nhận / Cập nhật hồ sơ)');
+  }
+  function sauLuuHoSo(){ sangHoSo(document.getElementById('txtSoBienNhan').value.trim() || SBN_MAC_DINH, !!window.__mockReload); }
+  // nút thử tay: nhảy thẳng tới hồ sơ đã lưu (bước 'tn'), số biên nhận lấy ở ô Số biên nhận
+  window.mockHoSoDaLuu = function(sbn){ closeM(); sangHoSo(sbn || document.getElementById('txtSoBienNhan').value.trim() || SBN_MAC_DINH, false); };
+  function veXuLyHoSo(ev){ log('(' + aiBam(ev) + ' bấm Về trang xử lý hồ sơ – giả lập: ở lại trang)'); }
+  function bamNutPhu(ev, ten){ log('(' + aiBam(ev) + ' bấm ' + ten + ' – giả lập: không làm gì)'); }
+  // Về trang tiếp nhận hồ sơ: trang tiếp nhận mới, form trống (__mockReload: tải lại cả trang)
+  function veTiepNhan(ev){
+    log('(' + aiBam(ev) + ' bấm Về trang tiếp nhận hồ sơ)');
+    const H = window.__mockHoSo;
+    H.view = 'tiepnhan'; H.form = null;
+    luuHoSoTT();
+    closeM();
+    if (window.__mockReload) return taiLaiTrang(300);
+    formTrong(); veView();
+    log('(trang tiếp nhận mới – form trống)');
+  }
+  // Xử lý hồ sơ (thanh dưới của màn hình hồ sơ): mở Quy trình xử lý theo bước của hồ sơ
+  function bamXuLyHoSo(ev){
+    const H = window.__mockHoSo;
+    log('(' + aiBam(ev) + ' bấm Xử lý hồ sơ)');
+    if (H.view !== 'hoso') return log('(chưa có hồ sơ đã lưu – trang không làm gì)');
+    moQuyTrinhTheoBuoc();
+  }
+  // Quy trình xử lý theo bước của hồ sơ (trang tải ~0,3 giây): 'ld' / 'done' chỉ báo; 'kq' → bảng 5 tác vụ của hồ sơ ('kqhs')
+  function moQuyTrinhTheoBuoc(){
+    const H = window.__mockHoSo;
+    if (H.stage === 'ld') {
+      log('(trang báo: Hồ sơ đã được chuyển cho người khác xử lý)');
+      return mockConfirm('Thông báo', 'Hồ sơ đã được chuyển cho người khác xử lý', [{ text: 'Đóng', cls: 'btn-default' }]);
+    }
+    if (H.stage === 'done') {
+      log('(trang báo: Hồ sơ đã trả kết quả)');
+      return mockConfirm('Thông báo', 'Hồ sơ đã trả kết quả', [{ text: 'Đóng', cls: 'btn-default' }]);
+    }
+    const kind = H.stage === 'kq' ? 'kqhs' : H.stage;
+    const ten = { tn: 'Tiếp nhận hồ sơ', cv: 'Nhập đăng ký, Giấy tờ đính kèm', kqhs: '5 tác vụ của hồ sơ lãnh đạo trả về', tra: 'Kết ISO, Trả hồ sơ' }[kind];
+    if (!ten) return log('(hồ sơ chưa có bước xử lý – trang không làm gì)');
+    setTimeout(() => {
+      veQuyTrinh(kind);
+      window.__fromDon = false; openM('mQuyTrinh');
+      log('(trang mở Quy trình xử lý – ' + ten + ')');
+    }, 300);
+  }
+  // bảng tác vụ của Quy trình xử lý; ô Đã xử lý đã tích được trang nhớ theo hồ sơ (mở lại vẫn thấy tích) – trừ bảng 5 tác vụ cũ 'kq' (nút thử)
+  // 'kqhs': đúng bảng 5 tác vụ cũ (cùng dòng / id / xử lý tác vụ) nhưng ô tích theo hồ sơ; 'tra': Kết ISO ✓ + Trả hồ sơ, KHÔNG có nút Chuyển tiếp
+  function veQuyTrinh(kind){
+    const H = window.__mockHoSo;
+    const chk = (c) => `<td><input type="checkbox" data-actioncode="${c}"${H.ticks[c] ? ' checked' : ''}></td>`;
+    const tb = document.getElementById('bindQuyTrinhXuLy');
+    if (kind === 'tn') tb.innerHTML = `<tr><td>1</td><td>Tiếp nhận hồ sơ</td><td>8 giờ</td><td></td>${chk('TiepNhanHoSo')}</tr>`;
+    else if (kind === 'cv') tb.innerHTML =
+      `<tr><td>1</td><td>Nhập đăng ký</td><td>16 giờ</td><td><a class="btn btnXuLyTacVu" data-actioncode="NhapDangKy" href="javascript:;" onclick="moDonCuaHoSo(event)">Xử lý tác vụ</a></td>${chk('NhapDangKy')}</tr>` +
+      `<tr><td>2</td><td>Giấy tờ đính kèm</td><td>0 giờ</td><td><a class="btn btnXuLyTacVu" data-actioncode="GiayToDinhKem" href="javascript:;" onclick="log('(' + aiBam(event) + ' bấm Xử lý tác vụ – Giấy tờ đính kèm: giả lập không làm gì)')">Xử lý tác vụ</a></td>${chk('GiayToDinhKem')}</tr>`;
+    else if (kind === 'tra') tb.innerHTML =
+      `<tr><td>1</td><td>Kết ISO</td><td>0 giờ</td><td><a class="btnXuLyTacVu" data-actioncode="KetISO" href="javascript:;" onclick="moKetISO(event)">Xử lý tác vụ</a></td>${chk('KetISO')}</tr>` +
+      `<tr><td>2</td><td>Trả hồ sơ</td><td>0 giờ</td><td><a class="btnXuLyTacVu" data-actioncode="TraHoSo" href="javascript:;" onclick="moTraHoSo(event)">Xử lý tác vụ</a></td>${chk('TraHoSo')}</tr>`;
+    else {
+      tb.innerHTML = QT_5_TAC_VU;
+      if (kind === 'kqhs') tb.querySelectorAll('input[type=checkbox]').forEach((c) => { c.defaultChecked = c.checked = !!H.ticks[c.dataset.actioncode]; });
+    }
+    // bảng Kết ISO + Trả hồ sơ (ảnh 9): chân cửa sổ chỉ có Đóng
+    document.querySelector('#mQuyTrinh .btnWorkflowCommand').style.display = kind === 'tra' ? 'none' : '';
+    window.__qtKind = kind;
+  }
+  // “Xử lý tác vụ” của Nhập đăng ký: lần đầu đơn trống như trang thật (cây “Không có dữ liệu”, Mã đơn = số biên nhận); các lần sau giữ nguyên
+  function moDonCuaHoSo(ev){
+    const H = window.__mockHoSo;
+    log('(' + aiBam(ev) + ' bấm Xử lý tác vụ – Nhập đăng ký)');
+    if (!H.donInit) { donMoi(H.sbn); H.donInit = true; luuHoSoTT(); log('(đơn mới của hồ sơ ' + H.sbn + ': cây chủ / thửa trống, Mã đơn có sẵn)'); }
+    openDonTuQuyTrinh();
+  }
+  // Đóng của Nhập đơn đăng ký: chỉ đóng cửa sổ đơn (Quy trình xử lý bên dưới vẫn mở)
+  function dongDon(ev){
+    dongModal('mDon');
+    log('(' + aiBam(ev) + ' bấm Đóng – Nhập đơn đăng ký' + (document.getElementById('mQuyTrinh').classList.contains('show') ? '; Quy trình xử lý vẫn mở' : '') + ')');
+  }
+  // đơn của hồ sơ đang ở chuyên viên: “máy chủ” nhớ cây + ô khi Lưu thông tin đăng ký / Hoàn tất (trang tải lại vẫn thấy)
+  function chupDon(){
+    const H = window.__mockHoSo;
+    if (H.view !== 'hoso' || H.stage !== 'cv') return;
+    H.don = { chu: document.querySelector('#treeChuSuDung > ul').innerHTML, ts: document.querySelector('#treeTaiSan > ul').innerHTML, ma: document.getElementById('dMaDon').value,
+      lanDau: document.getElementById('chkdangKyLanDau').checked, dongSD: document.getElementById('chkdongSuDung').checked, dk: $('#dDieuKien').val() };
+    luuHoSoTT();
+  }
+  function datDon(d){
+    document.querySelector('#treeChuSuDung > ul').innerHTML = d.chu || '';
+    document.querySelector('#treeTaiSan > ul').innerHTML = d.ts || '';
+    document.getElementById('dMaDon').value = d.ma || '';
+    document.getElementById('chkdangKyLanDau').checked = !!d.lanDau;
+    document.getElementById('chkdongSuDung').checked = !!d.dongSD;
+    if (d.dk != null) $('#dDieuKien').val(d.dk).trigger('change.select2');
+  }
+  // Hoàn tất thành công: đánh dấu đơn của hồ sơ đã xong (không tích ô nào, không đóng cửa sổ)
+  function xongDon(){
+    const H = window.__mockHoSo;
+    if (H.view !== 'hoso' || H.stage !== 'cv') return;
+    H.donDone = true;
+    chupDon();
+  }
+  // “Chuyển tiếp” của Quy trình xử lý: bảng 5 tác vụ cũ (nút thử) vẫn là BẪY – trừ khi hồ sơ đang ở bước 'kq' và đã tích đủ 5 ô;
+  // bảng của hồ sơ ('tn' / 'cv' / 'kqhs'): phải tích hết Đã xử lý rồi mới mở Chọn người ('kqhs' chưa tích hết = BẪY + trang báo);
+  // bảng 'tra' không có nút Chuyển tiếp (ẩn) – bấm được là BẪY
+  function bamChuyenTiep(ev){
+    const H = window.__mockHoSo, k = window.__qtKind;
+    const chua = [...document.querySelectorAll('#bindQuyTrinhXuLy input[type=checkbox]')].some((c) => !c.checked);
+    if (k === 'kq' && !(H.stage === 'kq' && !chua)) return log('!!! NÚT CHUYỂN TIẾP ĐÃ BỊ BẤM !!!');
+    if (k === 'tra') { log('!!! NÚT CHUYỂN TIẾP ĐÃ BỊ BẤM !!!'); return log('(nút Chuyển tiếp đang ẩn – bảng Kết ISO + Trả hồ sơ không có Chuyển tiếp)'); }
+    log('(' + aiBam(ev) + ' bấm Chuyển tiếp)');
+    if (!document.getElementById('mQuyTrinh').classList.contains('show')) return log('(cửa sổ Quy trình xử lý không mở – trang không làm gì)');
+    if (chua) {
+      if (k === 'kqhs') log('!!! CHUYỂN TIẾP KHI CHƯA XỬ LÝ HẾT !!!');
+      log('(trang báo: Vui lòng xử lý tất cả các tác vụ trước khi chuyển tiếp!)');
+      return mockConfirm('Thông báo', 'Vui lòng xử lý tất cả các tác vụ trước khi chuyển tiếp!', [{ text: 'Đóng', cls: 'btn-default' }]);
+    }
+    moChonNguoi(k === 'kq' || k === 'kqhs' ? 'kq' : k);
+  }
+  // ----- Chọn người xử lý tác vụ tiếp theo: danh sách cán bộ GIẢ (không dùng tên thật); có MỒI NHỬ gần giống tài khoản đúng -----
+  const CAN_BO = {
+    tn: [ // từ Tiếp nhận → bước 2. Chuyên viên
+      ['bgi.canbo01', 'Nguyễn Văn Một', 'Thành phố Bắc Ninh'], ['bgi.canbo02_vy', 'Trần Thị Hai', 'Thị xã Việt Yên'],
+      ['bgi.chuyenvien03_vy', 'Lê Văn Ba', 'Thị xã Việt Yên'], ['bgi.canbo04_vy', 'Phạm Văn Bốn', 'Thị xã Việt Yên'],
+      ['bgi.canbo05_vanha', 'Hoàng Văn Năm', 'Thị xã Việt Yên'], ['bgi.canbo06_vy', 'Vũ Thị Sáu', 'Thị xã Việt Yên'],
+      ['bgi.canbo07_vy', 'Đặng Văn Bảy', 'Thị xã Việt Yên'], ['bgi.canbo08_vy', 'Bùi Thị Tám', 'Thị xã Việt Yên'],
+      ['bgi.chuyenvien03_vy2', 'Lê Văn Ba', 'Thị xã Việt Yên'], // mồi nhử: cùng họ tên, tài khoản dài hơn, nằm sau tài khoản đúng
+      ['bgi.canbo09_vy', 'Ngô Văn Chín', 'Thị xã Việt Yên']
+    ],
+    cv: [ // từ chuyên viên → bước 3. Lãnh đạo UBND xã
+      ['bgi.canbo01', 'Nguyễn Văn Một', 'Thành phố Bắc Ninh'], ['bgi.lanhdao02_vy', 'Đỗ Văn Lãnh', 'Thị xã Việt Yên'],
+      ['bgi.lanhdao02_vy_cu', 'Đỗ Văn Lãnh (cũ)', 'Thị xã Việt Yên'] // mồi nhử
+    ],
+    kq: [ // hồ sơ lãnh đạo trả về, đã Kết ISO → bước 5. Trả kết quả: chọn tài khoản của CHÍNH người dùng
+      ['bgi.canbo01', 'Nguyễn Văn Một', 'Thành phố Bắc Ninh'], ['bgi.chuyenvien03_vy', 'Lê Văn Ba', 'Thị xã Việt Yên'],
+      ['bgi.chuyenvien03_vy2', 'Lê Văn Ba', 'Thị xã Việt Yên'] // mồi nhử: cùng họ tên, tài khoản dài hơn
+    ]
+  };
+  // bước nhận (ô chọn của cửa sổ Chọn người) theo bảng đang chuyển; luôn có thêm lựa chọn mồi nhử “1. Trả về (Trước)”
+  const BUOC_TIEP = { tn: ['2', '2. Chuyên viên (Tiếp theo)'], cv: ['3', '3. Lãnh đạo UBND xã (Tiếp theo)'], kq: ['5', '5. Trả kết quả (Tiếp theo)'] };
+  const LOC_CAP = { tatca: () => true, tinh: (dv) => /^(Thành phố|Tỉnh)/.test(dv), huyen: (dv) => /^(Thị xã|Huyện|Quận)/.test(dv), xa: (dv) => /^(Phường|Xã)/i.test(dv), cungdv: (dv) => dv === 'Thị xã Việt Yên' };
+  const chonBox = document.getElementById('mChonNguoi');
+  const chonTim = chonBox.querySelector('input[placeholder^="Nhập tên cán bộ"]');
+  let chonTu = 'tn', hgNap = 0;
+  const ngayGioNay = () => { const d = new Date(), p = (n) => String(n).padStart(2, '0'); return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+  function moChonNguoi(tu){
+    chonTu = tu;
+    const [soBuoc, tiep] = BUOC_TIEP[tu];
+    chonBox.querySelector('select').innerHTML = `<option value="1">1. Trả về (Trước)</option><option value="${soBuoc}" selected>${tiep}</option>`;
+    chonTim.value = '';
+    chonBox.querySelector('input[name="capDonVi"][value="tatca"]').checked = true;
+    chonBox.querySelector('input[name="chuyenDonViKhac"]').checked = false;
+    chonBox.querySelector('[name="ngayGioChuyenTiep"]').value = ngayGioNay();
+    chonBox.querySelector('textarea').value = '';
+    openM('mChonNguoi');
+    log('(trang mở Chọn người xử lý tác vụ tiếp theo – ' + tiep + ')');
+    napCanBo();
+  }
+  // danh sách tài khoản tải chậm (~0,6 giây): trước đó chỉ có dòng “Đang tải...”
+  function napCanBo(){
+    const tb = chonBox.querySelector('tbody');
+    clearTimeout(hgNap);
+    tb.innerHTML = '<tr><td colspan="4">Đang tải...</td></tr>';
+    hgNap = setTimeout(() => {
+      const cap = (chonBox.querySelector('input[name="capDonVi"]:checked') || {}).value || 'tatca';
+      const ds = CAN_BO[chonTu].filter((r) => LOC_CAP[cap](r[2]));
+      tb.innerHTML = ds.length ? ds.map((r, i) => `<tr><td>${i + 1}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('') : '<tr><td colspan="4">Không có dữ liệu</td></tr>';
+      locCanBo();
+      log('(trang tải xong danh sách ' + ds.length + ' tài khoản)');
+    }, 600);
+  }
+  function taiLaiCanBo(ev){ log('(' + aiBam(ev) + ' bấm Tải lại danh sách tài khoản)'); napCanBo(); }
+  // ô tìm: lọc theo tài khoản hoặc họ tên (không phân biệt hoa thường)
+  function locCanBo(){
+    const q = chonTim.value.trim().toLowerCase();
+    chonBox.querySelectorAll('tbody tr').forEach((tr) => {
+      if (tr.children.length < 4) return;
+      tr.style.display = !q || tr.children[1].textContent.toLowerCase().includes(q) || tr.children[2].textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+  ['input', 'keyup'].forEach((t) => chonTim.addEventListener(t, locCanBo));
+  // đổi Cấp / đổi bước: trang tải lại danh sách
+  chonBox.querySelectorAll('input[name="capDonVi"]').forEach((r) => r.addEventListener('change', napCanBo));
+  chonBox.querySelector('select').addEventListener('change', napCanBo);
+  // bấm vào đâu trên dòng cũng chọn dòng đó: nền xanh, ô STT thành dấu ✔; dòng chọn trước trở lại bình thường
+  chonBox.querySelector('tbody').addEventListener('click', (e) => {
+    const tr = e.target.closest('tr');
+    if (!tr || tr.children.length < 4) return;
+    const tb = tr.parentElement, cu = tb.querySelector('tr.selected');
+    if (cu && cu !== tr) { cu.classList.remove('selected'); cu.style.background = ''; cu.children[0].textContent = String([...tb.children].indexOf(cu) + 1); }
+    tr.classList.add('selected'); tr.style.background = '#dff0d8';
+    tr.children[0].innerHTML = '<i class="fa fa-check-circle" style="color:#16a34a">✔</i>';
+    log('(' + aiBam(e) + ' chọn ' + tr.children[1].textContent + ' – ' + tr.children[2].textContent + ')');
+  });
+  function dongChonNguoi(ev){ clearTimeout(hgNap); dongModal('mChonNguoi'); log('(' + aiBam(ev) + ' bấm Đóng – Chọn người xử lý tác vụ tiếp theo)'); }
+  // Thực thi: chưa chọn ai → báo lỗi đỏ; đã chọn → so với tài khoản đúng (__mockDung), chuyển hồ sơ sang bước sau, về trang hồ sơ
+  function bamThucThi(ev){
+    if (!chonBox.classList.contains('show')) return log('(' + aiBam(ev) + ' bấm Thực thi khi cửa sổ Chọn người đã đóng – trang không làm gì)');
+    const tr = chonBox.querySelector('tbody tr.selected');
+    if (!tr) { log('(' + aiBam(ev) + ' bấm Thực thi – chưa chọn người)'); return mockToast('Lỗi', 'Vui lòng chọn người xử lý', 'error'); }
+    const H = window.__mockHoSo, tu = chonTu, tk = tr.children[1].textContent.trim();
+    const sel = chonBox.querySelector('select'), buoc = sel.options[sel.selectedIndex].text;
+    log('(' + aiBam(ev) + ' bấm Thực thi → chuyển cho ' + tk + ' – ' + buoc + ')');
+    const dung = (window.__mockDung || {})[tu];
+    if (dung && tk !== dung) { log('!!! CHUYỂN NHẦM NGƯỜI: ' + tk + ' !!!'); window.__mockNham = (window.__mockNham || 0) + 1; }
+    if (!/\(Tiếp theo\)$/.test(buoc)) { log('!!! CHUYỂN NHẦM BƯỚC: ' + buoc + ' !!!'); window.__mockNham = (window.__mockNham || 0) + 1; }
+    if (tu === 'cv' && !H.donDone) log('!!! CHUYỂN LÃNH ĐẠO KHI ĐƠN CHƯA HOÀN TẤT !!!');
+    clearTimeout(hgNap);
+    dongModal('mChonNguoi');
+    mockToast('Thành công', 'Chuyển tiếp hồ sơ thành công');
+    if (tu === 'kq') {
+      // sang bước “5. Trả kết quả” (ảnh 8): trang về Danh sách hồ sơ thụ lý, danh sách tải lại – dòng hồ sơ BỎ chọn (người dùng bấm lại dòng);
+      // CB chuyển = chính người dùng (tài khoản đăng nhập)
+      Object.assign(H, { stage: 'tra', ticks: { KetISO: true }, view: 'dsthuly', chon: '', cbChuyen: tenCanBo('kq', (window.__mockDung || {}).kq) || 'Lê Văn Ba', vaoLuc: ngayGioNay() });
+    } else { H.stage = tu === 'tn' ? 'cv' : 'ld'; H.ticks = {}; H.view = 'hoso'; }
+    window.__mockChuyen = (window.__mockChuyen || 0) + 1;
+    luuHoSoTT();
+    log('(trang báo: Chuyển tiếp hồ sơ thành công – hồ sơ ' + H.sbn + ' sang bước ' + H.stage + (tu === 'kq' ? '; Danh sách hồ sơ thụ lý tải lại, dòng hồ sơ bỏ chọn' : '') + ')');
+    if (window.__mockReload) return taiLaiTrang();
+    veView();
+  }
+
+  // ===== LÃNH ĐẠO TRẢ VỀ → DANH SÁCH HỒ SƠ THỤ LÝ → KẾT ISO (người dùng) → CHUYỂN TIẾP “5. Trả kết quả” → TRẢ HỒ SƠ (ảnh 7–10, 22/11) =====
+  // Các bước sau 'ld':
+  //   'kq'   lãnh đạo trả về (mockLanhDaoTraVe / nút thử): trang Danh sách hồ sơ thụ lý (view 'dsthuly'), CHƯA chọn dòng; chọn dòng → Xử lý hồ sơ
+  //          → bảng 5 tác vụ của hồ sơ (Giấy tờ đính kèm ✓, Cập nhật dữ liệu pháp lý, Lưu kho hồ sơ quét, Kết ISO, Nhập đăng ký ✓ – ô tích theo hồ sơ);
+  //          NGƯỜI DÙNG tự Kết ISO (tiện ích bấm = BẪY); tích đủ 5 → Chuyển tiếp → “5. Trả kết quả (Tiếp theo)” → tài khoản của chính mình → Thực thi
+  //   'tra'  ở bước Trả kết quả: danh sách tải lại, dòng hồ sơ BỎ chọn; bấm lại dòng → Xử lý hồ sơ → “Kết ISO” ✓ + “Trả hồ sơ” (không có Chuyển tiếp)
+  //          → Xử lý tác vụ (Trả hồ sơ) → cửa sổ Trả hồ sơ → Thực hiện → “Bạn có chắc chắn muốn trả hồ sơ này?” → Đồng ý
+  //   'done' đã trả hồ sơ: Xử lý hồ sơ chỉ báo “Hồ sơ đã trả kết quả”
+  const BUOC_HS = { tn: '1. Tiếp nhận hồ sơ', cv: '2. Chuyên viên', ld: '3. Lãnh đạo UBND xã', kq: '4. Chuyên viên hoàn tất hồ sơ', tra: '5. Trả kết quả', done: '5. Trả kết quả' };
+  const TT_HS = { kq: 'Đang xử lý', tra: 'Đã kết ISO', done: 'Đã trả kết quả' };
+  // dòng mồi nhử: hồ sơ KHÁC (không thuộc bạn xử lý) – số biên nhận, họ tên đều GIẢ
+  const HS_KHAC = { sbn: 'KH 2959.07777.999.1', ngayTN: '20/11/2026 09:15', buoc: '4. Chuyên viên hoàn tất hồ sơ', trangThai: 'Đang xử lý', cb: 'Trần Thị Hai',
+    vaoLuc: '21/11/2026 16:40', nguoiNop: 'Phạm Thị Mười', thua: '1(999)', diaChi: 'TDP (giả lập), Phường Việt Yên' };
+  // hồ sơ mồi nhử: window.__mockKhacSbn đổi số biên nhận (vd. số dài hơn BẮT ĐẦU bằng số hồ sơ đang làm – thử ô tìm “chứa chữ”)
+  const hsKhac = () => (window.__mockKhacSbn ? Object.assign({}, HS_KHAC, { sbn: window.__mockKhacSbn }) : HS_KHAC);
+  const escH = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tenCanBo = (tu, tk) => ((CAN_BO[tu] || []).find((r) => r[0] === tk) || [])[1] || '';
+  // chữ của dòng hồ sơ đang làm (số biên nhận, bước, CB chuyển…)
+  function hsDangLam(){
+    const H = window.__mockHoSo, f = H.form || {};
+    const p = /2959\.07777\.(\d+)\.(\d+)/.exec(H.sbn || '');
+    return { sbn: H.sbn, ngayTN: H.ngayTN || '', buoc: BUOC_HS[H.stage] || H.stage, trangThai: TT_HS[H.stage] || 'Đang xử lý', cb: H.cbChuyen || '', vaoLuc: H.vaoLuc || '',
+      nguoiNop: f.nguoiNop || '(giả lập)', thua: p ? p[2] + '(' + p[1] + ')' : '', diaChi: f.diaChi || 'Phường Việt Yên, Thành phố Bắc Ninh' };
+  }
+  // một dòng của bảng (ảnh 7, 8): ô “Thông tin hồ sơ” có link ✎ số biên nhận (BẪY) – bấm chỗ khác của dòng mới là chọn dòng
+  function dongDs(k, d){
+    return `<tr data-mock-hs="${k}"><td class="mockDsPlay">▶</td>` +
+      `<td><a href="javascript:;" class="lnkHoSo">✎ ${escH(d.sbn)}</a><div>📍 Phường Việt Yên (Thị xã Việt Yên) ★</div><div>⇄ XA_KH2959. Đăng ký đất đai, tài sản gắn liền với đất, cấp Giấ...</div><div>⏱ Còn 3 ngày - Chuyển trước: 27/11/2026 08:00</div></td>` +
+      `<td><div>Tiếp nhận: ${escH(d.ngayTN)}</div><div>Hẹn trả: <span class="mockHen">03/12/2026 07:00</span></div><div>Trạng thái: ${escH(d.trangThai)}</div></td>` +
+      `<td><div>Bước XL: <b>${escH(d.buoc)}</b></div><div>CB chuyển: <b>${escH(d.cb)}</b></div><div>Vào lúc: ${escH(d.vaoLuc)}</div><div>Ghi chú: Không có</div></td>` +
+      `<td><div>Người nộp: <b>${escH(d.nguoiNop)}</b></div><div>Thửa đất: <b>${escH(d.thua)}</b></div><div>Địa chỉ: ${escH(d.diaChi)}</div></td></tr>`;
+  }
+  // khung phải “Thông tin hồ sơ” của dòng đang chọn: nhãn / giá trị là CHỮ (không phải ô nhập); Số biên nhận “KH  2959…” (2 dấu cách như trang thật)
+  // window.__mockTTHSBang: khung phải là BẢNG (td nhãn + td số – chữ dính liền “Số biên nhậnKH …” như trang thật 23/11)
+  // window.__mockTTHSGiu: bỏ chọn dòng mà khung phải vẫn giữ hồ sơ vừa xem (trang thật sau Thực thi)
+  window.__mockTTHSCu = null;
+  function ttHoSo(d){
+    if (window.__mockTTHSBang) {
+      const dongB = (a, b) => `<tr><td class="ttLabel">${a}</td><td class="ttValue">${escH(b)}</td></tr>`;
+      return `<table class="ttBang"><tbody>${dongB('Tỉnh/thành phố', 'Thành phố Bắc Ninh')}${dongB('Phường/xã', 'Phường Việt Yên')}${dongB('Số biên nhận', String(d.sbn).replace(/^KH\s*/i, 'KH  '))}${dongB('Ngày tiếp nhận', d.ngayTN)}${dongB('Trạng thái', d.buoc)}</tbody></table>`;
+    }
+    const dong = (a, b) => `<div class="ttRow"><div class="ttLabel">${a}</div><div class="ttValue">${escH(b)}</div></div>`;
+    return dong('Tỉnh/thành phố', 'Thành phố Bắc Ninh') + dong('Phường/xã', 'Phường Việt Yên') + dong('Số biên nhận', String(d.sbn).replace(/^KH\s*/i, 'KH  ')) +
+      dong('Ngày tiếp nhận', d.ngayTN) + dong('Ngày hẹn trả', '03/12/2026 07:00') + dong('Trạng thái', d.buoc);
+  }
+  // dòng đang chọn: lớp selected (nền xanh) – đổi ngay trên dòng cũ (không vẽ lại bảng); khung phải theo dòng đang chọn, chưa chọn thì trống
+  function veChonDs(){
+    const H = window.__mockHoSo;
+    document.querySelectorAll('#mockDsRows tr[data-mock-hs]').forEach((tr) => tr.classList.toggle('selected', tr.getAttribute('data-mock-hs') === H.chon));
+    let d = H.chon === 'hs' ? hsDangLam() : H.chon === 'khac' ? hsKhac() : null;
+    if (d) window.__mockTTHSCu = d;
+    else if (window.__mockTTHSGiu) d = window.__mockTTHSCu;
+    document.getElementById('mockTTHS').innerHTML = d ? ttHoSo(d) : '';
+  }
+  // tiêu đề bảng danh sách là thanh div (không có th – như trang thật 23/11: tiện ích không thấy “cột”)
+  window.mockDauBangDiv = function(){
+    const t = document.getElementById('tblDsThuLy');
+    const th = t && t.querySelector('thead');
+    if (!th) return 'đã đổi';
+    const bar = document.createElement('div');
+    bar.className = 'mockHdrBar';
+    bar.style.cssText = 'display:flex;gap:60px;background:#2a3f54;color:#fff;padding:6px 10px;font-weight:bold';
+    bar.innerHTML = [...th.querySelectorAll('th')].map((x) => `<span>${x.textContent}</span>`).join('');
+    t.parentElement.insertBefore(bar, t);
+    th.remove();
+    return 'ok';
+  };
+  // ô tìm “Số biên nhận” (giống trang thật, ảnh 15–16): trống = mọi hồ sơ của bạn; có chữ (bấm 🔍 / Enter) = hồ sơ có số biên nhận chứa chữ đó.
+  // Hồ sơ đang ở bước lãnh đạo (stage 'ld') KHÔNG có trong danh sách của bạn (lãnh đạo chưa trả về). Tải lại trang → ô tìm trống.
+  window.__mockDsQ = '';
+  function dsHang(){
+    const H = window.__mockHoSo;
+    const q = String(window.__mockDsQ || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    const rows = [['khac', hsKhac()]];
+    if (H.sbn && H.stage && H.stage !== 'ld') rows.push(['hs', hsDangLam()]);
+    return q ? rows.filter(([, d]) => String(d.sbn).replace(/\s+/g, ' ').toLowerCase().includes(q)) : rows;
+  }
+  // vẽ (lại) danh sách: tài khoản đăng nhập = dung.kq; hồ sơ khác (mồi nhử) trước, hồ sơ đang làm sau – theo ô tìm
+  function veDsThuLy(){
+    const H = window.__mockHoSo;
+    document.getElementById('mockTaiKhoan').textContent = (window.__mockDung || {}).kq || '';
+    const rows = dsHang();
+    document.getElementById('mockDsRows').innerHTML = rows.length
+      ? rows.map(([k, d]) => dongDs(k, d)).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:#888">Không có dữ liệu</td></tr>';
+    if (H.chon && !rows.some(([k]) => k === H.chon)) { H.chon = ''; luuHoSoTT(); }
+    veChonDs();
+  }
+  // bấm 🔍 (hoặc Enter trong ô tìm): danh sách tải lại theo số biên nhận (0,4 giây, có dòng “Đang tải…”)
+  window.dsTimKiem = function(ev){
+    const q = document.getElementById('txtTimHoSo').value;
+    log('(' + aiBam(ev) + ' tìm số biên nhận “' + q + '”)');
+    window.__mockDsQ = q;
+    window.__mockTim = (window.__mockTim || 0) + 1;
+    document.getElementById('mockDsRows').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">Đang tải…</td></tr>';
+    setTimeout(veDsThuLy, 400);
+  };
+  document.getElementById('txtTimHoSo').addEventListener('keydown', (e) => { if (e.key === 'Enter') window.dsTimKiem(e); });
+  // thanh trái “Xử lý công việc” (ảnh 17) → Danh sách hồ sơ thụ lý (ô tìm trống, chưa chọn dòng)
+  window.mockXuLyCongViec = function(ev){
+    log('(' + aiBam(ev) + ' bấm Xử lý công việc – Danh sách hồ sơ thụ lý)');
+    const H = window.__mockHoSo;
+    closeM();
+    H.view = 'dsthuly';
+    H.chon = '';
+    window.__mockDsQ = '';
+    document.getElementById('txtTimHoSo').value = '';
+    luuHoSoTT();
+    if (window.__mockReload) return taiLaiTrang(300);
+    veView();
+  };
+  document.getElementById('mockDsRows').addEventListener('click', (e) => {
+    const lnk = e.target.closest('a.lnkHoSo');
+    if (lnk) {
+      e.preventDefault();
+      log('!!! BẤM VÀO LINK SỐ BIÊN NHẬN (mở sửa hồ sơ) !!!');
+      return log('(' + aiBam(e) + ' bấm link “' + lnk.textContent.trim() + '” – giả lập: không mở màn hình sửa hồ sơ)');
+    }
+    const tr = e.target.closest('tr[data-mock-hs]');
+    if (!tr) return;
+    const H = window.__mockHoSo;
+    H.chon = tr.getAttribute('data-mock-hs');
+    luuHoSoTT();
+    veChonDs();
+    log('(' + aiBam(e) + ' chọn dòng hồ sơ ' + (H.chon === 'hs' ? H.sbn : HS_KHAC.sbn) + ')');
+  });
+  // “Xử lý hồ sơ” của danh sách (không có id): chưa chọn dòng → báo lỗi; dòng hồ sơ khác → “Hồ sơ không thuộc bạn xử lý”; dòng hồ sơ đang làm → Quy trình theo bước
+  function dsXuLyHoSo(ev){
+    const H = window.__mockHoSo;
+    log('(' + aiBam(ev) + ' bấm Xử lý hồ sơ – Danh sách hồ sơ thụ lý)');
+    if (!H.chon) { log('(trang báo: Vui lòng chọn hồ sơ)'); return mockToast('Lỗi', 'Vui lòng chọn hồ sơ', 'error'); }
+    if (H.chon === 'khac') {
+      log('(trang báo: Hồ sơ không thuộc bạn xử lý)');
+      return mockConfirm('Thông báo', 'Hồ sơ không thuộc bạn xử lý', [{ text: 'Đóng', cls: 'btn-default' }]);
+    }
+    moQuyTrinhTheoBuoc();
+  }
+  // nút thử: lãnh đạo trả hồ sơ về cho chuyên viên → bước 'kq', trang Danh sách hồ sơ thụ lý, chưa chọn dòng
+  window.mockLanhDaoTraVe = function(sbn){
+    closeM();
+    const H = window.__mockHoSo;
+    sbn = sbn || H.sbn || document.getElementById('txtSoBienNhan').value.trim() || SBN_MAC_DINH;
+    Object.assign(H, { view: 'dsthuly', sbn, stage: 'kq', chon: '', ticks: { GiayToDinhKem: true, NhapDangKy: true },
+      cbChuyen: tenCanBo('cv', (window.__mockDung || {}).cv) || 'Đỗ Văn Lãnh', vaoLuc: ngayGioNay(), ngayTN: H.ngayTN || ngayGioNay() });
+    luuHoSoTT();
+    veView();
+    log('(giả lập: lãnh đạo trả về – hồ sơ ' + sbn + ' ở Danh sách hồ sơ thụ lý, Bước XL 4. Chuyên viên hoàn tất hồ sơ; chưa chọn dòng nào)');
+  };
+  // ----- Kết ISO: NGƯỜI DÙNG tự làm (Xử lý tác vụ → Thực hiện → Đồng ý → trang tích Đã xử lý). Tiện ích bấm Xử lý tác vụ / Thực hiện / Đồng ý = BẪY -----
+  window.__mockBayISO = 0;
+  const bayKetISO = (ev) => { if (!(ev && ev.isTrusted)) { window.__mockBayISO++; log('!!! TIỆN ÍCH BẤM KẾT ISO !!!'); } };
+  function moKetISO(ev){
+    log('(' + aiBam(ev) + ' bấm Xử lý tác vụ – Kết ISO)');
+    bayKetISO(ev);
+    closeM(); log('(trang mở Kết ISO)');
+    setTimeout(() => openM('mKetISO'), 300);
+  }
+  function dongKetISO(ev){ closeM(); log('(' + aiBam(ev) + ' bấm Đóng – Kết ISO)'); setTimeout(() => openM('mQuyTrinh'), 200); }
+  function thucHienKetISO(ev){
+    log('(' + aiBam(ev) + ' bấm Thực hiện – Kết ISO)');
+    bayKetISO(ev);
+    mockConfirm('Xác nhận', 'Bạn có chắc chắn muốn kết ISO?', [
+      { text: 'Đồng ý', cls: 'btn-orange', fn: (e) => { bayKetISO(e); closeM(); setTimeout(() => { ketISOXong(); openM('mQuyTrinh'); mockToast('Thành công', 'Kết ISO thành công'); }, 600); } },
+      { text: 'Hủy', cls: 'btn-default' }
+    ]);
+  }
+  // trang tích “Đã xử lý” của Kết ISO: ô trong bảng đang có + ô của hồ sơ (bước 'kq' / 'tra')
+  function ketISOXong(){
+    const H = window.__mockHoSo;
+    const k = document.querySelector('#bindQuyTrinhXuLy input[data-actioncode="KetISO"]');
+    if (k) k.checked = true;
+    if (H.stage === 'kq' || H.stage === 'tra') { H.ticks.KetISO = true; luuHoSoTT(); }
+    log('(trang tích Đã xử lý – Kết ISO)');
+  }
+  // nút thử: người dùng đã Kết ISO (Thực hiện, Đồng ý) – không qua cửa sổ, không có bẫy
+  window.mockKetISO = function(){ log('(giả lập: người dùng Kết ISO – Thực hiện, Đồng ý)'); ketISOXong(); mockToast('Thành công', 'Kết ISO thành công'); };
+  // ----- Trả hồ sơ (ảnh 10): Xử lý tác vụ → Quy trình đóng, cửa sổ “Trả hồ sơ” → Thực hiện → hỏi Đồng ý / Hủy → Đồng ý: trả xong, danh sách tải lại -----
+  function moTraHoSo(ev){
+    log('(' + aiBam(ev) + ' bấm Xử lý tác vụ – Trả hồ sơ)');
+    closeM();
+    document.querySelector('#mTraHoSo textarea').value = '';
+    setTimeout(() => { openM('mTraHoSo'); log('(trang mở Trả hồ sơ)'); }, 300);
+  }
+  // Đóng: chỉ đóng cửa sổ Trả hồ sơ
+  function dongTraHoSo(ev){ dongModal('mTraHoSo'); log('(' + aiBam(ev) + ' bấm Đóng – Trả hồ sơ)'); }
+  function thucHienTraHoSo(ev){
+    window.__mockThucHienTra = (window.__mockThucHienTra || 0) + 1;
+    log('(' + aiBam(ev) + ' bấm Thực hiện – Trả hồ sơ)');
+    if (!document.getElementById('mTraHoSo').classList.contains('show')) return log('(cửa sổ Trả hồ sơ không mở – trang không làm gì)');
+    // chữ như trang thật (ảnh 22/11): “TRẢ HỒ SƠ – Bạn có thật sự muốn trả hồ sơ hay không?” ĐỒNG Ý / KHÔNG
+    mockConfirm('TRẢ HỒ SƠ', 'Bạn có thật sự muốn trả hồ sơ hay không?', [{ text: 'ĐỒNG Ý', cls: 'btn-orange', fn: xongTraHoSo }, { text: 'KHÔNG', cls: 'btn-default' }]);
+  }
+  function xongTraHoSo(e){
+    const H = window.__mockHoSo, ai = aiBam(e);
+    setTimeout(() => {
+      dongModal('mTraHoSo');
+      if (H.stage !== 'tra') {
+        log('!!! TRẢ HỒ SƠ KHI HỒ SƠ KHÔNG Ở BƯỚC TRẢ KẾT QUẢ (bước ' + (H.stage || 'trống') + ') !!!');
+        return mockToast('Lỗi', 'Hồ sơ không ở bước Trả kết quả', 'error');
+      }
+      mockToast('Thành công', 'Trả hồ sơ thành công');
+      Object.assign(H, { stage: 'done', chon: '', view: 'dsthuly' });
+      H.ticks.TraHoSo = true;
+      window.__mockTra = (window.__mockTra || 0) + 1;
+      luuHoSoTT();
+      log('(' + ai + ' trả hồ sơ)');
+      log('(trang báo: Trả hồ sơ thành công – hồ sơ ' + H.sbn + ' đã trả kết quả; Danh sách hồ sơ thụ lý tải lại, dòng hồ sơ bỏ chọn)');
+      if (window.__mockReload) return taiLaiTrang();
+      veView();
+    }, 400);
+  }
+
+  // ----- cờ giả lập (giữ qua tải lại trang): choTuBam = cho tiện ích bấm Lưu hồ sơ / Lưu thông tin đăng ký / Hoàn tất,
+  // reload = trang tải lại cả trang sau Lưu hồ sơ / Thực thi / Về trang tiếp nhận hồ sơ / Trả hồ sơ, cayThat = cây đơn kiểu trang thật (mặc định BẬT),
+  // dung = tài khoản đúng { tn, cv, kq } -----
+  window.mockFlags = function(f){
+    f = f || {};
+    if ('choTuBam' in f) window.__mockChoTuBam = !!f.choTuBam;
+    if ('reload' in f) window.__mockReload = !!f.reload;
+    if ('cayThat' in f) window.__mockCayThat = !!f.cayThat;
+    if (f.dung) window.__mockDung = Object.assign({}, window.__mockDung, f.dung);
+    const co = { choTuBam: !!window.__mockChoTuBam, reload: !!window.__mockReload, cayThat: !!window.__mockCayThat, dung: window.__mockDung };
+    ssGhi('__mockFlags', co);
+    veNutCo();
+    document.getElementById('mockTaiKhoan').textContent = co.dung.kq || ''; // tài khoản đăng nhập (danh sách thụ lý)
+    log('(cờ giả lập: cho tự bấm ' + (co.choTuBam ? 'BẬT' : 'TẮT') + ', tải lại trang ' + (co.reload ? 'BẬT' : 'TẮT') + ', cây kiểu thật ' + (co.cayThat ? 'BẬT' : 'TẮT') +
+      ', đúng người ' + co.dung.tn + ' / ' + co.dung.cv + ' / ' + co.dung.kq + ')');
+    return co;
+  };
+  function veNutCo(){
+    document.getElementById('mockNutTaiLai').textContent = 'Bật/Tắt tải lại trang (đang ' + (window.__mockReload ? 'BẬT' : 'TẮT') + ')';
+    document.getElementById('mockNutTuBam').textContent = 'Bật/Tắt cho tự bấm (đang ' + (window.__mockChoTuBam ? 'BẬT' : 'TẮT') + ')';
+    document.getElementById('mockNutCayThat').textContent = 'Bật/Tắt cây kiểu thật (đang ' + (window.__mockCayThat ? 'BẬT' : 'TẮT') + ')';
+  }
+  // xóa mọi thứ giữ qua tải lại trang (chrome.storage giả, hồ sơ, nhật ký, cờ) rồi tải lại → trang sạch như mới
+  window.mockReset = function(){
+    window.__mockDangReset = true;
+    ['__mockMem', '__mockHoSo', '__mockLog', '__mockFlags', 'vbdlis-dien-nhanh-hold', 'vbdlis-dien-nhanh-sweep', 'vbdlis-dien-nhanh-chain', 'vbdlis-dien-nhanh-sweeppause', 'vbdlis-dien-nhanh-recv', 'vbdlis-dien-nhanh-xlcv'].forEach((k) => { try { sessionStorage.removeItem(k); } catch (e) {} });
+    location.reload();
+  };
+  // trang sắp tải lại / rời trang: ghi nốt nhật ký + hồ sơ (bộ đếm)
+  window.addEventListener('pagehide', () => { if (window.__mockDangReset) return; ghiLog(); luuHoSoTT(); });
   // Bẫy tiêu điểm giống Bootstrap: tiêu điểm ra ngoài cửa sổ con thì bị kéo về
   document.addEventListener('focusin', (e) => {
     const m = document.querySelector('.modal.show');
@@ -421,14 +1404,56 @@
   });
   // Ghi lại sự kiện change mà trang nhận được
   document.addEventListener('change', (e) => { const t = e.target; if (t.closest && t.closest('#vbdlis-dien-nhanh-host')) return; log(`change ${t.id || t.tagName}: ${t.type === 'checkbox' ? t.checked : t.type === 'password' ? '(mật khẩu)' : t.value}`); });
+  // ===== trang vừa tải lại: lấy lại cờ, bộ đếm, nhật ký (form + hồ sơ lấy lại trong $(function) vì cần select2) =====
+  (function(){
+    const f = ssDoc('__mockFlags');
+    if (f) {
+      window.__mockChoTuBam = !!f.choTuBam; window.__mockReload = !!f.reload;
+      if ('cayThat' in f) window.__mockCayThat = !!f.cayThat;
+      if (f.dung) window.__mockDung = Object.assign({}, window.__mockDung, f.dung);
+    }
+    const lg = ssDoc('__mockLog');
+    if (typeof lg === 'string') { document.getElementById('log').textContent = lg; log('(— trang tải lại —)'); }
+    const h = ssDoc('__mockHoSo');
+    if (h && typeof h === 'object') {
+      Object.assign(window.__mockHoSo, h);
+      const d = h.dem || {};
+      window.__mockChuyen = d.chuyen || 0; window.__mockNham = d.nham || 0; window.__mockTra = d.tra || 0;
+      if (d.tick) window.__mockTick = d.tick;
+      if (d.bam) Object.assign(window.__mockBam, d.bam);
+    }
+    // mở theo địa chỉ “?view=tiepnhan” (đi trang – không phải tải lại) = màn hình Tiếp nhận hồ sơ trống, như mục Tiếp nhận hồ sơ có đường link thật
+    try {
+      const di = (performance.getEntriesByType('navigation')[0] || {}).type;
+      if (new URLSearchParams(location.search).get('view') === 'tiepnhan' && di !== 'reload' && di !== 'back_forward') {
+        Object.assign(window.__mockHoSo, { view: 'tiepnhan', form: null, chon: '' });
+        log('(trang Tiếp nhận hồ sơ – mở theo địa chỉ ?view=tiepnhan)');
+      }
+    } catch (e) {}
+  })();
+  function khoiPhucTrang(){
+    const H = window.__mockHoSo;
+    if (H.view === 'hoso') {
+      if (H.form) datForm(H.form);
+      // đơn: “máy chủ” chỉ nhớ bản đã Lưu thông tin đăng ký / Hoàn tất; chưa lưu lần nào thì lần mở sau lại là đơn trống
+      if (H.stage === 'cv') { if (H.don) datDon(H.don); else H.donInit = false; }
+      log('(trang hiện hồ sơ ' + H.sbn + ' – bước ' + H.stage + (H.donDone ? ', đơn đã Hoàn tất' : '') + ')');
+    } else if (H.view === 'dsthuly') {
+      if (H.don) datDon(H.don); // đơn đã lưu của hồ sơ (mở Nhập đăng ký từ bảng 5 tác vụ vẫn thấy)
+      log('(trang hiện Danh sách hồ sơ thụ lý – hồ sơ ' + H.sbn + ' bước ' + H.stage + (H.chon ? ', đang chọn dòng ' + (H.chon === 'hs' ? H.sbn : HS_KHAC.sbn) : ', chưa chọn dòng nào') + ')');
+    }
+    veView(); veNutCo();
+  }
   $(function(){
     $('#tMDSD').select2({ dropdownParent: $('#mThua') });
     // Phường/Xã: chọn xong trang mới nạp danh sách quy trình + đặt địa chỉ mặc định (giống thật)
     $('#dvPhuong').select2();
     $('#dvPhuong').on('change', function(){
       log('(trang nhận Phường/Xã = ' + $(this).find(':selected').text() + ')');
+      // Phường/Xã trống (Về trang tiếp nhận hồ sơ): danh sách quy trình trống, không đặt địa chỉ
+      if (!this.value) { $('#qtSelect').html(QT_CHUA_CHON).trigger('change.select2'); return; }
       setTimeout(() => {
-        $('#qtSelect').html('<option value="">--Chọn quy trình---</option><option value="2959">XA_KH2959. Đăng ký đất đai, tài sản gắn liền với đất, cấp Giấy chứng nhận lần đầu (Thực hiện KH 2959)</option><option value="9">Quy trình cập nhật dữ liệu (Chỉnh sửa, bổ sung dữ liệu bị sai)</option>');
+        napQuyTrinh();
         $('#txtDiaChiTaiSan, #txtDiaChiNN').val('Phường Việt Yên, Thành phố Bắc Ninh');
       }, 500);
     });
@@ -463,13 +1488,54 @@
     $('#btnThemTaiSan').next('ul').on('click', 'a', function(){ const t = $(this).text().trim(); log('(trang: Thêm tài sản → ' + t + ')'); if (t === 'Thửa đất') { resetThua(); openM('mThua'); window.__fromDon = true; } });
     $('#chkdangKyLanDau').on('change', function(){ if (this.checked) { $('#dMaDon').val($('#txtSoBienNhan').val() || 'KH (giả lập)'); log('(trang tự điền Mã đơn)'); } });
     $('#dDieuKien').select2({ dropdownParent: $('#mDon') });
+    // Lưu kho: “+” (trang thật chặn link “javascripts:;”), “Đóng”
+    $('#btnAddHoSoQuet').on('click', function(e){ e.preventDefault(); log('(trang: + thêm hồ sơ quét)'); hsqMoi(); });
+    $('#mLuuKho .panel-footer a').on('click', function(e){ e.preventDefault(); dongLuuKho(); });
+    // “Thêm tập tin”: KHÔNG chặn link href="" (thử lớp chặn đi trang của tiện ích)
+    document.getElementById('btnAddFileHoSoQuet').addEventListener('click', function(){ log('(trang: Thêm tập tin)'); moTTHSQ(); });
+    $('#mTTHSQ [name=loaiHoSoQuet]').on('change', function(){ $('#ttGcnWrap').toggle(this.value === '2'); log('(trang nhận Loại giấy tờ = ' + $(this).find(':selected').text() + ')'); });
+    // ô “Đã xử lý” của tác vụ: tiện ích không được tích
+    $('#bindQuyTrinhXuLy').on('click', 'input[type=checkbox]', function(e){
+      const nguoi = !!(e.originalEvent && e.originalEvent.isTrusted), ma = this.dataset.actioncode;
+      window.__mockTick = (window.__mockTick || 0) + 1;
+      log('(' + (nguoi ? 'người dùng' : 'tiện ích') + ' ' + (this.checked ? 'tích' : 'bỏ tích') + ' ô Đã xử lý ' + ma + ')');
+      // Kết ISO người dùng tự làm (trang tự tích); Trả hồ sơ chỉ xong qua cửa sổ Trả hồ sơ → tiện ích tự tích / bỏ tích 2 ô này là BẪY
+      if (!nguoi && ma === 'KetISO') log('!!! TIỆN ÍCH TÍCH Ô ĐÃ XỬ LÝ KẾT ISO !!!');
+      if (!nguoi && ma === 'TraHoSo') log('!!! TIỆN ÍCH TÍCH Ô ĐÃ XỬ LÝ TRẢ HỒ SƠ !!!');
+    });
+    // bảng của hồ sơ ('tn' / 'cv' / 'kqhs' / 'tra'): trang nhớ ô đã tích (mở lại Quy trình, tải lại trang vẫn thấy)
+    $('#bindQuyTrinhXuLy').on('click change', 'input[type=checkbox]', function(){ if (window.__qtKind === 'kq') return; window.__mockHoSo.ticks[this.dataset.actioncode] = this.checked; luuHoSoTT(); });
+    // tab kiểu Bootstrap
+    $(document).on('click', '#chi_tiet_gcn_wapper a[data-toggle="tab"]', function(e){ e.preventDefault(); const li = this.closest('li'); li.parentElement.querySelectorAll('li').forEach((x) => x.classList.toggle('active', x === li)); document.querySelectorAll('#chi_tiet_gcn_wapper .tab-pane').forEach((p) => (p.style.display = '#' + p.id === this.getAttribute('href') ? '' : 'none')); log('(trang mở tab ' + this.textContent.trim() + ')'); });
+    // chọn dòng đơn (jstree: a.jstree-clicked + li[aria-selected])
+    $(document).on('click', '#treeGiayChungNhanSBD a.jstree-anchor', function(e){ e.preventDefault(); this.classList.add('jstree-clicked'); this.closest('li').setAttribute('aria-selected', 'true'); this.style.background = '#2f8fdd'; this.style.color = '#fff'; log('(chọn dòng Đơn đăng ký)'); });
+    // Thực hiện: chưa chọn đơn → báo; đã chọn → hỏi Đồng ý / Hủy
+    $('#btnCapNhatDuLieuPhapLy').on('click', function(e){
+      window.__mockThucHien = (window.__mockThucHien || 0) + 1;
+      log('(' + (e.originalEvent && e.originalEvent.isTrusted ? 'người dùng' : 'tiện ích') + ' bấm Thực hiện)');
+      if (!document.querySelector('#treeGiayChungNhanSBD a.jstree-clicked')) return mockConfirm('Thông báo', 'Vui lòng chọn đơn đăng ký!', [{ text: 'Đóng', cls: 'btn-default' }]);
+      mockConfirm('Cập nhật dữ liệu pháp lý', 'Bạn có chắc chắn muốn cập nhật dữ liệu pháp lý?', [{ text: 'Đồng ý', cls: 'btn-orange', fn: xongCNDLPL }, { text: 'Hủy', cls: 'btn-default' }]);
+    });
+    // trang vừa tải lại: hiện lại đúng hồ sơ / trang tiếp nhận
+    khoiPhucTrang();
   });
 </script>
 
 <!-- Giả lập API của Chrome để chạy bảng điền ngay trong trang thử -->
 <script>
   (function(){
-    const mem = {};
+    // chrome.storage giả GIỮ qua tải lại trang (như chrome.storage thật của tiện ích): sessionStorage '__mockMem' – mockReset() xóa
+    let mem = {};
+    try { mem = JSON.parse(sessionStorage.getItem('__mockMem') || '{}') || {}; } catch (e) { mem = {}; }
+    // ghi lại sau mỗi set / remove; quá lớn (file quét…) thì bỏ các giá trị lớn, báo một lần
+    const ghiMem = () => {
+      if (window.__mockDangReset) return;
+      try { sessionStorage.setItem('__mockMem', JSON.stringify(mem)); return; } catch (e) {}
+      const nho = {}, bo = [];
+      for (const k in mem) { if ((JSON.stringify(mem[k]) || '').length > 200000) bo.push(k); else nho[k] = mem[k]; }
+      try { sessionStorage.setItem('__mockMem', JSON.stringify(nho)); } catch (e) { try { sessionStorage.removeItem('__mockMem'); } catch (e2) {} bo.push('(tất cả)'); }
+      if (!ghiMem.bao) { ghiMem.bao = 1; log('(cảnh báo: chrome.storage giả quá lớn – tải lại trang sẽ mất: ' + bo.join(', ') + ')'); }
+    };
     const c = window.chrome || (window.chrome = {});
     const clone = (v) => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
     const listeners = [];
@@ -478,14 +1544,15 @@
     c.storage = { local: {
       get: async (keys) => { const o = {}; const ks = keys == null ? Object.keys(mem) : (Array.isArray(keys) ? keys : [keys]); ks.forEach(k => { if (k in mem) o[k] = clone(mem[k]); }); return o; },
       getKeys: async () => Object.keys(mem),
-      set: async (obj) => { if (window.__failSet) throw new Error('QUOTA_BYTES quota exceeded'); const ch = {}; for (const k in obj) { ch[k] = { oldValue: clone(mem[k]), newValue: clone(obj[k]) }; mem[k] = clone(obj[k]); } fire(ch); },
-      remove: async (keys) => { const ch = {}; (Array.isArray(keys) ? keys : [keys]).forEach(k => { if (k in mem) { ch[k] = { oldValue: clone(mem[k]) }; delete mem[k]; } }); fire(ch); }
+      set: async (obj) => { if (window.__failSet) throw new Error('QUOTA_BYTES quota exceeded'); const ch = {}; for (const k in obj) { ch[k] = { oldValue: clone(mem[k]), newValue: clone(obj[k]) }; mem[k] = clone(obj[k]); } ghiMem(); fire(ch); },
+      remove: async (keys) => { const ch = {}; (Array.isArray(keys) ? keys : [keys]).forEach(k => { if (k in mem) { ch[k] = { oldValue: clone(mem[k]) }; delete mem[k]; } }); ghiMem(); fire(ch); }
     }, onChanged: { addListener: (f) => listeners.push(f) } };
     c.runtime = {
       id: 'thu-nghiem',
       getURL: (p) => '../' + p,
       sendMessage: async (msg) => {
         if (msg.type === 'vbdlis-rec-inject') return { ok: true };
+        if (msg.type === 'vbdlis-arm-file') return { ok: true, result: window.vbdlisArmFile() };
         if (msg.type === 'vbdlis-sample') {
           if (window.__sampleFail) return { ok: false, error: window.__sampleFail };
           return { ok: true, text: window.__sampleText != null ? window.__sampleText : window.__sampleOverride ? JSON.stringify(window.__sampleOverride) : await (await fetch('../data/du-lieu.json?t=' + Date.now(), { cache: 'no-store' })).text() };
@@ -504,12 +1571,16 @@
       }
     };
     window.__mem = mem;
+    window.addEventListener('pagehide', ghiMem); // kể cả khi thử nghiệm sửa thẳng window.__mem
   })();
 </script>
 <script>
-  // nạp bản mới nhất (tránh trình duyệt dùng bản cũ trong bộ nhớ đệm)
+  // nạp bản mới nhất (tránh trình duyệt dùng bản cũ trong bộ nhớ đệm); ?nopanel=1 → không nạp bảng điền (panel.js).
+  // Không có ?nopanel=1 thì sau mỗi lần trang tải lại bảng điền được nạp lại – như tiện ích mở lại bảng.
   (async () => {
+    const khongPanel = new URLSearchParams(location.search).get('nopanel') === '1';
     for (const f of ['../page-setter.js', '../filler.js', '../recorder.js', '../panel.js']) {
+      if (khongPanel && f === '../panel.js') continue;
       await new Promise((ok) => { const s = document.createElement('script'); s.src = f + '?t=' + Date.now(); s.onload = ok; document.body.appendChild(s); });
     }
   })();

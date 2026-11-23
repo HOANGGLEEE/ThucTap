@@ -6,7 +6,7 @@
 // (Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Đóng – chỉ khi bật “Tự động hết”). Bộ điền không bao giờ bấm Kết ISO / Chuyển tiếp /
 // Thực thi / Trả hồ sơ: Chuyển tiếp + Thực thi (chuyển hồ sơ cho đúng tài khoản) do bảng điền tự bấm, có kiểm tra riêng.
 (() => {
-  const VERSION = 31;
+  const VERSION = 33;
   // cửa sổ chủ sử dụng (cùng mẫu với bảng điền)
   const CHU_WIN = /^((thong tin|them|moi|cap nhat|sua|chi tiet) )*(ca nhan|chu su dung|nguoi su dung|chu so huu)\b/;
   const THUA_WIN = /^((them|moi|thong tin|chi tiet|cap nhat|sua) )*thua dat\b/;
@@ -1164,6 +1164,22 @@
         bs[0].click();
         return { ...base, ok: true };
       }
+      case 'closeTop': {
+        // đóng cửa sổ trên cùng KHÔNG lưu (vd. cửa sổ thửa khi trang báo thửa đã tồn tại – bạn yêu cầu 23/11): tên cửa sổ phải khớp msg.win;
+        // nút Hủy bỏ / Hủy / Đóng / Thoát (đúng MỘT nút), không có thì nút × (.close, data-dismiss) của cửa sổ đó
+        const tm = topModal();
+        if (!tm) return { ...base, ok: false, why: 'không có cửa sổ nào đang mở' };
+        if (msg.win && !new RegExp(msg.win).test(titleKey(modalTitle(tm)))) return { ...base, ok: false, why: `cửa sổ trên cùng là ${scopeName(tm)}` };
+        let bs = buttonsByText(['Hủy bỏ', 'Hủy', 'Đóng', 'Thoát'], tm, []).filter((x) => !realLink(x));
+        if (bs.length !== 1)
+          bs = [...tm.querySelectorAll('.close, [data-dismiss="modal"], [data-bs-dismiss="modal"], [aria-label="Close"], [aria-label="Đóng"], [title="Đóng"]')].filter(
+            (x) => isVisible(x) && !x.disabled && !realLink(x)
+          );
+        if (!bs.length) return { ...base, ok: false, why: 'không thấy nút Hủy bỏ / Đóng / ×' };
+        const said = (bs[0].value || bs[0].textContent || '').replace(/\s+/g, ' ').trim() || '×';
+        bs[0].click();
+        return { ...base, ok: true, btn: said };
+      }
       case 'tplClick': {
         // tab Trường: bấm MỘT nút bạn đã tích. Bước 1 (dry): tìm đúng cửa sổ + đúng nút (id / chữ + thứ tự), đánh dấu nút bằng token;
         // bảng điền thấy đúng 1 nút ở đúng 1 khung mới gửi bước 2 (bấm nút mang token đó) – không bấm nhầm nút trùng chữ / khung khác.
@@ -1242,15 +1258,24 @@
             if (hit.length !== 1) hit = list.filter((b) => b.key === L.btn.key && b.nth === (L.btn.nth || 0));
             if (hit.length === 1 && !hit[0].el.disabled && isVisible(hit[0].el)) {
               hit[0].el.click();
-              return { ...base, ok: true, open: true, title, btn: hit[0].text, learned: true, key };
+              return { ...base, ok: true, open: true, title, text: raw, btn: hit[0].text, learned: true, key };
             }
           }
           return { ...base, ok: false, open: true, title, text: raw, key };
         }
-        // rule.btn: một chữ hoặc danh sách chữ nút (vd. Đồng ý / Có / OK) – phải thấy ĐÚNG MỘT nút
+        // rule.btn: một chữ hoặc danh sách chữ nút (vd. Đồng ý / Có / OK) – phải thấy ĐÚNG MỘT nút.
+        // rule.btnRe: mẫu chữ nút (đã bỏ dấu, vd. mọi nút có chữ “bỏ qua” – “Bỏ qua”, “Bỏ qua thửa này”) – cũng phải đúng MỘT nút
         const labels = [].concat(rule.btn || []);
-        const b = buttonsByText(labels, d, []).filter((x) => !NEVER_BTN.test(normBtn(x.value || x.textContent)));
-        if (b.length !== 1) return { ...base, ok: false, open: true, title, text: `${raw} (không thấy, hoặc thấy nhiều nút “${labels.join(' / ')}”)` };
+        let b;
+        if (rule.btnRe) {
+          const rx = new RegExp(rule.btnRe);
+          const cs = [...d.querySelectorAll('button, a, [role="button"], input[type="button"], .btn')].filter(
+            (el) => !el.disabled && isVisible(el) && rx.test(normBtn(el.value || el.textContent)) && !NEVER_BTN.test(normBtn(el.value || el.textContent))
+          );
+          b = cs.filter((el) => !cs.some((o) => o !== el && el.contains(o)));
+        } else b = buttonsByText(labels, d, []).filter((x) => !NEVER_BTN.test(normBtn(x.value || x.textContent)));
+        if (b.length !== 1)
+          return { ...base, ok: false, open: true, title, text: `${raw} (không thấy, hoặc thấy nhiều nút “${rule.btnRe ? rule.btnRe : labels.join(' / ')}”)` };
         const said = (b[0].value || b[0].textContent || '').replace(/\s+/g, ' ').trim();
         b[0].click();
         return { ...base, ok: true, open: true, title, btn: said };
@@ -1912,7 +1937,7 @@
       retry.push({ id, value: x.v, soft: false, numeric: CANON_NUM.test(x.v), idx: results.indexOf(x.res), date: DATE_RE.test(x.v) });
     }
     retry.sort((a, b) => (b.date ? 1 : 0) - (a.date ? 1 : 0)); // ngày trước (trang có thể tự tính Năm sinh từ Ngày sinh)
-    lastFill = { token, frame: location.href, scopeName: scope.name, opened, results, retry, items: recheck, tplSkip };
+    lastFill = { token, frame: location.href, scopeName: scope.name, opened, results, retry, items: recheck, tplSkip, notes, off: sec.tplOff || [] };
     return { ...base, token, scopeName: scope.name, opened, results, retry, notes, tplSkip, off: sec.tplOff || [] };
   }
 
@@ -1970,7 +1995,8 @@
       }
     }
     fillEnd();
-    return { frame: last.frame, token, scopeName: last.scopeName, opened: last.opened, results: last.results };
+    // giữ ô bỏ qua theo mẫu / ghi chú (bước 1) – bảng điền dựa vào đó để không tự Lưu khi ô bắt buộc chưa đúng
+    return { frame: last.frame, token, scopeName: last.scopeName, opened: last.opened, results: last.results, notes: last.notes || [], tplSkip: last.tplSkip || [], off: last.off || [] };
   }
 
   // điền xong: báo bộ ghi thao tác ghi ngay các ô vừa đổi (khi cờ "tiện ích" còn bật), rồi mới tắt cờ

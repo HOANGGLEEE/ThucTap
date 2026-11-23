@@ -56,13 +56,33 @@ Bấm nút **🤖 Tự động: TẮT** cạnh “▶ Chạy cả TB”, đọc 
 - 🤖 **chỉ chạy ở tab bạn bật**. Tab VBDLIS khác hiện “🤖 Tự động: ở tab khác” và không tự bấm gì; muốn chạy ở tab đó thì bấm nút đó. Tắt 🤖 / đổi tài khoản, tốc độ… ở tab nào thì các tab khác nhận ngay.
 - Bấm lại nút để **TẮT**. Khi tắt, tiện ích quay về cách cũ: tô vàng các nút cho bạn tự bấm (ở cửa sổ chọn người, bấm ▶ thì tiện ích chọn sẵn đúng người, bạn tự bấm Thực thi). Bật 🤖 không còn sửa 3 ô “tự động” của bạn (chủ / hồ sơ quét / Quy trình) – khi bật thì coi như bật, tắt thì theo lựa chọn cũ.
 - Cửa sổ chọn người đang **mở sẵn** lúc bạn bấm ▶: tiện ích chỉ chọn đúng người và tô vàng Thực thi, **không tự bấm**.
+- Bản 1.21: tiện ích nhận dòng đã chọn theo dấu của trang thật (dòng chọn có lớp `selectUser`, nền xanh – ô STT vẫn là số). Trước đây có lúc trang đã chọn đúng người mà tiện ích báo “không thấy dấu chọn rõ ràng” và không bấm Thực thi. Nếu vẫn gặp, chụp dòng **“Để báo lỗi…”** ngay dưới (có lớp của dòng và mã ô STT) gửi người hỗ trợ.
+
+## 👔 Vai trò Lãnh đạo – ký duyệt, chuyển bước 4 (bản 1.21)
+Dùng ở máy (hoặc Chrome) **đăng nhập tài khoản lãnh đạo UBND xã** – giống vai trò Lãnh đạo của tiện ích bản 0.9.3. Không cần dữ liệu TB.
+1. Ở đầu bảng điền, ô **Vai trò** chọn **Lãnh đạo (ký duyệt → chuyển bước 4)**. Bảng ẩn các dòng TB và hiện bảng **👔 Lãnh đạo**.
+2. Kiểm tra cài đặt:
+   - **Người nhận bước 4**: để trống = tài khoản ở ô **Chuyên viên** (tab Biên nhận) – bạn chọn 23/11. Muốn chuyển cho tài khoản khác thì điền vào đây.
+   - **Bước nhận phải có**: mặc định “Chuyên viên hoàn tất” (cửa sổ chọn người phải là bước “4. Chuyên viên hoàn tất hồ sơ (Tiếp theo)”).
+   - Ô **Lãnh đạo** ở tab Biên nhận: điền tài khoản lãnh đạo – tiện ích **dừng hẳn** (⛔) nếu thấy đang đăng nhập tài khoản khác.
+   - **Chạy liên tục** (mặc định bật): hết hồ sơ thì 🤖 tải lại danh sách sau N giây (mặc định 60, ít nhất 15) để nhận hồ sơ chuyên viên mới chuyển lên.
+3. Mở **Xử lý công việc** (Danh sách hồ sơ thụ lý), bấm **Quét danh sách** để xem các hồ sơ đang chờ ký duyệt (chỉ đọc, không bấm gì trên trang).
+4. Bật **🤖** (lần đầu đọc hộp xác nhận rồi bấm OK). Với **mỗi hồ sơ KH 2959… đang ở bước “… Lãnh đạo …”**, tiện ích:
+   bấm vào hồ sơ → **Xử lý hồ sơ** → Quy trình chỉ có “Ký duyệt hồ sơ” → tích **Đã xử lý** → **Chuyển tiếp** → bước “4. Chuyên viên hoàn tất hồ sơ (Tiếp theo)”
+   → chọn **đúng tài khoản** nhận bước 4 (tài khoản giống tên khác không chọn) → **Thực thi** → kiểm tra hồ sơ đã rời bước lãnh đạo (không rõ thì tìm đúng số biên nhận) → hồ sơ tiếp theo.
+   Ký duyệt = chỉ tích ô “Đã xử lý” của “Ký duyệt hồ sơ” (không ký số – bạn xác nhận 23/11). Hồ sơ ở trang sau của danh sách: 🤖 tự sang trang sau.
+5. **Hồ sơ lỗi** (không thấy tài khoản nhận, trang báo lạ…): kêu ting, ghi lỗi trong bảng Lãnh đạo, 20 giây sau (bạn không thao tác) 🤖 quay về danh sách **làm hồ sơ khác**, thử lại hồ sơ lỗi sau N giây – **tối đa 3 lần** rồi bỏ qua (⊘). Đã bấm Thực thi mà trang báo lỗi / không rõ đã chuyển chưa → **không tự làm lại** hồ sơ đó: bạn kiểm tra trên VBDLIS, chưa chuyển thì bấm nút **“Chưa chuyển – làm lại hồ sơ …”**. Nút **Xóa dấu lỗi** cho 🤖 thử lại mọi hồ sơ lỗi / bỏ qua.
+6. **🤖 tắt**: ▶ chỉ mở hồ sơ đầu tiên đang chờ và **tô vàng** ô Đã xử lý + Chuyển tiếp – bạn tự tích, tự bấm; ở cửa sổ chọn người bấm ▶ thì tiện ích **chọn sẵn đúng người**, tô vàng Thực thi để bạn tự bấm (bạn bấm xong, trang báo thành công → bảng ghi “✓ đã chuyển bước 4”). Ô **Chạy thử** (tab Biên nhận) bật: 🤖 dừng ở Thực thi cho bạn bấm.
+7. Bảng Lãnh đạo ghi từng hồ sơ: ○ chờ ký duyệt · ⏳ đã bấm Thực thi – chờ xác nhận · ⏸ chờ bạn bấm Thực thi (Chạy thử / cửa sổ bạn mở – 🤖 không mở lại hồ sơ đó, bấm ▶ để làm lại) · ✓ đã chuyển bước 4 (giờ) · ✗ lỗi n/3 · ⊘ bỏ qua; dòng trên cùng đếm số đã chuyển hôm nay. Máy này có dữ liệu TB của hồ sơ đó thì TB được ghi giờ “LĐ ký duyệt” (◐ Đã nhập nhưng chưa xong).
+8. Bấm **■ Dừng** lúc 🤖 đang làm: 🤖 **tạm dừng hẳn** (kể cả khi cửa sổ Quy trình / chọn người còn mở – không tự tích, chuyển tiếp, Thực thi nữa) tới khi bạn bấm **▶** hoặc tắt / bật lại 🤖.
+9. Đổi **Vai trò** về **Chuyên viên** là quay lại làm như trước (tiếp nhận, nhập đơn, chuyển lãnh đạo, trả hồ sơ). Đổi vai trò lúc 🤖 đang bật thì 🤖 **tự tắt** – bấm 🤖 bật lại (tiện ích hỏi xác nhận đúng vai trò mới).
 
 ## Tab “Trường” – lấy tất cả các trường, tích trường cần điền (bản 1.20)
 1. Mở màn hình / cửa sổ / **hộp hỏi** cần điền trên VBDLIS (cửa sổ chủ, cửa sổ thửa, Nhập đơn đăng ký, chọn người, Trả hồ sơ, màn hình Tiếp nhận…).
 2. Vào tab **Trường** → bấm **Lấy tất cả các trường trên màn hình đang mở**. Tiện ích liệt kê mọi ô kèm giá trị đang có: ô gõ chữ, ô chọn, **ô tích**, **nhóm ô tròn** (vd. “Cấp: Tất cả / Tỉnh/Tp / … / Cùng đơn vị” – một dòng, chọn một lựa chọn), ô **chỉ có chữ mờ** (vd. “Nhập tên cán bộ, tên user…”), ô trong bảng (vd. “Đã xử lý – Kết ISO”), ô không có nhãn (gọi theo vị trí, vd. “(ô chọn không nhãn thứ 1)”). Tên ô là nhãn của chính ô đó – không lấy tiêu đề cửa sổ, chữ trên nút, số hồ sơ. Chỉ lấy được ô đang hiện (tab đang mở).
 3. **Tích ô cần điền**. Mỗi ô lấy từ:
    - **Dữ liệu TB**: ô tiện ích vốn biết (Họ tên, Giới tính, Số giấy tờ, Diện tích…) – điền theo TB của từng hồ sơ, đúng quy tắc như khi chạy (tên theo thẻ CCCD, đất ở ODT…). Tiện ích tự tích sẵn các ô này.
-   - **Giá trị mẫu**: chữ cố định, **giống nhau mọi hồ sơ** (lấy sẵn giá trị đang có trên trang, sửa được). Để trống = không điền ô đó.
+   - **Giá trị mẫu**: chữ cố định, **giống nhau mọi hồ sơ** (lấy sẵn giá trị đang có trên trang, sửa được). Để trống = không điền ô đó (như bỏ tích: ô bắt buộc để trống mà trên trang trống / khác dữ liệu TB thì 🤖 không tự Lưu – bản 1.21).
 4. **Tích / sửa là tự lưu ngay** (nút **Lưu mẫu** chỉ để đóng bảng tích). Lần sau **không phải tích lại**. Lấy lại trường lần nữa thì **tích cũ vẫn giữ**; ô lần đó không thấy (ở tab khác, đang ẩn…) vẫn giữ, ghi “không thấy lần lấy này”, có nút ✕ để bỏ.
    - **Mỗi cửa sổ một mẫu**: “Thêm thửa đất” (Tiếp nhận) và “Thông tin thửa đất” (đơn) là hai mẫu riêng. Tên cửa sổ có số hồ sơ → mẫu bỏ số đó, **dùng lại cho mọi hồ sơ**.
    - **Tích hết**: chỉ tích ô lấy từ dữ liệu TB và ô bạn đã đặt giá trị mẫu; ô giá trị mẫu khác (giá trị đọc lúc lấy trường) bạn tự tích – tiện ích liệt kê các ô đó.
@@ -78,12 +98,14 @@ Bấm nút **🤖 Tự động: TẮT** cạnh “▶ Chạy cả TB”, đọc 
    - **🤖 Tự động hết**, cửa sổ / hộp hỏi tiện ích **không tự làm** → tự điền + bấm theo mẫu **mỗi lần cửa sổ mở một lần** (đóng rồi mở lại là lần mới; cửa sổ con đóng không làm mẫu chạy lại). Bảng tích của mẫu đó đang mở → 🤖 chờ bạn đóng bảng tích.
    - **🤖**, cửa sổ tiện ích **tự làm** (chủ, thửa, Nhập đơn đăng ký, chọn người, Trả hồ sơ, Kết ISO khi bật “Tự Kết ISO”, Thông tin hồ sơ quét, Hồ sơ quét): 🤖 làm như cũ, đủ kiểm tra; **trước nút chốt** (Lưu / Lưu thông tin đăng ký / Thực thi / Thực hiện / Cập nhật) điền thêm ô giá trị mẫu và bấm thêm nút bạn đã tích, theo thứ tự bạn đặt. Nút trùng nút chốt chỉ bấm một lần (🤖 tự bấm); nút Đóng / × không bấm. **Quy trình xử lý**: 🤖 làm theo bước riêng (mẫu chỉ dùng khi bấm Điền).
    - **🤖**, **màn hình chính** tiện ích không tự làm (không phải Tiếp nhận, màn hình hồ sơ, Danh sách hồ sơ thụ lý): tự chạy mẫu **một lần mỗi lần vào** màn hình đó.
-   - Mẫu có nút vừa tự chạy mà cửa sổ lại mở ngay (không do bạn) → 🤖 không chạy lại (chống lặp), kêu ting báo bạn.
+   - Mẫu có nút vừa tự chạy mà cửa sổ lại mở ngay (không do bạn) → 🤖 không chạy lại lần mở đó (chống lặp – cả khi trang tự tải lại, bản 1.21), kêu ting báo bạn. Bạn bấm **Điền** bằng tay cũng tính là mẫu đã chạy ở lần mở / lần vào đó (bật 🤖 sau đó không chạy lại).
+   - Cửa sổ chuỗi (chủ, thửa, đơn, chọn người, Trả hồ sơ, Kết ISO, hồ sơ quét): 🤖 làm phần đã tích **sau** các kiểm tra của chuỗi (đúng bước, đúng hồ sơ, người bạn đang chọn…) và **trước** nút chốt; nút Đóng / Hủy / × không bấm; bấm nút theo mẫu xong mà trang hiện hộp hỏi, hay cửa sổ đổi / đóng → dừng trước nút chốt (không ghi “bỏ qua” thửa). Chuỗi dừng mà cửa sổ còn mở → mẫu không tự chạy lại trên cùng lần mở (bản 1.21).
    - **▶ Chạy cả TB**: màn hình Tiếp nhận, cửa sổ chủ / thửa / đơn điền theo tích của mẫu.
 7. **Dạy 🤖 trả lời hộp hỏi lạ**: lúc hộp đang hiện, bấm **Lấy tất cả các trường…** (lấy được cả hộp chỉ có nút), tích nút trả lời (vd. “Đồng ý” / “Không”). Từ đó 🤖 bật mà **đúng câu hỏi đó** hiện ra (cùng tiêu đề + câu hỏi; số hồ sơ khác nhau vẫn nhận) thì 🤖 tự bấm nút đó – ở mọi bước. Hộp báo lỗi (vui lòng…, không thể…, có lỗi…) thì không bao giờ tự trả lời.
+   - Hộp báo tiện ích cần ĐỌC (sau “Xử lý hồ sơ”, hộp báo thành công của Trả hồ sơ / Kết ISO, hộp “số biên nhận đã dùng cho hồ sơ khác”) thì tiện ích đọc trước, **không** bấm theo hộp đã dạy (bản 1.21 – tránh ghi nhầm ✓ Xong).
 - Ngày sinh, Ngày cấp, Ngày hết hạn không tích được, không bao giờ điền (quy tắc).
 8. **Cấu hình cho nơi khác** (mỗi nơi làm một kiểu): cuối tab Trường bấm **⬇ Xuất cấu hình** → file `cau-hinh-truong-vbdlis-….json` (mọi mẫu: cửa sổ, ô đã tích, lấy từ đâu, giá trị mẫu bạn đặt, thứ tự nút – không có dữ liệu hồ sơ, tên tài khoản). Nơi khác bấm **⬆ Nạp cấu hình…**, chọn file đó: tiện ích cho xem mẫu nào **thêm mới**, mẫu nào **máy đã có**; bấm “Thêm … mẫu mới, giữ mẫu đang có” hoặc “… thay … mẫu đang có” (thay thì mất tích / giá trị của mẫu đang có), hoặc Hủy.
-- **Sao lưu tiến độ** (hộp Tiến độ) kèm các mẫu tab Trường (tích, thứ tự nút, giá trị mẫu bạn đặt – giá trị có thể là dữ liệu cá nhân thì không đưa vào file). Nạp lại chỉ **thêm** mẫu máy này chưa có, mẫu đang có giữ nguyên.
+- **Sao lưu tiến độ** (hộp Tiến độ) kèm các mẫu tab Trường (tích, thứ tự nút, giá trị mẫu bạn đặt – giá trị có thể là dữ liệu cá nhân thì không đưa vào file). Bản 1.21: file sao lưu / file cấu hình giữ đủ dấu “không thấy lần lấy này”, ô khóa, nút là đường link; **bỏ** mẫu hộp hỏi / nút có tên người trong dữ liệu TB, tên tài khoản (bgi.…, tài khoản trong cài đặt) hoặc dãy số dài (báo số mẫu bị bỏ) – vẫn nên mở file xem trước khi gửi nơi khác. Nạp lại chỉ **thêm** mẫu máy này chưa có, mẫu đang có giữ nguyên.
 
 ## Chọn thư mục file quét (TB 18xx)
 Bấm **Chọn thư mục…** ở tab Giấy tờ, hoặc kéo cả thư mục (vd. `18 TH`) thả vào bảng. Trong thư mục có các thư mục **TB 1846**, **TB 1847**…, mỗi thư mục chứa PDF của TB đó.
@@ -189,6 +211,7 @@ Tiện ích **không mở cửa sổ** cho thửa trùng, chỉ ghi một dòng 
 - thửa **ghi 2 lần** trong danh sách của cùng một TB (lần 2 bỏ qua);
 - thửa **đã nhập ở TB khác** (cùng số tờ, số thửa – vd. TB 1582 trùng TB 1527, TB 1592 trùng thửa 344/111 với TB 1534): TB kia đã tiếp nhận / nhập đơn có thửa đó thì TB này bỏ qua;
 - thửa mà lần trước **bạn bấm Đóng / Hủy bỏ** ở cửa sổ thửa (thường vì VBDLIS báo thửa đã có): tiện ích ghi nhớ “bỏ qua” và chạy tiếp thửa sau, không dừng nữa.
+- **Trang báo thửa “đã tồn tại”** (bản 1.21 – bạn yêu cầu 23/11), ở cửa sổ “Thêm thửa đất” (Tiếp nhận) và cửa sổ thửa của Nhập đơn đăng ký – cả khi 🤖 bật lẫn tắt: tiện ích bấm nút có chữ **“Bỏ qua”** của hộp (vd. “Bỏ qua”, “Bỏ qua thửa này”); hộp chỉ báo (không hỏi) thì bấm **Đóng / OK** của hộp; rồi đóng cửa sổ thửa (**Hủy bỏ / Đóng / ×**, không lưu), ghi **bỏ qua** thửa đó (lần sau không nhập lại) và làm tiếp thửa sau. Hộp **hỏi** mà không có nút bỏ qua (vd. “… đã tồn tại. Bạn có muốn cập nhật?” Đồng ý / Không) → tiện ích **không bấm gì**, kêu ting, dòng báo ghi rõ chữ của hộp – bạn tự trả lời / đóng cửa sổ thửa, tiện ích ghi bỏ qua rồi làm tiếp. Tiện ích **không bao giờ** bấm Đồng ý / Tiếp tục / Lưu ở hộp này. (Hộp “Giấy tờ tùy thân đã tồn tại” của cửa sổ chủ vẫn trả lời Đồng ý như cũ.)
 
 Cuối nhật ký có dòng **“Thửa đang bỏ qua: …”** kèm nút **“Mở lại để thêm”** – bấm nếu bạn lỡ tay đóng, tiện ích chạy lại và mở thửa đó. Ở bước tiếp nhận (chỉ cần 1 thửa), thửa đầu bị bỏ qua thì tiện ích dùng thửa kế tiếp; nếu **mọi thửa** của TB đều trùng thì dừng, có nút **“⏸ Tạm hoãn TB …”**. Bảng **☰ Tiến độ** ghi “bỏ qua thửa …” ở cột Cần xem.
 

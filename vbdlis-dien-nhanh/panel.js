@@ -13,11 +13,14 @@
   const DEFAULT_PHUONG = 'Phường Việt Yên (Phường Bích Động - Thị xã Việt Yên cũ)';
   const DEFAULT_QUY_TRINH = 'XA_KH2959';
   const DEFAULT_NGUON_GOC = 'Công nhận QSDĐ như giao đất không thu tiền sử dụng đất';
+  // thửa ĐẤT Ở (MĐSD ONT / ODT – bạn yêu cầu 23/11): nguồn gốc “có thu tiền”, thời hạn “Lâu dài”
+  const DAT_O_NGUON_GOC = 'Công nhận QSDĐ như giao đất có thu tiền sử dụng đất';
+  const DAT_O_THOI_HAN = 'Lâu dài';
   // cửa sổ "Nhập đơn đăng ký" (bước xử lý hồ sơ)
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.18.9'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.19.5'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -180,8 +183,8 @@
     kq: 'suy ra từ Quy trình 5 tác vụ (lãnh đạo đã trả về)',
   };
   // dấu “đang chuyển” (fwd.k) → chữ ngắn (dòng tiến độ) / chữ đủ (cảnh báo)
-  const FWD_TEXT = { cv: 'chuyển CV', ld: 'chuyển LĐ', trk: 'chuyển bước Trả KQ', tra: 'Trả hồ sơ' };
-  const FWD_LONG = { cv: 'Thực thi chuyển chuyên viên', ld: 'Thực thi chuyển lãnh đạo', trk: 'Thực thi chuyển bước Trả kết quả', tra: 'Thực hiện Trả hồ sơ' };
+  const FWD_TEXT = { cv: 'chuyển CV', ld: 'chuyển LĐ', trk: 'chuyển bước Trả KQ', tra: 'Trả hồ sơ', iso: 'Kết ISO' };
+  const FWD_LONG = { cv: 'Thực thi chuyển chuyên viên', ld: 'Thực thi chuyển lãnh đạo', trk: 'Thực thi chuyển bước Trả kết quả', tra: 'Thực hiện Trả hồ sơ', iso: 'Thực hiện Kết ISO' };
   // ghi dấu “đang chuyển tiếp” TRƯỚC khi bấm Thực thi (trang có thể tải lại ngay) – lần sau nhìn Quy trình là biết đã chuyển chưa
   // dấu phụ của một TB (không đổi trạng thái): tnClick (đã bấm Lưu hồ sơ), htClick (đã bấm Hoàn tất), fwd (đang chuyển tiếp)…
   // – ghi TRƯỚC khi bấm nút không làm lại được (trang có thể tải lại ngay); v = null → xóa dấu
@@ -495,7 +498,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     <div class="row"><span class="muted" style="flex:none">Trạng thái:</span><select id="tbStage" title="Tiện ích tự đánh dấu: ◐ Đã tiếp nhận khi trang báo “Lưu hồ sơ thành công” (nhập đơn xong – “Lưu đơn đăng ký thành công” – vẫn là Đã tiếp nhận, chỉ ghi thêm giờ); ✓ Xong khi đã có cả nhập đơn xong và lưu kho hồ sơ quét (“Cập nhật thành công”). Sai thì sửa tay ở đây."><option value="chua">○ Chưa làm</option><option value="tn">◐ Đã tiếp nhận (kể cả đã nhập đơn)</option><option value="xong">✓ Xong – đã nhập đơn và lưu kho hồ sơ quét</option><option value="hoan">⏸ Tạm hoãn (chưa nhập được)</option></select><span id="stageInfo" class="muted"></span></div>
     <div class="row prog"><span id="progTxt" class="muted"></span><span class="sp"></span><button class="btn" id="scanQBtn" style="display:none" title="Hàng chờ file quét (DDK, TBXN) – bấm để xem">📎 0</button><button class="btn" id="nextTodo" title="Chọn TB chưa tiếp nhận tiếp theo">→ TB chưa làm</button><button class="btn" id="progList" title="Bảng tiến độ tất cả TB – lọc TB chưa xong, xuất ra Excel">☰ Tiến độ</button></div>
     <div class="evt" id="evt" style="display:none"></div>
-    <div class="row"><button class="btn" id="scan" title="Kiểm tra tiện ích còn tìm thấy đủ ô, nút cần dùng trên màn hình đang mở (khi VBDLIS đổi giao diện) – kèm danh sách nhãn → ô">Kiểm tra trang</button><button class="btn" id="dataBtn">Dữ liệu</button><button class="btn run" id="runAll" title="Màn hình Tiếp nhận hồ sơ: chọn Phường/Xã, quy trình, Số biên nhận, thêm thửa đầu, điền người nộp. Cửa sổ Nhập đơn đăng ký: chọn Điều kiện cấp giấy, tích Đăng ký lần đầu, rồi lần lượt tự bấm Thêm → Cá nhân / Thửa đất và điền từng chủ (tự Lưu chủ khi khớp), từng thửa (bạn bấm Lưu). Cửa sổ Quy trình xử lý: tự làm tác vụ Cập nhật dữ liệu pháp lý (Thực hiện, Đồng ý) và Lưu kho hồ sơ quét từ hàng chờ file (Cập nhật), tích Đã xử lý.">▶ Chạy cả TB</button><button class="btn auto" id="autoBtn" title="Tự động hết: bật lên thì tiện ích tự chạy khi bạn mở màn hình Tiếp nhận (trống), cửa sổ Nhập đơn đăng ký, Quy trình xử lý – tự bấm Lưu, Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, tác vụ 2–3. Ô lệch / hộp hỏi lạ / lỗi thì dừng, kêu ting chờ bạn. Không bấm Kết ISO, Chuyển tiếp, Thực thi.">🤖 Tự động: TẮT</button><span class="sp"></span><button class="btn" id="resetDone" title="Xóa dấu ✓ của TB này">Xóa dấu ✓</button></div>
+    <div class="row"><button class="btn" id="scan" title="Kiểm tra tiện ích còn tìm thấy đủ ô, nút cần dùng trên màn hình đang mở (khi VBDLIS đổi giao diện) – kèm danh sách nhãn → ô">Kiểm tra trang</button><button class="btn" id="dataBtn">Dữ liệu</button><button class="btn run" id="runAll" title="Màn hình Tiếp nhận hồ sơ: chọn Phường/Xã, quy trình, Số biên nhận, thêm thửa đầu, điền người nộp. Cửa sổ Nhập đơn đăng ký: chọn Điều kiện cấp giấy, tích Đăng ký lần đầu, rồi lần lượt tự bấm Thêm → Cá nhân / Thửa đất và điền từng chủ (tự Lưu chủ khi khớp), từng thửa (bạn bấm Lưu). Cửa sổ Quy trình xử lý: tự làm tác vụ Cập nhật dữ liệu pháp lý (Thực hiện, Đồng ý) và Lưu kho hồ sơ quét từ hàng chờ file (Cập nhật), tích Đã xử lý.">▶ Chạy cả TB</button><button class="btn auto" id="autoBtn" title="Tự động hết: bật lên thì tiện ích tự chạy khi bạn mở màn hình Tiếp nhận (trống), cửa sổ Nhập đơn đăng ký, Quy trình xử lý – tự bấm Lưu, Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, tác vụ 2–3, Chuyển tiếp / Thực thi (đúng tài khoản trong cài đặt), Trả hồ sơ. Ô lệch / hộp hỏi lạ / lỗi thì dừng, kêu ting chờ bạn. Kết ISO: chỉ khi bạn bật “Tự Kết ISO” (tab Biên nhận).">🤖 Tự động: TẮT</button><span class="sp"></span><button class="btn" id="resetDone" title="Xóa dấu ✓ của TB này">Xóa dấu ✓</button></div>
     <div class="note" id="note" style="display:none"></div>
     <div class="tabs">
       <button data-tab="bn">Biên nhận</button><button data-tab="chu">Chủ SD</button><button data-tab="thua">Thửa đất</button><button data-tab="gt">Giấy tờ</button><button data-tab="tr" title="Lấy tất cả các trường trên màn hình đang mở, tích trường cần điền">Trường</button>
@@ -554,7 +557,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         <label class="opt"><input type="checkbox" id="optTuChu"${S.opts.tuLuuChu !== false ? ' checked' : ''}> Nhập chủ sử dụng tự động: mọi ô khớp dữ liệu thì tiện ích tự bấm “Lưu” cửa sổ chủ rồi sang chủ sau (thiếu dữ liệu, hoặc trang hỏi “Giấy tờ tùy thân đã tồn tại…” thì vẫn dừng chờ bạn)</label>
         <label class="opt"><input type="checkbox" id="optTuHsq"${S.opts.tuHsq !== false ? ' checked' : ''}> Lưu kho hồ sơ quét tự động: tự thêm dòng (bấm “Lưu” ở cửa sổ nhỏ “Thông tin hồ sơ quét”) và tự “Tải lên” file từ hàng chờ</label>
         <label class="opt"><input type="checkbox" id="optTuQT"${S.opts.tuQT !== false ? ' checked' : ''}> Quy trình xử lý tự động: tác vụ Cập nhật dữ liệu pháp lý (bấm “Thực hiện”, “Đồng ý”), Lưu kho hồ sơ quét (bấm “Cập nhật”, “Đóng”), tích “Đã xử lý”</label>
-        <div class="hint">Nút <b>🤖 Tự động</b> (cạnh ▶): bật thì tiện ích làm hết – tự bấm cả Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Chuyển tiếp, Thực thi (chỉ chuyển cho đúng 2 tài khoản dưới). Tắt thì tiện ích không bấm các nút đó. Không bao giờ bấm Kết ISO, Trả hồ sơ.</div>
+        <div class="hint">Nút <b>🤖 Tự động</b> (cạnh ▶): bật thì tiện ích làm hết – tự bấm cả Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Chuyển tiếp, Thực thi (chỉ chuyển cho đúng 2 tài khoản dưới). Tắt thì tiện ích không bấm các nút đó. Trả hồ sơ: 🤖 bấm Thực hiện, Đồng ý. Kết ISO: chỉ khi bạn bật “Tự Kết ISO” (mục dưới).</div>
       </div>
       <div class="card">
         <div class="ct">🤖 Tự động hết – chuyển tiếp hồ sơ</div>
@@ -570,6 +573,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           .map(([v, t]) => `<option value="${v}"${(S.opts.tocDo || 'vua') === v ? ' selected' : ''}>${t}</option>`)
           .join('')}</select><span></span></div>
         <label class="opt"><input type="checkbox" id="optThuTT"${S.opts.thuThucThi ? ' checked' : ''}> Chạy thử: chọn sẵn đúng người rồi DỪNG ở “Thực thi” / “Trả hồ sơ” để tôi tự bấm (nên bật cho 1–2 hồ sơ đầu trên VBDLIS thật)</label>
+        <label class="opt"><input type="checkbox" id="optTuISO"${S.opts.tuISO === true ? ' checked' : ''}> <b>Tự Kết ISO</b> (mặc định tắt): hồ sơ lãnh đạo trả về, Quy trình chỉ còn thiếu “Kết ISO” → 🤖 tự bấm Xử lý tác vụ → Thực hiện → Đồng ý, tích “Đã xử lý”, rồi chuyển bước Trả kết quả, Trả hồ sơ. Tắt: bạn tự Kết ISO như cũ</label>
         <label class="opt"><input type="checkbox" id="optSangTB"${S.opts.tuSangTB !== false ? ' checked' : ''}> Chuyển lãnh đạo xong thì tự sang TB chưa làm tiếp theo (bấm “Về trang tiếp nhận hồ sơ”, tiếp nhận luôn)</label>
       </div>`,
     chu: (tb) =>
@@ -607,11 +611,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           <input data-path="thua.${i}.soThua" value="${esc(t.soThua)}" title="Số thửa">
           <input data-path="thua.${i}.soTo" value="${esc(t.soTo)}" title="Số tờ">
           <input data-path="thua.${i}.dienTich" value="${esc(t.dienTich)}" title="Diện tích (m²)">
-          <input data-path="thua.${i}.mdsd" value="${esc(t.mdsd)}" title="Mục đích sử dụng (LUC, BHK, NTS…)">
+          <input data-path="thua.${i}.mdsd" value="${esc(thuaMdsd(t))}" title="Mục đích sử dụng (LUC, BHK, NTS…; ONT / ONT+CLN điền thành ODT)">
           <button class="btn pri" data-fill="thua" data-i="${i}">${isDone(tb, 'thua' + i) ? '✓ Điền' : 'Điền'}</button>
         </div>
-        <div class="tr2"><input data-path="thua.${i}.diaChi" value="${esc(t.diaChi)}" title="Địa chỉ chi tiết" placeholder="Địa chỉ chi tiết"><input data-path="thua.${i}.thoiHan" value="${esc(t.thoiHan)}" title="Thời hạn SD (trống = ${DEFAULT_THOI_HAN})" placeholder="${DEFAULT_THOI_HAN}"></div>
-        <div class="tr3"><input data-path="thua.${i}.nguonGoc" value="${esc(t.nguonGoc)}" title="Nguồn gốc đất (trống = ${esc(DEFAULT_NGUON_GOC)})" placeholder="${esc(DEFAULT_NGUON_GOC)}"></div>
+        <div class="tr2"><input data-path="thua.${i}.diaChi" value="${esc(t.diaChi)}" title="Địa chỉ chi tiết" placeholder="Địa chỉ chi tiết"><input data-path="thua.${i}.thoiHan" value="${esc(isDatO(t) ? thuaThoiHan(t) : t.thoiHan)}" title="Thời hạn SD (trống = ${isDatO(t) ? DAT_O_THOI_HAN + ' – đất ở' : DEFAULT_THOI_HAN})" placeholder="${isDatO(t) ? DAT_O_THOI_HAN : DEFAULT_THOI_HAN}"></div>
+        <div class="tr3"><input data-path="thua.${i}.nguonGoc" value="${esc(isDatO(t) ? thuaNguonGoc(t) : t.nguonGoc)}" title="Nguồn gốc đất (trống = ${esc(isDatO(t) ? DAT_O_NGUON_GOC + ' – đất ở' : DEFAULT_NGUON_GOC)})" placeholder="${esc(isDatO(t) ? DAT_O_NGUON_GOC : DEFAULT_NGUON_GOC)}"></div>
       </div>`
         )
         .join('')}`,
@@ -1170,13 +1174,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const a = normArea(t.dienTich);
       const pl = t.dienTichPL ? normArea(t.dienTichPL) : a;
       return {
-        mdsd: t.mdsd,
+        mdsd: thuaMdsd(t),
         soThua: t.soThua,
         soTo: t.soTo,
         dienTich: a.v || '✗' + String(t.dienTich ?? ''), // sai dạng → bộ điền chắc chắn từ chối, báo ✗
         dienTichPL: pl.v || '✗' + String(t.dienTichPL ?? t.dienTich ?? ''),
-        nguonGoc: t.nguonGoc || DEFAULT_NGUON_GOC,
-        thoiHan: t.thoiHan || DEFAULT_THOI_HAN,
+        nguonGoc: thuaNguonGoc(t),
+        thoiHan: thuaThoiHan(t),
         diaChi: t.diaChi || (tb.nguoiNop && tb.nguoiNop.diaChi),
       };
     }
@@ -1193,6 +1197,33 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       return { loai: g, moTa: g, ten: g };
     }
     return {};
+  }
+
+  // MĐSD sẽ điền / đối chiếu: phường (đô thị) – đất ở là ODT: “ONT”, “ONT+CLN” (cả “ONT + CLN”, “CLN+ONT”, “ONT/CLN”…) → “ODT”
+  // (bạn yêu cầu 23/11: “ont+cln, ont thì thành odt hết”)
+  function thuaMdsd(t) {
+    const m = String((t && t.mdsd) || '').trim();
+    if (/^(ONT|ONT\s*[+,\/;&]\s*CLN|CLN\s*[+,\/;&]\s*ONT)$/i.test(m)) return 'ODT';
+    return m;
+  }
+  // thửa đất ở (mục đích ODT – đất ở tại đô thị; ONT / ONT+CLN đã đổi thành ODT)
+  function isDatO(t) {
+    const m = thuaMdsd(t);
+    return /^(ONT|ODT)\b/i.test(m) || /^dat o\b/.test(norm(m));
+  }
+  // nguồn gốc / thời hạn sẽ điền cho thửa. Đất ở mà dữ liệu để trống hoặc để mặc định của đất nông nghiệp
+  // (“… không thu tiền …”, “50 năm”) → “Công nhận QSDĐ như giao đất có thu tiền sử dụng đất”, “Lâu dài”.
+  // Dữ liệu ghi riêng giá trị khác (theo TBXN) thì giữ nguyên
+  function thuaNguonGoc(t) {
+    const v = String((t && t.nguonGoc) || '').trim();
+    if (isDatO(t) && (!v || norm(v) === norm(DEFAULT_NGUON_GOC))) return DAT_O_NGUON_GOC;
+    return v || DEFAULT_NGUON_GOC;
+  }
+  function thuaThoiHan(t) {
+    const v = String((t && t.thoiHan) || '').trim();
+    const k = (s) => norm(s).replace(/\s+/g, '');
+    if (isDatO(t) && (!v || k(v) === k(DEFAULT_THOI_HAN))) return DAT_O_THOI_HAN;
+    return v || DEFAULT_THOI_HAN;
   }
 
   const TITLES = {
@@ -1390,12 +1421,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // ---------- “🤖 Tự động hết” (bạn bật, 22/11) ----------
   // Bật: tiện ích tự chạy khi mở màn hình Tiếp nhận (trống) / Nhập đơn đăng ký / Quy trình xử lý, và TỰ BẤM Lưu thửa, Lưu chủ,
   // Đồng ý các hộp hỏi đã biết, Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, tác vụ 2–3. Ô lệch / hộp hỏi lạ / lỗi → dừng, kêu ting chờ bạn.
-  // Không bao giờ bấm Kết ISO, Chuyển tiếp, Thực thi, Trả hồ sơ.
+  // Kết ISO: chuỗi tự động chỉ làm khi bạn bật “Tự Kết ISO” (S.opts.tuISO, mặc định tắt – bạn yêu cầu 23/11).
   // chỉ ở ĐÚNG tab bạn bật (tbAutoTab) – tab VBDLIS khác coi như tắt (không tự chạy, không tự bấm).
   // S.tabId: undefined = đang hỏi tiện ích (chưa tự chạy), null = không biết tab (trang thử nghiệm) → coi là đúng tab
   const AUTO = () => S.opts.tuDong === true && S.tabId !== undefined && (S.tabId === null || String(S.autoTab) === String(S.tabId));
   // 🤖 bật thì coi như bật cả 3 ô “Nhập chủ / Lưu kho hồ sơ quét / Quy trình xử lý tự động” (không sửa lựa chọn của bạn – tắt 🤖 là về như cũ)
   const optOn = (k) => AUTO() || S.opts[k] !== false;
+  // bạn bật “Tự Kết ISO” (23/11) và 🤖 đang bật ở tab này → 🤖 tự Kết ISO khi Quy trình chỉ còn thiếu Kết ISO
+  const isoAuto = () => AUTO() && S.opts.tuISO === true;
   // vừa chuyển lãnh đạo (15 phút) – không tính mốc suy ra từ Quy trình 5 tác vụ (hồ sơ lãnh đạo đã trả về)
   const ldRecent = (s) => !!(s && s.ld && s.ldBy !== 'kq' && Date.now() - s.ld < 15 * 60 * 1000);
   // hồ sơ đang ở chặng cuối: lãnh đạo đã trả về / đã sang bước Trả kết quả / đang Trả hồ sơ – chưa trả hồ sơ
@@ -1439,13 +1472,15 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // dấu tạm giữ đã được thả chưa (bạn đã tự làm bước tiện ích chờ)
   function holdFree(id, h) {
     if (h.kind === 'tt') {
-      // chỉ câu báo đúng loại (chuyển tiếp / trả hồ sơ) và chỉ khi BẠN bấm Thực thi ở đúng bước đó
+      // chỉ khi BẠN bấm đúng nút của bước đó (Thực thi ở đúng bước / Thực hiện, Đồng ý của Trả hồ sơ) CHO ĐÚNG hồ sơ của TB này
+      // (số biên nhận của hồ sơ lúc bạn bấm → đúng TB này); câu báo thành công chỉ tính khi đến SAU cú bấm đó
+      // (không lấy câu báo của hồ sơ khác bạn vừa tự làm)
       const okRe = h.k === 'tra' ? /tra ho so/ : /chuyen tiep|chuyen ho so|thuc thi/;
-      const ok = toastsSince(h.at).some((t) => toastOk(t) && okRe.test(t.text || ''));
-      const me =
-        USER.btnAt > h.at &&
-        (h.k === 'tra' ? /^(thuc hien|dong y)$/.test(USER.btn) : USER.btn === 'thuc thi' && (!h.st || USER.btnStep === h.st));
-      if (!ok && !me) return false;
+      const ul = USER.btnSo ? tbOfSo(USER.btnSo).list : [];
+      const mine = USER.btnAt > h.at && ul.length === 1 && String(ul[0].tb) === String(id);
+      const me = mine && (h.k === 'tra' ? /^(thuc hien|dong y)$/.test(USER.btn) : USER.btn === 'thuc thi' && (!h.st || USER.btnStep === h.st));
+      if (!me) return false;
+      const ok = toastsSince(USER.btnAt - 500).some((t) => toastOk(t) && okRe.test(t.text || ''));
       // bạn tự bấm: có câu báo thành công → ghi xong bước đó; chưa có → ghi “đang chuyển” (bước sau kiểm lại, không bấm lại)
       if (h.k) {
         if (ok) markStage(id, h.k, 'auto');
@@ -1478,6 +1513,19 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // hộp báo trả hồ sơ thành công (nếu trang báo bằng hộp thay vì thông báo nổi) → Đóng
   const TRA_DONE_DIALOGS = [
     { re: '^(?!.*(vui long|khong the|khong duoc|that bai|khong thanh cong|(co|bi|gap|xay ra) loi)).*(thanh cong|da (duoc )?tra (ho so|ket qua))', btn: ['Đóng', 'OK', 'Đồng ý'] },
+  ];
+  const TRA_DONE_RE = new RegExp(TRA_DONE_DIALOGS[0].re);
+  // hộp hỏi ngay sau khi tiện ích bấm “Thực hiện” ở cửa sổ “Kết ISO” (bạn bật “Tự Kết ISO”) → Đồng ý, chỉ 1 lần;
+  // hộp báo lỗi / hộp khác → dừng chờ bạn
+  const ISO_DIALOGS = [
+    {
+      re: '^(?!.*(vui long|khong the|khong duoc|that bai|khong thanh cong|(co|bi|gap|xay ra) loi|chua nhap|chua chon|bat buoc|khong co quyen|xoa)).*(xac nhan|ban co|co chac|chac chan|that su|co muon).*(ket iso|thuc hien)',
+      btn: ['Đồng ý', 'Có', 'OK', 'Xác nhận'],
+    },
+  ];
+  // hộp báo Kết ISO thành công (nếu trang báo bằng hộp) → Đóng
+  const ISO_DONE_DIALOGS = [
+    { re: '^(?!.*(vui long|khong the|khong duoc|that bai|khong thanh cong|(co|bi|gap|xay ra) loi)).*(thanh cong|da ket iso)', btn: ['Đóng', 'OK', 'Đồng ý'] },
   ];
   // hộp xác nhận khi tích “Đã xử lý” / Chuyển tiếp / Thực thi (bước chuyển tiếp bạn cho phép): chỉ hộp HỎI xác nhận việc đó
   const FWD_DIALOGS = [
@@ -1646,12 +1694,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       else add(item, 'Diện tích', node.area, a.v, isNaN(pa) ? 'na' : Math.abs(pa - parseFloat(a.v)) < 1e-6 ? 'ok' : 'bad');
       const codes = node.purposes.map((x) => x.code.toUpperCase());
       const have = codes.flatMap((c) => c.split(/[+,]/));
-      const want = String(t.mdsd || '').trim().toUpperCase();
+      const want = thuaMdsd(t).toUpperCase(); // ONT / ONT+CLN → ODT (như lúc điền)
       const wants = want.split(/[\s+,;/]+/).filter(Boolean); // “ONT+CLN” → cả 2 mã phải có
       if (!want) add(item, 'Mục đích', codes.join(', '), '(dữ liệu thiếu – chọn tay)', 'gap');
       else add(item, 'Mục đích', codes.join(', '), want, !codes.length ? 'na' : wants.every((w) => have.includes(w)) ? 'ok' : 'bad');
       // thời hạn: chỉ so khi trang ghi kiểu “50 năm” / “Lâu dài” (cách ghi khác thì không đoán)
-      const th = String(t.thoiHan || DEFAULT_THOI_HAN);
+      const th = thuaThoiHan(t);
       // nhiều mục đích mà mỗi mục một thời hạn → không so (dữ liệu chỉ có một thời hạn cho cả thửa)
       const terms = [...new Set(node.purposes.map((x) => x.thoiHan).filter(Boolean).map((x) => norm(x).replace(/\s+/g, '')))];
       const pth = terms.length === 1 ? (node.purposes.find((x) => x.thoiHan) || {}).thoiHan || '' : terms.length > 1 ? '(nhiều thời hạn)' : '';
@@ -2464,6 +2512,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     // (không chuyển nhầm hồ sơ). sure: vừa Lưu hồ sơ của chính TB này trong lần chạy này (trang chưa hiện số thì vẫn là TB đó)
     const dossierTb = async (sure) => {
       const so = await dossierSo();
+      noteQtSo(so, true);
       const m = tbOfSo(so);
       let x = m.list.length === 1 ? m.list[0] : null;
       if (!x && !so && sure && tb) x = tb;
@@ -2520,7 +2569,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     // bấm “Xử lý hồ sơ” → chờ Quy trình (hoặc thông báo) → làm theo Quy trình
     const openQt = async (wantSo) => {
       const s = S.stage[String(tb.tb)] || {};
-      if ((await topNow()) && realModals().length) throw new Error(`đang có cửa sổ mở trên trang (${modalDiag()}) – tiện ích không bấm “Xử lý hồ sơ”`);
+      {
+        const t0m = await topNow();
+        if (t0m && (realModals().length || (t0m.frame && t0m.frame !== location.href)))
+          throw new Error(`đang có cửa sổ mở trên trang (${t0m.frame && t0m.frame !== location.href ? t0m.name || 'khung con' : modalDiag()}) – tiện ích không bấm “Xử lý hồ sơ”`);
+      }
       {
         // hộp đang mở sẵn không được coi là câu trả lời của “Xử lý hồ sơ”
         const d0 = await dlgNow([]);
@@ -2551,6 +2604,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
       if (got === 'dlg') {
         const dt = norm(d.text || d.title || '');
+        if (wantSo) {
+          // trang trả lời về hồ sơ ĐANG CHỌN – khác hồ sơ vừa tìm (khung bên phải / dòng chọn) thì không ghi tiến độ cho TB này
+          const so3 = await dossierSo();
+          if (so3 && soKey(so3) !== soKey(wantSo)) {
+            needYou('Trang báo – bạn xem', 'bad');
+            throw ask(`bấm “Xử lý hồ sơ”, trang báo “${d.text.slice(0, 160)}” – nhưng hồ sơ đang chọn là ${so3}, không phải ${wantSo}; tiện ích không ghi gì`, '');
+          }
+        }
         // đã bấm Thực thi chuyển lãnh đạo (hoặc bạn tự chuyển sau khi nhập đơn) mà trang báo hồ sơ không còn của bạn → đã chuyển lãnh đạo
         if ((pending(s, 'ld') || (s.cv && s.don && !s.ld && !s.fwd)) && !(s.fwd && s.fwd.bad) && LD_MOVED.test(dt)) {
           markStage(tb.tb, 'ld', 'suy');
@@ -2635,14 +2696,131 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (q2.rows.some((r) => ['pl', 'lk'].includes(qtKindOf(r)) && !r.chk.checked)) return;
         q = q2;
       }
+      const left = q.rows.filter((r) => !r.chk.checked);
+      if (left.length && isoAuto() && left.every((r) => qtKindOf(r) === 'iso')) {
+        const q3 = await runIso(q);
+        if (!q3) return;
+        q = q3;
+      }
       if (q.rows.some((r) => !r.chk.checked)) {
+        const other = q.rows.filter((r) => !r.chk.checked && qtKindOf(r) !== 'iso');
+        if (isoAuto() && other.length) {
+          step('Kết ISO').skip(`còn tác vụ chưa tích “Đã xử lý”: ${other.map((r) => r.name).join(', ')} – tiện ích chưa Kết ISO`);
+          tailOk = '<div class="hint">Bạn xem các tác vụ chưa tích “Đã xử lý”. Chỉ còn thiếu <b>Kết ISO</b> là 🤖 tự Kết ISO, chuyển bước “Trả kết quả” rồi Trả hồ sơ.</div>';
+          tailNeed = '-';
+          return;
+        }
         step('Kết ISO').skip('chưa tích đủ “Đã xử lý” (Kết ISO bạn tự làm) – tích đủ 5 tác vụ là tiện ích tự chuyển bước Trả kết quả');
         tailOk =
-          '<div class="hint">Bạn làm <b>Kết ISO</b> (Thực hiện, Đồng ý) và tích “Đã xử lý”. Tích đủ 5 tác vụ là 🤖 Tự động hết tự <b>Chuyển tiếp</b> bước “Trả kết quả” rồi <b>Trả hồ sơ</b>.</div>';
+          '<div class="hint">Bạn làm <b>Kết ISO</b> (Thực hiện, Đồng ý) và tích “Đã xử lý”. Tích đủ 5 tác vụ là 🤖 Tự động hết tự <b>Chuyển tiếp</b> bước “Trả kết quả” rồi <b>Trả hồ sơ</b>.' +
+          (AUTO() ? ' Muốn 🤖 tự Kết ISO: tích ô <b>Tự Kết ISO</b> ở tab Biên nhận (mục 🤖 Tự động hết – chuyển tiếp).' : '') +
+          '</div>';
         tailNeed = '-';
         return;
       }
       return runForward(q);
+    };
+    // Kết ISO (bạn bật “Tự Kết ISO”, 23/11): Quy trình chỉ còn thiếu “Kết ISO” → Xử lý tác vụ → cửa sổ “Kết ISO” → Thực hiện → Đồng ý (1 lần)
+    // → trang tích “Đã xử lý” (chưa tích thì tiện ích tích) → đọc lại Quy trình: trả về Quy trình mới; null = dừng chờ bạn (Chạy thử / chưa tích được).
+    // Hộp hỏi lạ / trang báo lỗi / bạn đang thao tác → dừng, kêu ting. Đã bấm Thực hiện mà chưa xác nhận (trang tải lại…) → không bấm lại.
+    const runIso = async (q) => {
+      cur = step('Hồ sơ của Quy trình (Kết ISO)');
+      const { x, so } = await dossierTb(false);
+      stage3 = true;
+      if (x !== tb) setTb(x);
+      title = `TB ${tb.tb} – Kết ISO`;
+      const s = S.stage[String(tb.tb)] || {};
+      if (s.hoan) throw ask(`TB ${tb.tb} đang tạm hoãn – tiện ích không Kết ISO`, actBtn('unHoan', tb.tb, `Bỏ tạm hoãn, chạy TB ${tb.tb}`));
+      cur.ok(`${so} – TB ${tb.tb}`);
+      const iso = q.rows.find((r) => qtKindOf(r) === 'iso');
+      if (!iso || !iso.chk) throw new Error('không thấy tác vụ “Kết ISO” trong Quy trình');
+      if (iso.chk.checked) return q;
+      if (pending(s, 'iso'))
+        throw ask(`đã bấm “Thực hiện” Kết ISO lúc ${fmtTime(s.fwd.at)} mà “Kết ISO” chưa tích “Đã xử lý” – kiểm tra trên VBDLIS; chưa Kết ISO thì bấm nút dưới`, redoBtn());
+      if (S.opts.thuThucThi) {
+        if (iso.link) ringFor(iso.link, 60000);
+        step('Kết ISO').ok('Chạy thử: đã tô vàng – bạn tự bấm Xử lý tác vụ → Thực hiện → Đồng ý');
+        tailNeed = '-';
+        return null;
+      }
+      cur = step('Mở “Kết ISO” (Xử lý tác vụ)');
+      if (!iso.link) throw new Error('không thấy “Xử lý tác vụ” của Kết ISO');
+      clickPage(iso.link);
+      let im = null;
+      for (let i = 0; i < 50 && !im; i++) {
+        stopIf();
+        await sleep(400);
+        im = isoModal();
+      }
+      if (!im) {
+        log.push({ icon: '•', cls: 'muted', html: esc(`Để báo lỗi (gửi người hỗ trợ): cửa sổ: ${modalDiag()}; khối có nút Thực hiện: ${traDiag()}`) });
+        needYou('Chưa thấy cửa sổ Kết ISO – bạn xem', 'bad');
+        throw new Error('bấm “Xử lý tác vụ” rồi mà chưa nhận ra cửa sổ “Kết ISO” – bạn tự Kết ISO (Thực hiện → Đồng ý), 🤖 làm tiếp; chụp dòng “Để báo lỗi” gửi người hỗ trợ');
+      }
+      cur.ok();
+      cur = step('Bấm “Thực hiện”, “Đồng ý” (Kết ISO)');
+      const go = [...im.querySelectorAll('button, a, input[type="button"], input[type="submit"]')].find((b) => shownEl(b) && btnText(b) === 'thuc hien');
+      if (!go) throw new Error('không thấy nút “Thực hiện” của cửa sổ Kết ISO');
+      await setFwd(tb.tb, 'iso'); // ghi dấu trước khi bấm
+      stopIf();
+      // kiểm tra ngay trước khi bấm: đúng cửa sổ “Kết ISO”, không có hộp hỏi, bạn không vừa thao tác
+      if (isoModal() !== im || pageDialog() || Date.now() - USER.at < 2000) {
+        await setMark(tb.tb, 'fwd', null);
+        throw ask('cửa sổ Kết ISO vừa đổi / bạn đang thao tác – bấm “▶ Chạy cả TB” lại', '');
+      }
+      const t0 = Date.now();
+      clickPage(go);
+      let good = null;
+      let closedAt = 0;
+      let confirmed = 0;
+      for (;;) {
+        stopIf();
+        const ts = toastsSince(t0);
+        const bad = ts.find(toastBad);
+        if (bad) {
+          needYou('Kết ISO chưa xong – bạn xem', 'bad');
+          throw ask(`bấm “Thực hiện” Kết ISO, trang báo “${bad.raw.slice(0, 150)}”`, redoBtn());
+        }
+        const dd = await dlgNow(ISO_DONE_DIALOGS);
+        if (dd && dd.answered) good = good || { raw: dd.title || 'Kết ISO thành công' };
+        else if (dd) {
+          const canAsk = !confirmed && Date.now() - t0 < 15000 * slowK();
+          const d = await dlgNow(canAsk ? ISO_DIALOGS : []);
+          if (d && d.answered) confirmed++;
+          else if (d) {
+            needYou('Trang hỏi – bạn xem', 'bad');
+            throw ask(`trang hỏi / báo “${d.text.slice(0, 150)}” – tiện ích dừng`, redoBtn());
+          }
+        }
+        good = good || ts.find(toastOk) || null;
+        if (!(im.isConnected && shownEl(im))) {
+          if (!closedAt) closedAt = Date.now();
+          if (good) break;
+          if (USER.at > t0) {
+            needYou('Kết ISO – bạn kiểm tra', 'bad');
+            throw ask('cửa sổ Kết ISO đóng lúc bạn đang bấm / gõ trên trang (chưa thấy câu báo thành công) – bạn kiểm tra trên VBDLIS', redoBtn());
+          }
+          if (Date.now() - closedAt > 2000) break;
+        }
+        if (Date.now() - t0 > 60000 * slowK()) throw new Error('60 giây cửa sổ Kết ISO chưa đóng – xem lại trang');
+        await sleep(300);
+      }
+      cur.ok(good ? `trang báo “${good.raw.slice(0, 80)}”` : `cửa sổ Kết ISO đã đóng sau khi bấm ${confirmed ? 'Đồng ý' : 'Thực hiện'}, không có câu báo lỗi`);
+      // trang mở lại Quy trình và tự tích “Đã xử lý” của Kết ISO; chưa tích thì tiện ích tích
+      cur = step('Tích “Đã xử lý” – Kết ISO');
+      const tk = await tickTask(iso.code || 'KetISO', alive);
+      if (!/da tich|duoc tich/.test(norm(tk))) {
+        cur.skip(tk);
+        needYou('Kết ISO – bạn xem', 'bad');
+        tailOk = '<div class="hint">Kết ISO đã bấm xong. Bạn tích “Đã xử lý” của Kết ISO (Quy trình xử lý) rồi bấm “▶ Chạy cả TB” – tiện ích không Kết ISO lại.</div>';
+        tailNeed = '-';
+        return null;
+      }
+      cur.ok(tk);
+      await setMark(tb.tb, 'fwd', null);
+      const q2 = await qtSettled(alive);
+      if (!q2 || q2.v !== q.v) throw ask('Kết ISO xong mà Quy trình xử lý chưa hiện lại đúng – bạn xem trên VBDLIS, rồi bấm “▶ Chạy cả TB”', '');
+      return q2;
     };
     // chuyển tiếp: Quy trình → bước nhận → tài khoản
     const FWD = {
@@ -2929,7 +3107,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
                   .join(' | ') || '(không có dòng)'
               }; chữ lạ trong dòng 1: ${(() => {
                 const r1 = listDataRows()[0];
-                const odd = r1 ? [...new Set((r1.textContent || '').match(/[^\x20-\x7E\u00C0-\u024F\u1E00-\u1EFF\s]/g) || [])] : [];
+                const odd = r1 ? [...new Set((r1.textContent || '').match(/[^\x20-\x7E\u00C0-\u024F\u1E00-\u1EFF\s]/gu) || [])] : [];
                 return odd.length ? odd.slice(0, 8).map((c) => 'U+' + c.codePointAt(0).toString(16).toUpperCase()).join(' ') : 'không';
               })()}`
             ),
@@ -2938,9 +3116,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         }
         const top = await topNow();
         if (top) {
-          // bộ điền báo có cửa sổ mở: trên trang thật sự còn cửa sổ → chờ; không thấy cửa sổ thật nào (cửa sổ ma) 3 lần liền → bỏ qua
-          if (realModals().length || ++ghost < 3) {
-            why = `chờ cửa sổ “${top.name || '?'}” đóng`;
+          // bộ điền báo có cửa sổ mở: trên trang thật sự còn cửa sổ (hoặc cửa sổ ở khung con) → chờ;
+          // không thấy cửa sổ thật nào (cửa sổ ma) 3 lần liền → bỏ qua
+          if (realModals().length || (top.frame && top.frame !== location.href) || ++ghost < 3) {
+            why = `chờ ${top.name || 'cửa sổ'} đóng`;
             continue;
           }
         } else ghost = 0;
@@ -2959,7 +3138,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           }
           // chưa có → gõ Số biên nhận vào ô tìm → đúng 1 hồ sơ → bấm vào hồ sơ
           tries++;
-          const r = await searchList(tb, alive);
+          S.listRun = true; // đang tìm ở danh sách (■ Dừng lúc này → tạm dừng tìm)
+          let r;
+          try {
+            r = await searchList(tb, alive);
+          } finally {
+            S.listRun = false;
+          }
           if (r.err) throw new Error(r.err);
           if (r.row) {
             cur.ok(`tìm thấy hồ sơ ${tb.soBienNhan}${tries > 1 ? ` (lần tìm thứ ${tries})` : ''}`);
@@ -2984,8 +3169,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         } else why = `chưa nhận ra trang (trang danh sách: ${onListPage() ? 'có' : 'không'}, ô tìm số biên nhận: ${sbnSearch() ? 'có' : 'không'}, nút Xử lý hồ sơ: ${btnXuLyHoSo() ? 'có' : 'không'})`;
       }
       needYou('Chưa mở lại được hồ sơ – bạn xem', 'bad');
-      cur.bad(`chưa bấm được vào hồ sơ (${why || 'chưa thấy đúng hồ sơ'}) – bạn bấm vào hồ sơ rồi “Xử lý hồ sơ”, Tự động hết làm tiếp (Trả hồ sơ)`);
-      tailNeed = '-';
+      tbKnown = true; // giữ TB này (🤖 không tự tìm / mở lại cho tới khi bạn bấm ▶)
+      throw new Error(`chưa bấm được vào hồ sơ (${why || 'chưa thấy đúng hồ sơ'}) – bạn bấm vào hồ sơ rồi “Xử lý hồ sơ”, Tự động hết làm tiếp (Trả hồ sơ)`);
     };
     // trang Danh sách hồ sơ thụ lý (bạn yêu cầu 22/11, ảnh 15–17): mỗi lần tìm MỘT TB còn chờ (lần lượt): gõ Số biên nhận vào ô tìm, bấm 🔍.
     // Chưa ra kết quả (lãnh đạo chưa trả về…) → thôi, 5 giây sau 🤖 tìm TB kế tiếp. Ra đúng 1 hồ sơ → bấm vào hồ sơ → Xử lý hồ sơ → làm tiếp
@@ -3008,12 +3193,28 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const n = labelDossierNumbers();
         return n.length === 1 ? n[0] : n.length ? '?' : '';
       };
-      const bg0 = getComputedStyle(row).backgroundColor;
-      const m0 = rowSelected(row); // dòng đã trông như “được chọn” TRƯỚC khi bấm (vd. lớp trạng thái) → không coi là bằng chứng
-      const p0 = panelSo(); // khung bên phải TRƯỚC khi bấm (số cũ còn sót không tính)
-      let marked = false;
+      // trạng thái của dòng (lớp, aria-selected, màu nền / chữ của dòng và 2 ô đầu) – ĐỔI sau cú bấm = trang đã nhận cú bấm.
+      // (trang thật: dòng được chọn thêm lớp “selected”, nền xanh đậm; ô đầu luôn có ▶ nên không dùng biểu tượng làm dấu chọn)
+      const rowState = (r) => {
+        if (!r || !r.isConnected) return '';
+        const cs = getComputedStyle(r);
+        const cells = [...r.children].slice(0, 2).map((c) => {
+          const s = getComputedStyle(c);
+          return s.backgroundColor + '/' + s.color;
+        });
+        return [r.className, r.getAttribute('aria-selected') || '', cs.backgroundColor, cs.color, ...cells].join('|');
+      };
+      const p0 = panelSo(); // khung bên phải TRƯỚC khi bấm (số cũ còn sót – kể cả đúng số này – không tính là bằng chứng)
+      // dòng ĐÃ được chọn sẵn (lớp selected) và khung bên phải không hiện hồ sơ khác → không bấm nữa (bấm lại có thể bỏ chọn)
+      if (rowSelected(row) && !(p0 && p0 !== '?' && soKey(p0) !== want)) {
+        S.listPick = { so: x.soBienNhan, at: Date.now() };
+        const n0 = listDataRows().filter((r) => soKey(rowSo(r)) !== want).length + 1;
+        return { row, marked: true, panOk: !!p0 && p0 !== '?' && soKey(p0) === want, n: n0, already: true };
+      }
+      const s0 = rowState(row);
+      let changed = false;
       let pan = '';
-      // bấm ô chữ; trang chưa nhận (không đổi gì) → bấm ô đầu dòng → bấm cả dòng
+      // bấm ô chữ; trang chưa nhận (dòng không đổi, khung bên phải không đổi) → bấm ô đầu dòng → bấm cả dòng
       for (const how of ['plain', 'first', 'row']) {
         clickRowCell(row, how);
         await waitUntil(
@@ -3022,28 +3223,28 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
               const r2 = exactRow();
               if (r2) row = r2;
             }
-            marked = rowSelected(row) || getComputedStyle(row).backgroundColor !== bg0;
+            changed = rowState(row) !== s0;
             pan = panelSo();
-            // khung bên phải hiện ĐÚNG số này → xong; khung đổi sang số khác → thôi chờ; không đổi → dòng đã được đánh dấu chọn
-            if (pan && pan !== '?' && (soKey(pan) === want || pan !== p0)) return true;
-            return marked && !m0;
+            return changed || (!!pan && pan !== '?' && pan !== p0);
           },
           (how === 'plain' ? 3500 : 2500) * slowK(),
           alive
         );
-        if ((pan && pan !== '?' && soKey(pan) === want) || (marked && !m0) || (pan && pan !== '?' && pan !== p0)) break;
+        if (changed || (pan && pan !== '?' && pan !== p0)) break;
       }
-      const panOk = !!pan && pan !== '?' && soKey(pan) === want;
       // khung bên phải ĐỔI sang hồ sơ khác sau cú bấm → chọn nhầm
-      if (pan && pan !== '?' && !panOk && pan !== p0) {
-        const e = new Error(`đã bấm vào hồ sơ ${x.soBienNhan} mà khung “Thông tin hồ sơ” vẫn hiện hồ sơ ${pan} – tiện ích không bấm Xử lý hồ sơ`);
+      if (pan && pan !== '?' && pan !== p0 && soKey(pan) !== want) {
+        const e = new Error(`đã bấm vào hồ sơ ${x.soBienNhan} mà khung “Thông tin hồ sơ” hiện hồ sơ ${pan} – tiện ích không bấm Xử lý hồ sơ`);
         e.repick = true;
         throw e;
       }
+      // bằng chứng cú bấm đã ăn: dòng đổi, hoặc khung bên phải đổi sang đúng số này (khung cũ còn sót đúng số không tính)
+      const marked = changed;
+      const panOk = !!pan && pan !== '?' && soKey(pan) === want && (pan !== p0 || changed);
       const others = listDataRows().filter((r) => soKey(rowSo(r)) !== want); // dòng của hồ sơ KHÁC (bản lặp của hồ sơ này không tính)
       const n = others.length + 1;
       const othersMarked = others.some(rowSelected);
-      if (n > 1 && !panOk && (!marked || m0 || othersMarked)) {
+      if (n > 1 && !panOk && (!marked || othersMarked)) {
         const e = new Error(`danh sách có ${n} hồ sơ, đã bấm vào hồ sơ ${x.soBienNhan} mà chưa thấy dòng đó được chọn – tiện ích không bấm Xử lý hồ sơ`);
         e.repick = true;
         throw e;
@@ -3070,7 +3271,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         }
         row = pr.row;
         cur.ok(
-          pr.panOk
+          pr.already
+            ? 'dòng đã được chọn sẵn'
+            : pr.panOk
             ? 'khung “Thông tin hồ sơ” đã hiện đúng hồ sơ này'
             : pr.marked
             ? 'dòng đã được chọn'
@@ -3101,6 +3304,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         stopIf();
         const r = await searchList(x, alive);
         if (r.err) throw new Error(r.err);
+        if (r.dup) throw new Error(`có ${r.dup} hồ sơ cùng số biên nhận ${x.soBienNhan} (ngày tiếp nhận khác nhau – trùng?) – tiện ích không chọn; bạn xem rồi bấm ▶`);
         row = r.row;
         if (row) {
           cur.ok(n > 1 ? `có hồ sơ (lần tìm thứ ${n})` : 'có hồ sơ');
@@ -3119,6 +3323,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       S.sweepSeen = { ...(S.sweepSeen || {}), [String(x.tb)]: { snap: stageSnap(x.tb), at: Date.now() } };
       saveSweepSeen();
       if (String(x.tb) !== String(S.cur)) setChainTb(x.tb); // trang tải lại giữa chừng → 🤖 vẫn làm tiếp TB này
+      S.listRun = false; // xong phần tìm – từ đây là mở / làm hồ sơ
       return openFromList(tb, row);
     };
     const runSweep = async (manual) => {
@@ -3168,6 +3373,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         cur = step(`Tìm số biên nhận ${x.soBienNhan} (TB ${x.tb})`);
         const r = await searchList(x, alive);
         if (r.err) throw new Error(r.err);
+        if (!r.row && r.dup) {
+          // có nhiều hồ sơ cùng số (ngày tiếp nhận khác nhau) → không chọn, giữ TB chờ bạn xem
+          S.sweepNext = Date.now() + 5000;
+          tbKnown = true;
+          if (x !== tb) setTb(x);
+          throw new Error(`có ${r.dup} hồ sơ cùng số biên nhận ${x.soBienNhan} (ngày tiếp nhận khác nhau – trùng?) – tiện ích không chọn; bạn xem rồi bấm ▶`);
+        }
         if (!r.row) {
           S.sweepNext = Date.now() + 5000; // 5 giây sau mới tìm TB kế tiếp (giữa 2 lần tìm, bảng điền rảnh cho bạn dùng)
           // lượt tìm này đã tìm TB này, chưa thấy (đủ mọi TB chờ = xong một lượt)
@@ -3193,6 +3405,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       S.sweepSeen = { ...(S.sweepSeen || {}), [String(tb.tb)]: { snap: stageSnap(tb.tb), at: Date.now() } };
       saveSweepSeen();
       if (String(tb.tb) !== String(S.cur)) setChainTb(tb.tb); // trang tải lại giữa chừng → 🤖 vẫn làm tiếp TB này
+      S.listRun = false; // xong phần tìm – từ đây là mở / làm hồ sơ
       return openFromList(tb, row);
     };
     // chưa thấy câu báo sau khi chuyển lãnh đạo → mở lại “Xử lý hồ sơ” một lần để xem. Chỉ ghi “đã chuyển” khi trang báo rõ hồ sơ
@@ -3256,9 +3469,17 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (s.hoan) throw ask(`TB ${tb.tb} đang tạm hoãn – tiện ích không trả hồ sơ`, actBtn('unHoan', tb.tb, `Bỏ tạm hoãn, chạy TB ${tb.tb}`));
       if (!s.trk) markStage(tb.tb, 'trk', 'suy'); // Quy trình “Trả hồ sơ” hiện ra = đã sang bước Trả kết quả
       cur.ok(`${so} – TB ${tb.tb}`);
-      const iso = q.rows.find((r) => qtKindOf(r) === 'iso');
-      const tra = q.rows.find((r) => qtKindOf(r) === 'tra');
-      if (!iso.chk.checked) throw ask('“Kết ISO” chưa tích “Đã xử lý” – tiện ích không Trả hồ sơ', '');
+      let iso = q.rows.find((r) => qtKindOf(r) === 'iso');
+      let tra = q.rows.find((r) => qtKindOf(r) === 'tra');
+      if (!iso.chk.checked && isoAuto() && !s.tra && !tra.chk.checked) {
+        const q3 = await runIso(q);
+        if (!q3) return;
+        q = q3;
+        iso = q.rows.find((r) => qtKindOf(r) === 'iso');
+        tra = q.rows.find((r) => qtKindOf(r) === 'tra');
+      }
+      if (!iso.chk.checked)
+        throw ask('“Kết ISO” chưa tích “Đã xử lý” – tiện ích không Trả hồ sơ' + (AUTO() && !isoAuto() ? ' (muốn 🤖 tự Kết ISO: tích ô “Tự Kết ISO” ở tab Biên nhận)' : ''), '');
       if (s.tra || tra.chk.checked) {
         if (!s.tra) markStage(tb.tb, 'tra', 'qt');
         step('Trả hồ sơ').skip('đã trả hồ sơ');
@@ -3285,10 +3506,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         await sleep(400);
         tm = traModal();
       }
-      if (!tm) throw new Error('bấm “Xử lý tác vụ” rồi mà chưa thấy cửa sổ “Trả hồ sơ”');
+      if (!tm) {
+        log.push({ icon: '•', cls: 'muted', html: esc(`Để báo lỗi (gửi người hỗ trợ): cửa sổ: ${modalDiag()}; khối có nút Thực hiện: ${traDiag()}`) });
+        needYou('Chưa thấy cửa sổ Trả hồ sơ – bạn xem', 'bad');
+        throw new Error('bấm “Xử lý tác vụ” rồi mà chưa nhận ra cửa sổ “Trả hồ sơ” – bạn tự bấm Thực hiện → Đồng ý (TB vẫn thành ✓ Xong); chụp dòng “Để báo lỗi” gửi người hỗ trợ');
+      }
       cur.ok();
       cur = step('Bấm “Thực hiện”, “Đồng ý” (Trả hồ sơ)');
-      const go = [...tm.querySelectorAll('button, a')].find((b) => shownEl(b) && btnText(b) === 'thuc hien');
+      const go = [...tm.querySelectorAll('button, a, input[type="button"], input[type="submit"]')].find((b) => shownEl(b) && btnText(b) === 'thuc hien');
       if (!go) throw new Error('không thấy nút “Thực hiện” của cửa sổ Trả hồ sơ');
       await setFwd(tb.tb, 'tra'); // ghi dấu trước khi bấm
       stopIf();
@@ -3335,6 +3560,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (Date.now() - t0 > 60000 * slowK()) throw new Error('60 giây cửa sổ Trả hồ sơ chưa đóng – xem lại trang');
         await sleep(300);
       }
+      // bấm Thực hiện (và Đồng ý) xong, cửa sổ đóng mà trang không báo lỗi → coi như đã trả (bạn yêu cầu 23/11:
+      // “khi bấm thực hiện thì TB ý phải là trạng thái đã xong”)
+      if (!good) good = { raw: confirmed ? 'cửa sổ Trả hồ sơ đã đóng sau khi bấm Đồng ý, không có câu báo lỗi' : 'cửa sổ Trả hồ sơ đã đóng sau khi bấm Thực hiện, không có câu báo lỗi' };
       if (good) markStage(tb.tb, 'tra', 'auto'); // ghi mốc Trả hồ sơ + ✓ Xong
       cur.ok(good ? `trang báo “${good.raw.slice(0, 80)}”` : 'cửa sổ Trả hồ sơ đã đóng (chưa thấy câu báo thành công – bạn kiểm tra)');
       if (good) step(`TB ${tb.tb}`).ok('✓ Xong');
@@ -4116,7 +4344,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         tailOk +
         bqHtml +
         (AUTO()
-          ? '<div class="hint">🤖 Tự động hết đang BẬT: tiện ích tự bấm Lưu, Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Chuyển tiếp / Thực thi (đúng tài khoản trong cài đặt), Trả hồ sơ, tác vụ 2–3; chuỗi tự động không bấm Kết ISO (nút bạn tích ở tab Trường thì bấm theo mẫu). Dừng giữa chừng thì sửa xong bấm “▶ Chạy cả TB”.</div>'
+          ? `<div class="hint">🤖 Tự động hết đang BẬT: tiện ích tự bấm Lưu, Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Chuyển tiếp / Thực thi (đúng tài khoản trong cài đặt), Trả hồ sơ, tác vụ 2–3; ${
+              isoAuto() ? 'tự Kết ISO (bạn bật “Tự Kết ISO”)' : 'không bấm Kết ISO (bật ô “Tự Kết ISO” ở tab Biên nhận để 🤖 tự làm)'
+            } – nút bạn tích ở tab Trường thì bấm theo mẫu. Dừng giữa chừng thì sửa xong bấm “▶ Chạy cả TB”.</div>`
           : '<div class="hint">Tự động hết đang TẮT: tiện ích không bấm Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Chuyển tiếp, Thực thi, Trả hồ sơ, Kết ISO. Bấm “Chạy cả TB” lại bất cứ lúc nào – bước/thửa đã xong sẽ được bỏ qua.</div>');
       show();
       // báo bạn: xong (tới lượt bạn bấm Lưu) hoặc dừng để hỏi / báo lỗi; bạn tự bấm Dừng thì im lặng
@@ -4622,11 +4852,15 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             '• Xử lý hồ sơ → tích “Tiếp nhận hồ sơ” → Chuyển tiếp → chọn đúng tài khoản chuyên viên → Thực thi',
             '• Xử lý hồ sơ → Nhập đăng ký: Lưu chủ / thửa, Đồng ý “Giấy tờ tùy thân đã tồn tại”, Lưu thông tin đăng ký, Hoàn tất, Đóng',
             '• tích “Nhập đăng ký”, “Giấy tờ đính kèm” → Chuyển tiếp → chọn đúng tài khoản lãnh đạo → Thực thi → sang TB chưa làm tiếp theo',
-            '• Quy trình 5 tác vụ: tác vụ 2 (Thực hiện, Đồng ý), 3 (Lưu kho hồ sơ quét, Cập nhật); bạn Kết ISO, tích đủ → Chuyển tiếp bước “Trả kết quả” (tài khoản của bạn) → Thực thi → Xử lý hồ sơ → Trả hồ sơ: Thực hiện, Đồng ý',
+            `• Quy trình 5 tác vụ: tác vụ 2 (Thực hiện, Đồng ý), 3 (Lưu kho hồ sơ quét, Cập nhật); ${
+              S.opts.tuISO === true ? 'tự Kết ISO (Thực hiện, Đồng ý)' : 'bạn Kết ISO'
+            }, tích đủ → Chuyển tiếp bước “Trả kết quả” (tài khoản của bạn) → Thực thi → Xử lý hồ sơ → Trả hồ sơ: Thực hiện, Đồng ý`,
             '',
             `Tài khoản nhận: chuyên viên (của bạn) “${S.opts.ctCV || '(chưa đặt)'}”, lãnh đạo “${S.opts.ctLD || '(chưa đặt)'}” (sửa ở tab Biên nhận).`,
             'Ô lệch dữ liệu / không thấy đúng người / hộp hỏi lạ / lỗi → dừng, kêu ting chờ bạn.',
-            'Không bao giờ bấm Kết ISO.',
+            S.opts.tuISO === true
+              ? 'Kết ISO: tiện ích tự làm (bạn đã bật “Tự Kết ISO” – tắt ở tab Biên nhận).'
+              : 'Không bấm Kết ISO (muốn 🤖 tự làm: bật ô “Tự Kết ISO” ở tab Biên nhận).',
           ].join('\n')
         );
         if (!ok) return;
@@ -4787,6 +5021,16 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       S.opts = { ...S.opts, thuThucThi: e.target.checked };
       safeSet({ tbOpts: S.opts });
       setStatus(e.target.checked ? 'Chạy thử: tiện ích chọn sẵn đúng người rồi dừng ở Thực thi / Trả hồ sơ cho bạn bấm.' : 'Tự bấm Thực thi / Trả hồ sơ (Tự động hết).');
+      return;
+    }
+    if (e.target.id === 'optTuISO') {
+      S.opts = { ...S.opts, tuISO: e.target.checked };
+      safeSet({ tbOpts: S.opts });
+      setStatus(
+        e.target.checked
+          ? 'Tự Kết ISO: BẬT – khi 🤖 Tự động hết bật, Quy trình chỉ còn thiếu Kết ISO thì tiện ích tự Kết ISO (Thực hiện, Đồng ý) rồi chuyển bước Trả kết quả.'
+          : 'Tự Kết ISO: TẮT – bạn tự làm Kết ISO, tiện ích chờ như cũ.'
+      );
       return;
     }
     if (e.target.id === 'optSangTB') {
@@ -6325,8 +6569,18 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // Quy trình 5 tác vụ (có Kết ISO): KHÔNG tự chuyển tiếp (chỉ làm tác vụ 2–3 như cũ).
   const btnText = (b) => norm((b && (b.value || b.textContent)) || '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
   const titleOf = (m) => {
-    const t = m && m.querySelector('.modal-title, .ui-dialog-title, .jconfirm-title, .modal-header h4, .modal-header h3, .modal-header');
-    return t ? norm(t.textContent).replace(/^[^a-z0-9]+/, '') : '';
+    if (!m) return '';
+    // ưu tiên phần tử tiêu đề (theo thứ tự này, không theo thứ tự trên trang – thanh đầu cửa sổ đứng trước tiêu đề của nó)
+    for (const sel of ['.modal-title', '.ui-dialog-title', '.jconfirm-title', '.k-window-title', '.modal-header h4', '.modal-header h3', '.panel-heading .panel-title']) {
+      const t = m.querySelector(sel);
+      if (t) return norm(t.textContent).replace(/^[^a-z0-9]+/, '');
+    }
+    // chỉ có thanh đầu cửa sổ: bỏ nút × và chữ ẩn của nó (“Đóng” / “Close”) – không thì tên thành “đóng trả hồ sơ”
+    const h = m.querySelector('.modal-header, .panel-heading');
+    if (!h) return '';
+    const c = h.cloneNode(true);
+    c.querySelectorAll('button, .close, .sr-only, [aria-hidden="true"]').forEach((x) => x.remove());
+    return norm(c.textContent).replace(/^[^a-z0-9]+/, '');
   };
   // cửa sổ “ma”: Bootstrap đã bỏ lớp in / show (đang đóng) hoặc gần như trong suốt – trên màn hình không còn thấy
   function modalPhantom(m) {
@@ -6342,7 +6596,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     [...document.querySelectorAll('.modal, [role="dialog"], .ui-dialog')].filter((m) => shownEl(m) && !m.closest('#' + HOST_ID) && !modalPhantom(m));
   // cửa sổ con thật sự đang hiện và có ô nhập (như bộ điền tính “cửa sổ đang mở”)
   const realModals = () =>
-    outer(shownModals()).filter((m) => [...m.querySelectorAll('input:not([type=hidden]), select, textarea')].some((c) => shownEl(c) || (c.parentElement && shownEl(c.parentElement))));
+    outer(
+      [...document.querySelectorAll('.modal, [role="dialog"], .ui-dialog, .k-window, .bootbox, .swal2-popup, .layui-layer')].filter(
+        (m) => shownEl(m) && !m.closest('#' + HOST_ID) && !modalPhantom(m)
+      )
+    ).filter((m) => [...m.querySelectorAll('input:not([type=hidden]), select, textarea')].some((c) => shownEl(c) || (c.parentElement && shownEl(c.parentElement))));
   // để báo lỗi: các cửa sổ con đang có trên trang (tên, lớp, độ mờ) – kể cả cửa sổ “ma”
   function modalDiag() {
     const all = [...document.querySelectorAll('.modal, [role="dialog"], .ui-dialog, .bootbox, .swal2-popup')].filter((m) => shownEl(m) && !m.closest('#' + HOST_ID));
@@ -6468,8 +6726,42 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   }
   // cửa sổ “Trả hồ sơ” (ảnh 10: Ghi chú, Thực hiện, Đóng)
   function traModal() {
-    const ms = outer(shownModals().filter((m) => /^tra ho so\b/.test(titleOf(m))));
-    return ms.length ? ms[ms.length - 1] : null;
+    return taskWin(/^tra ho so\b/);
+  }
+  // cửa sổ “Kết ISO” (bạn bật “Tự Kết ISO”): nhận ra như cửa sổ Trả hồ sơ
+  function isoModal() {
+    return taskWin(/^ket iso\b/);
+  }
+  // cửa sổ tác vụ theo tiêu đề (re: chữ đã bỏ dấu)
+  function taskWin(re) {
+    const ms = outer(shownModals().filter((m) => re.test(titleOf(m))));
+    if (ms.length) return ms[ms.length - 1];
+    // dự phòng (trang thật 23/11: cửa sổ Trả hồ sơ hiện mà tiện ích không nhận ra theo khung chuẩn):
+    // khối nhỏ nhất chứa nút “Thực hiện”, ô Ghi chú (textarea) và một tiêu đề khớp re (vd. bắt đầu bằng “Trả hồ sơ”)
+    for (const b of document.querySelectorAll('button, a, input[type="button"], input[type="submit"]')) {
+      if (b.closest('#' + HOST_ID) || !shownEl(b) || btnText(b) !== 'thuc hien') continue;
+      for (let e = b.parentElement, k = 0; e && e !== document.body && k < 10; e = e.parentElement, k++) {
+        if (!e.querySelector('textarea')) continue;
+        const head = [...e.querySelectorAll('h1, h2, h3, h4, h5, .modal-title, .panel-title, [class*="title"], [class*="header"], [class*="heading"]')].find(
+          (hh) => shownEl(hh) && re.test(norm(hh.textContent || '').replace(/^[^a-z0-9]+/, ''))
+        );
+        if (head) return e;
+        break; // khối nhỏ nhất có ô Ghi chú mà không có tiêu đề khớp → không phải cửa sổ này
+      }
+    }
+    return null;
+  }
+  // để báo lỗi khi không nhận ra cửa sổ Trả hồ sơ: các cửa sổ / khối đang hiện có nút “Thực hiện” (thẻ, lớp, tiêu đề)
+  function traDiag() {
+    const out = [];
+    for (const b of document.querySelectorAll('button, a, input[type="button"], input[type="submit"]')) {
+      if (b.closest('#' + HOST_ID) || !shownEl(b) || btnText(b) !== 'thuc hien') continue;
+      const w = b.closest('.modal, [role="dialog"], .ui-dialog, .k-window, .bootbox, .swal2-popup, .layui-layer, .panel, form') || b.parentElement;
+      const cls = w && typeof w.className === 'string' ? w.className.trim().split(/\s+/).slice(0, 4).join('.') : '';
+      const hd = w ? (w.querySelector('.modal-header, .modal-title, [class*="title"], [class*="header"], h4, h3') || {}).textContent || '' : '';
+      out.push(`${w ? w.tagName.toLowerCase() : '?'}.${cls} tiêu đề “${String(hd).replace(/\s+/g, ' ').trim().slice(0, 40)}” ô Ghi chú: ${w && w.querySelector('textarea') ? 'có' : 'không'}`);
+    }
+    return out.slice(0, 3).join(' | ') || 'không thấy nút “Thực hiện” nào';
   }
   // tài khoản: so CẢ CHUỖI – bỏ dấu cách (cả NBSP), ký tự vô hình, không phân biệt hoa / thường
   const accNorm = (s) =>
@@ -6594,13 +6886,19 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   }
   // lần cuối BẠN bấm / gõ trên trang (không tính bảng điền) – tiện ích không bấm nút quan trọng ngay lúc bạn đang thao tác
   const USER = { at: 0, btn: '', btnAt: 0, btnStep: '' };
+  // nền ngoài cửa sổ (bấm vào đó là đóng cửa sổ ở nhiều trang)
+  const OVERLAY_CLS = ['modal', 'modal-backdrop', 'ui-widget-overlay', 'k-overlay', 'swal2-container', 'layui-layer-shade'];
   const noteUserAct = (e) => {
     if (!e.isTrusted) return;
     const t = e.target;
     if (t === host || (t && t.closest && t.closest('#' + HOST_ID))) return;
     USER.at = Date.now();
     if (ATT.badge) stopNeed(); // bạn đã quay lại thao tác → tắt dấu “!” trên biểu tượng
-    const b = t && t.closest && t.closest('button, a, .btn');
+    // phím: chỉ Enter / Space mới là bấm nút (Tab, Esc… lúc nút đang được chọn không tính là bấm)
+    const key = e.type === 'keydown' ? String(e.key || '') : '';
+    // đang chờ Trả hồ sơ (bạn đã bấm Thực hiện): Esc, hoặc bấm ra nền ngoài cửa sổ → bạn thôi, không ghi ✓ Xong
+    if (S.userTra && (/^(Escape|Esc)$/.test(key) || (!key && t && t.classList && OVERLAY_CLS.some((c) => t.classList.contains(c))))) S.userTra = null;
+    const b = key && !/^(Enter| |Spacebar)$/.test(key) ? null : t && t.closest && t.closest('button, a, .btn');
     if (b) {
       USER.btn = btnText(b);
       USER.btnAt = Date.now();
@@ -6611,7 +6909,24 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (cm && cm.contains(b)) USER.btnStep = norm(chooserInfo(cm).step);
       }
       // Thực thi / Thực hiện / Đồng ý: nhớ số biên nhận của hồ sơ đang chọn lúc bấm (thả “chờ bạn bấm” đúng TB đó)
-      USER.btnSo = /^(thuc thi|thuc hien|dong y)$/.test(USER.btn) ? soSync() : '';
+      // bạn tự bấm “Thực hiện” ở cửa sổ Trả hồ sơ → chờ trang xong để đánh dấu TB của hồ sơ đó ✓ Xong
+      if (USER.btn === 'thuc hien') {
+        const tmU = traModal();
+        if (tmU && tmU.contains(b)) S.userTra = { so: soSync() || (S.qtSeen && S.qtSeen.so) || '', at: Date.now() };
+      }
+      // Đồng ý ở hộp hỏi trả hồ sơ (cửa sổ Trả hồ sơ còn mở bên dưới) → cũng chờ để ghi ✓ Xong
+      if (USER.btn === 'dong y' && traModal()) {
+        const pd = pageDialog();
+        if (pd && pd.box.contains(b) && /tra ho so/.test(norm(pd.text)))
+          S.userTra = { so: (S.userTra && S.userTra.so) || soSync() || (S.qtSeen && S.qtSeen.so) || '', at: Date.now() };
+      }
+      USER.btnSo = '';
+      if (/^(thuc thi|thuc hien|dong y)$/.test(USER.btn)) {
+        const inWin = !!b.closest('.modal, [role="dialog"], .ui-dialog, .k-window, .bootbox, .swal2-popup, .jconfirm, .layui-layer');
+        const qm = qtModal();
+        const q = S.qtSeen && S.qtSeen.el && qm && S.qtSeen.el === qm && Date.now() - S.qtSeen.at < 30 * 60 * 1000 ? S.qtSeen.so : '';
+        USER.btnSo = soSync() || (inWin ? q : '');
+      }
     }
     audioReady(); // tiếng “ting” dùng được sau khi bạn bấm (cả sau khi trang tải lại)
   };
@@ -6769,7 +7084,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         (i) =>
           /^(text|search|)$/.test(i.type || '') &&
           !i.closest('#' + HOST_ID) &&
-          !i.closest('.modal, [role="dialog"], header, nav, .navbar, .main-header') &&
+          !i.closest('.modal, [role="dialog"], header, nav, .navbar, .main-header, aside, .sidebar, .main-sidebar, .left-side, [class*="sidebar"]') &&
           shownEl(i) &&
           i.getBoundingClientRect().bottom <= top + 5
       )
@@ -6803,6 +7118,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     return el;
   }
   function findListBox() {
+    // trang thật (bản ghi thao tác 22/11): bảng danh sách hồ sơ thụ lý là table#tblTraCuuHoSoTiepNhan (tiêu đề cột là thanh div riêng)
+    const real = document.getElementById('tblTraCuuHoSoTiepNhan');
+    if (real && shownEl(real) && !real.closest('#' + HOST_ID)) return real;
     const ok = (h) => !h.closest('#' + HOST_ID) && !h.closest('.modal, [role="dialog"]') && /^thong tin ho so$/.test(norm(h.textContent || '').trim()) && shownEl(h);
     const boxOf = (h) => {
       const hr = h.closest('tr, [role="row"]');
@@ -6851,7 +7169,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         (r) =>
           !r.closest('#' + HOST_ID) &&
           !r.closest('.modal, [role="dialog"], thead, .toast, #toast-container, .dropdown-menu') &&
-          /KH\s*2959\.07777\.\d/i.test((r.textContent || '').replace(/\s+/g, ' ')) &&
+          /KH\s*2959\.07777\.\d/i.test(khText(r)) &&
           shownEl(r) &&
           !isLabelRow(r)
       );
@@ -6947,10 +7265,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     await sleep(500);
     if (sb.btn) clickPage(sb.btn);
     else pressEnter(sb.input);
+    S.busySince = 0; // lần tìm mới – “đang tải” tính lại từ đầu
     await sleep(1500); // cho trang bắt đầu tải danh sách
     const t0 = Date.now();
     let prev = null;
     let none = 0;
+    let dupN = 0;
     while (Date.now() - t0 < 12000 * slowK()) {
       if (!alive()) return { row: null };
       const busy = listBusy();
@@ -6961,9 +7281,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const r = !busy && exact.length === 1 ? exact[0] : null;
       if (r && r === prev && r.isConnected) return { row: r, many: rows.length > 1 }; // 2 lần đọc liền nhau vẫn đúng dòng đó
       prev = r;
-      // trang đã tải xong mà danh sách trống 3 lần đọc liền (≈ 2,4 giây) → chưa có hồ sơ này (không chờ hết 12 giây)
-      none = !busy && !rows.length ? none + 1 : 0;
+      // trang đã tải xong (không còn dấu tải nào) mà danh sách trống 3 lần đọc liền (≈ 2,4 giây) → chưa có hồ sơ này
+      none = !listLoading() && !rows.length ? none + 1 : 0;
       if (none >= 3) return { row: null, none: true };
+      // nhiều hồ sơ cùng ĐÚNG số (ngày tiếp nhận khác nhau – trùng hồ sơ thật), đọc 2 lần liền vẫn vậy → báo, không chọn
+      dupN = !busy && exact.length > 1 ? dupN + 1 : 0;
+      if (dupN >= 2) return { row: null, dup: exact.length };
       await sleep(800);
     }
     return { row: null };
@@ -7157,18 +7480,33 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // hoặc danh sách còn đúng 1 dòng
   function soSync() {
     try {
+      // trang danh sách: chỉ dòng ĐANG ĐƯỢC CHỌN (khung bên phải có thể còn giữ hồ sơ cũ sau khi bỏ chọn – không tin)
+      if (onListPage()) {
+        const sel = listDataRows().filter(rowSelected);
+        const nums = [...new Set(sel.map((r) => soKey(rowSo(r))).filter(Boolean))];
+        return nums.length === 1 ? rowSo(sel[0]) : '';
+      }
       const n = labelDossierNumbers();
       if (n.length === 1) return n[0];
-      if (onListPage()) {
-        const rows = listDataRows();
-        if (rows.length === 1) return rowSo(rows[0]);
+      // màn hình hồ sơ: ô “Số biên nhận” cạnh nhãn của nó
+      for (const lab of document.querySelectorAll('label')) {
+        if (lab.closest('#' + HOST_ID) || lab.closest('.modal, [role="dialog"]') || !/^so bien nhan\s*:?$/.test(norm(lab.textContent || '').trim()) || !shownEl(lab)) continue;
+        const f = lab.htmlFor ? document.getElementById(lab.htmlFor) : null;
+        const box = lab.closest('.form-group, .row, .col, td, div');
+        const inp = (f && f.tagName === 'INPUT' ? f : null) || (box && box.querySelector('input'));
+        if (inp && /KH\s*2959\.07777\./i.test(khNorm(inp.value))) return khNorm(inp.value).trim();
       }
     } catch (e) {}
     return '';
   }
-  // dòng danh sách đang được chọn (lớp selected / active…, dấu ✓)
+  // hồ sơ của Quy trình đang mở (tiện ích vừa đọc) – để biết cú bấm Thực thi / Thực hiện / Đồng ý của bạn là cho hồ sơ nào
+  function noteQtSo(so, force) {
+    const m = qtModal();
+    if (so && (m || force)) S.qtSeen = { so, at: Date.now(), el: m || null };
+  }
+  // dòng danh sách đang được chọn: lớp selected / row-selected / active… hoặc aria-selected (KHÔNG theo biểu tượng – trang thật luôn có ▶ ở ô đầu)
   function rowSelected(r) {
-    return rowMarked(r) || /(^|\s)(selected|active|info|success|highlight|row-selected|chosen|current)(\s|$)/i.test(r.className || '');
+    return !!r && (/(^|\s)(selected|row-selected|active|highlight|chosen)(\s|$)/i.test(r.className || '') || r.getAttribute('aria-selected') === 'true');
   }
   const SWEEP_KEY = 'vbdlis-dien-nhanh-sweep';
   const stageSnap = (id) => JSON.stringify(S.stage[String(id)] || {});
@@ -7743,7 +8081,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     }
     // TB của hồ sơ đang mở (theo Số biên nhận) – chỉ tự chạy chuyển tiếp cho TB đang làm (TB đang chọn trong bảng)
     const curDossierTb = async () => {
-      const list = tbOfSo(await dossierSo()).list;
+      const soC = await dossierSo();
+      noteQtSo(soC);
+      const list = tbOfSo(soC).list;
       return list.length === 1 && isWorkTb(list[0].tb) ? list[0] : null;
     };
     if (top && CHOOSER_MODAL.test(k)) {
@@ -7770,7 +8110,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
       if (v === 'kq' || v === 'tra') {
         // hồ sơ lãnh đạo đã trả về (bạn mở Quy trình): đúng MỘT TB trong dữ liệu
-        const list = tbOfSo(await dossierSo()).list;
+        const soQt = await dossierSo();
+        noteQtSo(soQt);
+        const list = tbOfSo(soQt).list;
         if (list.length !== 1) return '';
         const x = list[0];
         const st = S.stage[String(x.tb)] || {};
@@ -7780,14 +8122,17 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           // Kết ISO đã tích, Trả hồ sơ chưa → Trả hồ sơ (Thực hiện, Đồng ý)
           const iso = kindRow('iso');
           const tra = kindRow('tra');
-          return iso.chk.checked && !tra.chk.checked && !st.tra ? `tra:${x.tb}` : '';
+          return (iso.chk.checked || isoAuto()) && !tra.chk.checked && !st.tra ? `tra:${x.tb}` : '';
         }
         const nd = kindRow('nhap');
         if (nd && !nd.chk.checked) return '';
         const need2 = !kindRow('pl').chk.checked;
         const need3 = !kindRow('lk').chk.checked && S.scanQ.length > 0;
         const all = rows.every((r) => r.chk.checked); // bạn đã Kết ISO, tích đủ → chuyển bước Trả kết quả
-        return need2 || need3 || all ? `kq:${x.tb}:${qtSig(rows)}:${S.scanQ.length}` : '';
+        // bạn bật “Tự Kết ISO”: chỉ còn thiếu Kết ISO → 🤖 tự Kết ISO rồi chuyển bước Trả kết quả
+        const left = rows.filter((r) => !r.chk.checked);
+        const needIso = isoAuto() && left.length > 0 && left.every((r) => qtKindOf(r) === 'iso');
+        return need2 || need3 || all || needIso ? `kq:${x.tb}:${qtSig(rows)}:${S.scanQ.length}` : '';
       }
       if (scanScreen() !== 'quytrinh') return '';
       const nd = qtTaskCheck('NhapDangKy');
@@ -7926,13 +8271,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       // dấu tạm giữ “chờ bạn bấm Thực thi / Thực hiện” (Chạy thử): xét ở MỌI màn hình (cả trang danh sách, nơi trang quay về sau khi bạn bấm)
       // – chỉ khi CHÍNH BẠN đã bấm đúng nút của bước đó sau lúc giữ (không lấy câu báo của TB khác) → thả, 🤖 làm tiếp
       for (const [hid, hh] of [...S.autoHold]) {
-        if (hh.kind !== 'tt' || !(USER.btnAt > hh.at) || !USER.btnSo || !onListPage()) continue;
-        const ul = tbOfSo(USER.btnSo).list;
-        const me =
-          ul.length === 1 &&
-          String(ul[0].tb) === String(hid) &&
-          (hh.k === 'tra' ? /^(thuc hien|dong y)$/.test(USER.btn) : USER.btn === 'thuc thi' && (!hh.st || USER.btnStep === hh.st));
-        if (me && holdFree(hid, hh)) {
+        if (hh.kind === 'tt' && USER.btnAt > hh.at && holdFree(hid, hh)) {
           dropHold(hid);
           S.autoSig = '';
           S.autoCool = Date.now() + 4000;
@@ -7988,6 +8327,40 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     }
   }
   const autoTimer = setInterval(autoTick, 2500);
+  // bạn tự Trả hồ sơ (bấm Thực hiện ở cửa sổ Trả hồ sơ, rồi Đồng ý nếu trang hỏi): trang báo thành công, hoặc cửa sổ đóng mà không báo lỗi
+  // → TB của hồ sơ đó ✓ Xong (bạn yêu cầu 23/11) – kể cả khi 🤖 tắt. Bạn bấm Không / Đóng / Hủy, hoặc trang báo lỗi → thôi
+  const userTraTimer = setInterval(() => {
+    if (!host.isConnected) return clearInterval(userTraTimer);
+    const u = S.userTra;
+    if (!u || S.running) return;
+    const now = Date.now();
+    if (now - u.at > 2 * 60 * 1000 || toastsSince(u.at).some(toastBad)) {
+      S.userTra = null;
+      return;
+    }
+    // hộp của trang báo lỗi → thôi; hộp báo trả thành công → ✓ Xong
+    const dlg = pageDialog();
+    const dn = dlg ? norm(dlg.text) : '';
+    if (dlg && ERR_TOAST.test(dn)) {
+      S.userTra = null;
+      return;
+    }
+    // bạn bấm Không / Đóng / Hủy / nút × (nút không chữ)… sau đó → thôi
+    if (USER.btnAt > u.at && /^(dong|khong|huy|thoat|bo qua|close|cancel|x|)$/.test(USER.btn)) {
+      S.userTra = null;
+      return;
+    }
+    const ok = toastsSince(u.at).some(toastOk) || (!!dlg && TRA_DONE_RE.test(dn));
+    const gone = !traModal() && !dlg;
+    if (!ok && !(gone && now - USER.btnAt > 2500)) return;
+    S.userTra = null;
+    const l = u.so ? tbOfSo(u.so).list : [];
+    if (l.length !== 1) return;
+    const id = String(l[0].tb);
+    if ((S.stage[id] || {}).tra) return;
+    markStage(id, 'tra', 'auto');
+    setEvt(`✓ TB ${esc(id)} – ${esc(whoOf(l[0]))}: bạn đã <b>Trả hồ sơ</b> – <b>✓ Xong</b>.`);
+  }, 1000);
 
   // ---------- khởi động ----------
   (async () => {

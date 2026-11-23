@@ -299,6 +299,7 @@
           <option value="NTS">NTS (Đất nuôi trồng thủy sản)</option>
           <option value="ONT">ONT (Đất ở tại nông thôn)</option>
           <option value="CLN">CLN (Đất trồng cây lâu năm)</option>
+          <option value="ODT">ODT (Đất ở tại đô thị)</option>
         </select></div></div>
         <div class="col"><label>Diện tích<span class="req">*</span>:</label><div class="ctl"><input type="text" id="tDienTich2" class="area"></div></div>
         <div class="col"><label>Số thứ tự:</label><div class="ctl"><input type="text" value="1"></div></div>
@@ -1305,7 +1306,13 @@
   };
   // ----- Kết ISO: NGƯỜI DÙNG tự làm (Xử lý tác vụ → Thực hiện → Đồng ý → trang tích Đã xử lý). Tiện ích bấm Xử lý tác vụ / Thực hiện / Đồng ý = BẪY -----
   window.__mockBayISO = 0;
-  const bayKetISO = (ev) => { if (!(ev && ev.isTrusted)) { window.__mockBayISO++; log('!!! TIỆN ÍCH BẤM KẾT ISO !!!'); } };
+  // bạn bật ô “Tự Kết ISO” của bảng điền (lưu trong bộ nhớ giả của tiện ích) → tiện ích được bấm Kết ISO
+  const choTuISO = () => { try { const m = JSON.parse(sessionStorage.getItem('__mockMem') || '{}'); return !!(m.tbOpts && m.tbOpts.tuISO === true); } catch (e) { return false; } };
+  const bayKetISO = (ev) => {
+    if (ev && ev.isTrusted) return;
+    if (choTuISO()) { window.__mockTuISO = (window.__mockTuISO || 0) + 1; return log('(tiện ích bấm Kết ISO – đã bật “Tự Kết ISO”)'); }
+    window.__mockBayISO++; log('!!! TIỆN ÍCH BẤM KẾT ISO !!!');
+  };
   function moKetISO(ev){
     log('(' + aiBam(ev) + ' bấm Xử lý tác vụ – Kết ISO)');
     bayKetISO(ev);
@@ -1338,24 +1345,64 @@
     document.querySelector('#mTraHoSo textarea').value = '';
     setTimeout(() => { openM('mTraHoSo'); log('(trang mở Trả hồ sơ)'); }, 300);
   }
+  // window.mockTraKhac('dong-an'): thanh đầu cửa sổ có nút × kèm chữ ẩn “Đóng” đứng TRƯỚC tiêu đề, tiêu đề không có lớp modal-title;
+  // 'khong-chuan': bỏ thanh đầu chuẩn, tiêu đề là div “window-header” (không có modal-title / modal-header)
+  window.mockTraKhac = function(kieu){
+    const m = document.getElementById('mTraHoSo');
+    const hd = m.querySelector('.modal-header, .window-header');
+    if (!hd) return 'không thấy thanh đầu';
+    if (kieu === 'dong-an') hd.outerHTML = '<div class="modal-header"><button type="button" class="close" onclick="dongTraHoSo(event)"><span aria-hidden="true">×</span><span class="sr-only">Đóng</span></button><span class="tieu-de"><i class="fa fa-ban"></i> Trả hồ sơ</span></div>';
+    else if (kieu === 'khong-chuan') hd.outerHTML = '<div class="window-header" style="padding:8px;background:#d9edf7"><i class="fa fa-ban"></i> Trả hồ sơ <a class="x" onclick="dongTraHoSo(event)">×</a></div>';
+    return 'ok';
+  };
   // Đóng: chỉ đóng cửa sổ Trả hồ sơ
   function dongTraHoSo(ev){ dongModal('mTraHoSo'); log('(' + aiBam(ev) + ' bấm Đóng – Trả hồ sơ)'); }
+  // window.__mockBsDong = true: như Bootstrap – phím Esc đóng hộp hỏi / cửa sổ trên cùng, bấm ra nền ngoài cửa sổ thì đóng cửa sổ đó
+  document.addEventListener('keydown', (e) => {
+    if (!window.__mockBsDong || e.key !== 'Escape') return;
+    const jc = [...document.querySelectorAll('.mockjc')].pop();
+    if (jc) { jc.remove(); return log('(Esc – đóng hộp hỏi)'); }
+    const ms = [...document.querySelectorAll('.modal.show')];
+    const m = ms[ms.length - 1];
+    if (m) { dongModal(m.id); log('(Esc – đóng cửa sổ ' + m.id + ')'); }
+  });
+  document.addEventListener('click', (e) => {
+    if (!window.__mockBsDong) return;
+    const m = e.target;
+    if (m && m.classList && m.classList.contains('modal') && m.classList.contains('show')) { dongModal(m.id); log('(bấm ra nền – đóng cửa sổ ' + m.id + ')'); }
+  });
+  // window.__mockTraKieu: 'ghi-chu' – Ghi chú trống → trang báo lỗi ngay trong cửa sổ (chữ đỏ), không hỏi;
+  // 'hop-loi' – Đồng ý → cửa sổ đóng, hộp “Có lỗi xảy ra…” (OK), không có câu báo nổi; 'hop-ok' – Đồng ý → hộp “Trả hồ sơ thành công” (Đóng)
   function thucHienTraHoSo(ev){
     window.__mockThucHienTra = (window.__mockThucHienTra || 0) + 1;
     log('(' + aiBam(ev) + ' bấm Thực hiện – Trả hồ sơ)');
     if (!document.getElementById('mTraHoSo').classList.contains('show')) return log('(cửa sổ Trả hồ sơ không mở – trang không làm gì)');
+    const loiGC = document.querySelector('#mTraHoSo .loi-ghi-chu');
+    if (loiGC) loiGC.remove();
+    if (window.__mockTraKieu === 'ghi-chu' && !document.querySelector('#mTraHoSo textarea').value.trim()) {
+      document.querySelector('#mTraHoSo .modal-body').insertAdjacentHTML('beforeend', '<div class="loi-ghi-chu" style="color:#c00">Vui lòng nhập ghi chú</div>');
+      return log('(trang báo trong cửa sổ: Vui lòng nhập ghi chú – không hỏi, không trả)');
+    }
     // chữ như trang thật (ảnh 22/11): “TRẢ HỒ SƠ – Bạn có thật sự muốn trả hồ sơ hay không?” ĐỒNG Ý / KHÔNG
     mockConfirm('TRẢ HỒ SƠ', 'Bạn có thật sự muốn trả hồ sơ hay không?', [{ text: 'ĐỒNG Ý', cls: 'btn-orange', fn: xongTraHoSo }, { text: 'KHÔNG', cls: 'btn-default' }]);
   }
   function xongTraHoSo(e){
     const H = window.__mockHoSo, ai = aiBam(e);
+    if (window.__mockTraKieu === 'hop-loi') {
+      return setTimeout(() => {
+        dongModal('mTraHoSo');
+        mockConfirm('Thông báo', 'Có lỗi xảy ra trong quá trình trả hồ sơ, vui lòng thử lại', [{ text: 'OK', cls: 'btn-default' }]);
+        log('(trang báo bằng hộp: Có lỗi xảy ra – hồ sơ CHƯA trả)');
+      }, 400);
+    }
     setTimeout(() => {
       dongModal('mTraHoSo');
       if (H.stage !== 'tra') {
         log('!!! TRẢ HỒ SƠ KHI HỒ SƠ KHÔNG Ở BƯỚC TRẢ KẾT QUẢ (bước ' + (H.stage || 'trống') + ') !!!');
         return mockToast('Lỗi', 'Hồ sơ không ở bước Trả kết quả', 'error');
       }
-      mockToast('Thành công', 'Trả hồ sơ thành công');
+      if (window.__mockTraKieu === 'hop-ok') mockConfirm('Thông báo', 'Trả hồ sơ thành công', [{ text: 'Đóng', cls: 'btn-default' }]);
+      else mockToast('Thành công', 'Trả hồ sơ thành công');
       Object.assign(H, { stage: 'done', chon: '', view: 'dsthuly' });
       H.ticks.TraHoSo = true;
       window.__mockTra = (window.__mockTra || 0) + 1;

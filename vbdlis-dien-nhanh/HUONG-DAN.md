@@ -44,6 +44,8 @@ Bấm nút **🤖 Tự động: TẮT** cạnh “▶ Chạy cả TB”, đọc 
 - Đã bấm Lưu hồ sơ / Hoàn tất mà chưa thấy báo thành công (trang tải lại…) → không tự tiếp nhận / hoàn tất lần nữa, hiện nút cho bạn xác nhận.
 - **Trang tải lại** (sau Lưu hồ sơ, Thực thi…): bảng điền tự mở lại và làm tiếp, chỉ khi đang bật Tự động hết và bạn không ẩn bảng (×). Sau Thực thi bước Trả kết quả, trang về Danh sách hồ sơ thụ lý: tiện ích tự bấm lại dòng hồ sơ rồi Trả hồ sơ. Làm xong bước 3 của hồ sơ cũ, **TB đang chọn trong bảng trở về như trước** (không làm lệch “TB chưa làm tiếp theo”).
 - Trả hồ sơ: tiện ích chỉ **Đồng ý một** hộp hỏi “Bạn có thật sự / chắc chắn muốn trả hồ sơ…”. Hộp khác / hộp báo lỗi → dừng chờ bạn.
+- **Bấm Thực hiện (Trả hồ sơ) là TB thành ✓ Xong** (bản 1.19.3): tiện ích bấm Thực hiện → Đồng ý, cửa sổ đóng mà trang không báo lỗi → ✓ Xong. **Bạn tự bấm** Thực hiện → Đồng ý (kể cả khi 🤖 tắt) → trang báo thành công / cửa sổ đóng không lỗi → TB của hồ sơ đang chọn cũng ✓ Xong. Bạn bấm Không / Đóng, hoặc trang báo lỗi → không đánh dấu.
+- Tiện ích không nhận ra cửa sổ Trả hồ sơ (trang đổi kiểu cửa sổ) → dừng, kêu ting, có dòng “Để báo lỗi…” – bạn tự bấm Thực hiện → Đồng ý (TB vẫn ✓ Xong), chụp dòng đó gửi người hỗ trợ.
 - 🤖 chờ bạn **ngừng bấm / gõ trên trang 3 giây** rồi mới tự chạy (bản 1.18.6) – vd. bạn vừa Kết ISO xong thì 3 giây sau tiện ích mới chuyển tiếp, không còn dừng vì “bạn vừa bấm”.
 - Trang tải lại giữa lúc 🤖 đang làm một TB mở từ Danh sách hồ sơ thụ lý (không phải TB đang chọn): bảng điền mới vẫn làm tiếp TB đó (30 phút), TB đang chọn không đổi.
 - **Dừng, kêu ting chờ bạn** (kêu được cả khi trang vừa tải lại; dấu **!** đỏ trên biểu tượng tiện ích còn tới khi bạn bấm / gõ) khi: phiếu đối chiếu có ô lệch (✗), Số biên nhận trên trang không khớp đúng một TB, không thấy đúng người, trang hiện hộp hỏi lạ, hoặc trang báo lỗi. Dữ liệu TB thiếu ô (⚠) thì vẫn lưu đơn, ghi nhắc để bạn xem lại. Bạn sửa xong thì bấm “▶ Chạy cả TB” – tiện ích làm tiếp từ bước đang dở.
@@ -216,7 +218,7 @@ Nếu bạn vừa tải lại / cập nhật tiện ích khi đang ghi, góc dư
 
 Có thể sửa trực tiếp giá trị trong bảng trước khi bấm Điền, bảng sẽ tự lưu lại. Ô “Địa chỉ chung” rồi “Áp dụng” trong tab Thửa đất đổi địa chỉ cho mọi thửa của TB, ví dụ khi cần ghi “Tổ dân phố Thiết Nham…”.
 
-**Thời hạn SD** tự điền “50 năm”, **Nguồn gốc đất** tự chọn “Công nhận QSDĐ như giao đất không thu tiền sử dụng đất”. Muốn khác thì sửa ở ô của từng thửa, hoặc dùng các ô chung + “Áp dụng” cho cả TB.
+**Thời hạn SD** tự điền “50 năm”, **Nguồn gốc đất** tự chọn “Công nhận QSDĐ như giao đất không thu tiền sử dụng đất”. MĐSD **ONT** hoặc **ONT+CLN** điền thành **ODT** (đất ở tại đô thị – bản 1.19.1). **Thửa đất ở** (MĐSD **ODT**, bản 1.19.0): Nguồn gốc “**Công nhận QSDĐ như giao đất có thu tiền sử dụng đất**”, Thời hạn “**Lâu dài**” (khi dữ liệu để trống hoặc để mặc định của đất nông nghiệp; dữ liệu ghi riêng giá trị khác thì theo dữ liệu). Muốn khác thì sửa ở ô của từng thửa, hoặc dùng các ô chung + “Áp dụng” cho cả TB.
 
 **Giấy tờ** mặc định có 2 loại: “Đơn đăng ký” và “Thông báo xác nhận kết quả đăng ký” (đúng 2 file quét DDK và TBXN).
 

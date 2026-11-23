@@ -57,26 +57,32 @@ Bấm nút **🤖 Tự động: TẮT** cạnh “▶ Chạy cả TB”, đọc 
 - Bấm lại nút để **TẮT**. Khi tắt, tiện ích quay về cách cũ: tô vàng các nút cho bạn tự bấm (ở cửa sổ chọn người, bấm ▶ thì tiện ích chọn sẵn đúng người, bạn tự bấm Thực thi). Bật 🤖 không còn sửa 3 ô “tự động” của bạn (chủ / hồ sơ quét / Quy trình) – khi bật thì coi như bật, tắt thì theo lựa chọn cũ.
 - Cửa sổ chọn người đang **mở sẵn** lúc bạn bấm ▶: tiện ích chỉ chọn đúng người và tô vàng Thực thi, **không tự bấm**.
 
-## Tab “Trường” – lấy tất cả các trường, tích trường cần điền
-1. Mở cửa sổ / màn hình cần điền trên VBDLIS (cửa sổ chủ, cửa sổ thửa, Nhập đơn đăng ký, màn hình Tiếp nhận…).
-2. Vào tab **Trường** → bấm **Lấy tất cả các trường trên màn hình đang mở**. Tiện ích liệt kê mọi ô kèm giá trị đang có – cả các **ô tích** (vd. “Có quyền sử dụng đất”, “Đồng sử dụng”, “Đăng ký lần đầu”). Chỉ lấy được ô đang hiện trên màn hình (tab đang mở).
-3. **Tích ô cần điền**. Với mỗi ô chọn **lấy từ đâu**:
-   - **Dữ liệu TB**: chỉ có ở ô tiện ích vốn biết, như Họ tên, Số giấy tờ, Diện tích…
-   - **Giá trị mẫu**: giá trị đang có trên trang. Sửa ngay trong bảng được.
-4. **Tích / sửa là tự lưu mẫu** (không cần bấm gì thêm; nút **Lưu mẫu** chỉ để lưu rồi đóng bảng tích). Lần sau mở lại cửa sổ đó **không phải tích lại**. Từ đó “▶ Chạy cả TB” và “🤖 Tự động” **chỉ điền các ô đã tích** của cửa sổ đó, kèm các ô giá trị mẫu. Ô bỏ tích thì không điền.
-   - Cửa sổ khác (tiện ích không tự làm): **🤖 Tự động hết tự điền + bấm theo mẫu** mỗi khi cửa sổ đó mở. 🤖 tắt thì dùng nút **Điền** ở danh sách mẫu.
-   - Tên cửa sổ có số (vd. số biên nhận) → mẫu lưu theo phần chữ đứng trước số, nên **dùng lại cho mọi hồ sơ**. Mẫu chỉ khớp cửa sổ có đúng phần chữ đó (không khớp cửa sổ khác chỉ vì tên bắt đầu giống).
-   - Màn hình chính (không có cửa sổ con): mỗi màn hình một mẫu riêng (vd. Danh sách hồ sơ thụ lý không đè mẫu của màn hình Tiếp nhận).
-   - **Sửa** / **Xóa** mẫu ở danh sách. Xóa mẫu thì tiện ích điền như cũ.
-5. **Nút trên màn hình**: bảng thứ hai liệt kê **mọi nút** của màn hình / cửa sổ đó – cả đường link, nút chỉ có biểu tượng (lấy theo tên gợi ý hoặc tên biểu tượng); tên nút bỏ số đếm cuối (vd. “Quá hạn xử lý (16)”). **Nút nào cũng tích được.** Tích nút cần bấm; ô số bên cạnh là **thứ tự bấm** (tích là tự đánh số tiếp, sửa được). Khi bấm **Điền** / **Điền ngay** (hoặc 🤖 tự chạy mẫu như trên), tiện ích điền các ô đã tích rồi **bấm lần lượt các nút đã tích**:
-   - chỉ bấm khi thấy đúng một nút đó, đúng cửa sổ của mẫu; nút đang mờ thì dừng;
-   - có ô chưa điền được thì **không bấm nút nào**;
-   - trang hiện hộp hỏi → 🤖 bật thì trả lời hộp đã biết, không thì dừng chờ bạn;
-   - nút là đường link sang trang khác: bấm là trang chuyển, các nút sau không bấm nữa.
-   - Bấm theo mẫu thì tiện ích **không kiểm tra thêm** (vd. Thực thi theo mẫu không kiểm người nhận) – bạn tự chọn đúng trước.
-   - Ở cửa sổ tiện ích tự làm (đơn, chủ, thửa, Quy trình, Trả hồ sơ), 🤖 vẫn làm theo cách riêng; nút của mẫu ở các cửa sổ này chỉ bấm khi bạn bấm Điền.
-   - Riêng **cửa sổ chọn người nhận**: tích nút **Thực thi** trong mẫu của cửa sổ này = cho 🤖 **tự bấm Thực thi cả khi cửa sổ do bạn mở**. Tiện ích vẫn kiểm: đúng bước “… (Tiếp theo)”, đúng hồ sơ trong dữ liệu, chọn đúng tài khoản trong cài đặt (chưa chọn thì tự chọn). Bạn đang chọn **người khác** thì tiện ích không đổi người, không bấm. Đang bật “Chạy thử” thì chỉ tô vàng.
-- Ngày sinh, Ngày cấp, Ngày hết hạn không tích được (quy tắc: không điền 3 ô này).
+## Tab “Trường” – lấy tất cả các trường, tích trường cần điền (bản 1.20)
+1. Mở màn hình / cửa sổ / **hộp hỏi** cần điền trên VBDLIS (cửa sổ chủ, cửa sổ thửa, Nhập đơn đăng ký, chọn người, Trả hồ sơ, màn hình Tiếp nhận…).
+2. Vào tab **Trường** → bấm **Lấy tất cả các trường trên màn hình đang mở**. Tiện ích liệt kê mọi ô kèm giá trị đang có: ô gõ chữ, ô chọn, **ô tích**, **nhóm ô tròn** (vd. “Cấp: Tất cả / Tỉnh/Tp / … / Cùng đơn vị” – một dòng, chọn một lựa chọn), ô **chỉ có chữ mờ** (vd. “Nhập tên cán bộ, tên user…”), ô trong bảng (vd. “Đã xử lý – Kết ISO”), ô không có nhãn (gọi theo vị trí, vd. “(ô chọn không nhãn thứ 1)”). Tên ô là nhãn của chính ô đó – không lấy tiêu đề cửa sổ, chữ trên nút, số hồ sơ. Chỉ lấy được ô đang hiện (tab đang mở).
+3. **Tích ô cần điền**. Mỗi ô lấy từ:
+   - **Dữ liệu TB**: ô tiện ích vốn biết (Họ tên, Giới tính, Số giấy tờ, Diện tích…) – điền theo TB của từng hồ sơ, đúng quy tắc như khi chạy (tên theo thẻ CCCD, đất ở ODT…). Tiện ích tự tích sẵn các ô này.
+   - **Giá trị mẫu**: chữ cố định, **giống nhau mọi hồ sơ** (lấy sẵn giá trị đang có trên trang, sửa được). Để trống = không điền ô đó.
+4. **Tích / sửa là tự lưu ngay** (nút **Lưu mẫu** chỉ để đóng bảng tích). Lần sau **không phải tích lại**. Lấy lại trường lần nữa thì **tích cũ vẫn giữ**; ô lần đó không thấy (ở tab khác, đang ẩn…) vẫn giữ, ghi “không thấy lần lấy này”, có nút ✕ để bỏ.
+   - **Mỗi cửa sổ một mẫu**: “Thêm thửa đất” (Tiếp nhận) và “Thông tin thửa đất” (đơn) là hai mẫu riêng. Tên cửa sổ có số hồ sơ → mẫu bỏ số đó, **dùng lại cho mọi hồ sơ**.
+   - **Tích hết**: chỉ tích ô lấy từ dữ liệu TB và ô bạn đã đặt giá trị mẫu; ô giá trị mẫu khác (giá trị đọc lúc lấy trường) bạn tự tích – tiện ích liệt kê các ô đó.
+   - **Sửa** / **Xóa** mẫu ở danh sách. Xóa mẫu thì tiện ích điền như cũ (mọi ô có dữ liệu).
+   - **Ô bỏ tích thì không điền.** Ô bắt buộc mà bạn bỏ tích (cửa sổ chủ / thửa: Họ tên, Số giấy tờ, Số thửa, Diện tích…; màn hình Tiếp nhận: Phường/Xã, Quy trình/Thủ tục, Số biên nhận, Người nộp hồ sơ): tiện ích không điền, nhưng trước khi **tự bấm Lưu / Lưu hồ sơ** nó đọc lại ô đó – **trống hoặc khác dữ liệu TB → dừng, kêu ting** chờ bạn điền.
+5. **Nút**: bảng thứ hai liệt kê **mọi nút** – cả nút chỉ có ký hiệu (×, 🔍, +, ➜), đường link, nút “Xử lý tác vụ” của từng tác vụ (vd. “Xử lý tác vụ – Kết ISO”). **Nút nào cũng tích được.** Ô số bên cạnh là **thứ tự bấm** (tích là tự đánh số tiếp, sửa được). Tiện ích điền các ô đã tích rồi **bấm lần lượt các nút đã tích**:
+   - chỉ bấm khi thấy đúng một nút đó, đúng cửa sổ của mẫu; nút đang mờ thì dừng; có ô chưa điền được thì **không bấm nút nào**;
+   - trang hỏi giữa chừng → 🤖 bật thì trả lời hộp đã biết / đã dạy, không thì dừng chờ bạn; **sau nút cuối trang còn hỏi** → báo ✗ (🤖: kêu ting);
+   - nút là đường link sang trang khác: bấm là trang chuyển, các nút sau không bấm nữa;
+   - bấm theo mẫu thì tiện ích **không kiểm tra thêm** (vd. Thực thi theo mẫu không kiểm người nhận) – bạn tự chọn đúng trước.
+6. **Khi nào mẫu được dùng**
+   - Bấm **Điền** ở danh sách mẫu (mọi lúc; mẫu chủ / thửa / giấy tờ: chọn số ở ô bên cạnh). Hồ sơ đang mở là của TB khác TB đang chọn → không điền.
+   - **🤖 Tự động hết**, cửa sổ / hộp hỏi tiện ích **không tự làm** → tự điền + bấm theo mẫu **mỗi lần cửa sổ mở một lần** (đóng rồi mở lại là lần mới; cửa sổ con đóng không làm mẫu chạy lại). Bảng tích của mẫu đó đang mở → 🤖 chờ bạn đóng bảng tích.
+   - **🤖**, cửa sổ tiện ích **tự làm** (chủ, thửa, Nhập đơn đăng ký, chọn người, Trả hồ sơ, Kết ISO khi bật “Tự Kết ISO”, Thông tin hồ sơ quét, Hồ sơ quét): 🤖 làm như cũ, đủ kiểm tra; **trước nút chốt** (Lưu / Lưu thông tin đăng ký / Thực thi / Thực hiện / Cập nhật) điền thêm ô giá trị mẫu và bấm thêm nút bạn đã tích, theo thứ tự bạn đặt. Nút trùng nút chốt chỉ bấm một lần (🤖 tự bấm); nút Đóng / × không bấm. **Quy trình xử lý**: 🤖 làm theo bước riêng (mẫu chỉ dùng khi bấm Điền).
+   - **🤖**, **màn hình chính** tiện ích không tự làm (không phải Tiếp nhận, màn hình hồ sơ, Danh sách hồ sơ thụ lý): tự chạy mẫu **một lần mỗi lần vào** màn hình đó.
+   - Mẫu có nút vừa tự chạy mà cửa sổ lại mở ngay (không do bạn) → 🤖 không chạy lại (chống lặp), kêu ting báo bạn.
+   - **▶ Chạy cả TB**: màn hình Tiếp nhận, cửa sổ chủ / thửa / đơn điền theo tích của mẫu.
+7. **Dạy 🤖 trả lời hộp hỏi lạ**: lúc hộp đang hiện, bấm **Lấy tất cả các trường…** (lấy được cả hộp chỉ có nút), tích nút trả lời (vd. “Đồng ý” / “Không”). Từ đó 🤖 bật mà **đúng câu hỏi đó** hiện ra (cùng tiêu đề + câu hỏi; số hồ sơ khác nhau vẫn nhận) thì 🤖 tự bấm nút đó – ở mọi bước. Hộp báo lỗi (vui lòng…, không thể…, có lỗi…) thì không bao giờ tự trả lời.
+- Ngày sinh, Ngày cấp, Ngày hết hạn không tích được, không bao giờ điền (quy tắc).
+- **Sao lưu tiến độ** (hộp Tiến độ) kèm các mẫu tab Trường (tích, thứ tự nút, giá trị mẫu bạn đặt – giá trị có thể là dữ liệu cá nhân thì không đưa vào file). Nạp lại chỉ **thêm** mẫu máy này chưa có, mẫu đang có giữ nguyên.
 
 ## Chọn thư mục file quét (TB 18xx)
 Bấm **Chọn thư mục…** ở tab Giấy tờ, hoặc kéo cả thư mục (vd. `18 TH`) thả vào bảng. Trong thư mục có các thư mục **TB 1846**, **TB 1847**…, mỗi thư mục chứa PDF của TB đó.

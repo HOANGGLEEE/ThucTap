@@ -542,6 +542,11 @@
     }
     const own = [...lab.querySelectorAll(CTRL)].find((c) => fits(c, kind) && usable(c));
     if (own) return own;
+    // nhãn của chính một ô tròn (radio): không đi tìm sang ô bên cạnh (vd. “Cùng đơn vị” không phải nhãn của ô “Chuyển đơn vị khác”)
+    if (kind !== 'radio') {
+      const forR = lab.htmlFor ? document.getElementById(lab.htmlFor) : null;
+      if ((forR && forR.type === 'radio') || [...lab.querySelectorAll('input[type=radio]')].some(usable)) return null;
+    }
     let el = lab;
     for (let depth = 0; depth < 4 && el && el !== document.body; depth++) {
       for (let s = el.nextElementSibling; s; s = s.nextElementSibling) {
@@ -1042,6 +1047,23 @@
         const c = pageControl(msg.label, 'text');
         return { ...base, ok: !!c, value: c ? c.value : '' };
       }
+      case 'tplCheck': {
+        // mẫu (tab Trường) không điền ô bắt buộc (bỏ tích / không có trong mẫu): đọc lại trên trang (không đổi gì) –
+        // ô trống / khác dữ liệu TB → trả tên ô (bảng điền không tự bấm nút lưu)
+        const s0 = msg.section && typeof msg.section === 'object' && msg.section.tpl ? msg.section : null;
+        if (!s0) return { ...base, ok: false };
+        let sec = tplSection(s0, null);
+        const scope = sec ? getScope(sec.scope) : null;
+        if (!scope || (sec.scope === 'modal' && !scopeMatches(sec, scope))) return { ...base, ok: false };
+        sec = tplSection(s0, scope);
+        const skip = [];
+        for (const g of sec.tplSkip || []) {
+          const v = msg.values ? msg.values[g.f.key] : undefined;
+          if (v === undefined || v === null || v === '') continue;
+          if (readNow(g.f, scope, v, g.rows) === false) skip.push(g.f.name);
+        }
+        return { ...base, ok: true, skip };
+      }
       case 'readSel': {
         // ô chọn của màn hình chính: đang chọn gì; want → có đúng lựa chọn đó không (cách khớp như lúc điền)
         const sel = pageControl(msg.label, 'select');
@@ -1209,7 +1231,8 @@
         if (msg.skip && key === msg.skip) return { ...base, ok: false, open: false, own: true };
         const rule = (msg.rules || []).find((r) => new RegExp(r.re).test(text));
         const title = modalTitle(d) || 'hộp thông báo của trang';
-        const raw = (d.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 200);
+        const said0 = dlgText(d);
+        const raw = (said0 ? (modalTitle(d) ? modalTitle(d) + ': ' : '') + said0 : (d.textContent || '').replace(/\s+/g, ' ').trim()).slice(0, 200);
         if (!rule) {
           // hộp bạn đã dạy (tab Trường: lấy hộp hỏi lúc đang hiện, tích nút trả lời) → bấm đúng nút đó. Hộp báo lỗi thì không
           const L = (msg.learned || []).find((x) => x && x.key === key);
@@ -1575,12 +1598,18 @@
     const baseFields = t.base === 'bienNhan' ? [...SECTIONS.donVi.fields, ...SECTIONS.quyTrinh.fields, ...b.fields] : b.fields;
     const fields = [];
     const skip = [];
-    const offNames = []; // ô dữ liệu TB bạn bỏ tích – tiện ích không điền (ghi cho bạn biết)
+    const offNames = []; // ô dữ liệu TB tiện ích không điền theo mẫu (bỏ tích / không có trong mẫu) – ghi cho bạn biết
     for (const f of baseFields) {
       if (NOT_USED.has(f.key)) continue;
       const fr = rows.filter((r) => r.key === f.key);
       if (!fr.length) {
-        fields.push(f); // mẫu không có dòng của ô này (lấy trường không thấy) → điền như cũ
+        // “chỉ nhập chỗ ý” (bạn yêu cầu 23/11): đã có mẫu (cấu hình) của đúng cửa sổ này → ô mẫu không có thì không điền;
+        // ô bắt buộc vẫn đọc lại trước khi 🤖 tự Lưu (trống / khác dữ liệu TB → dừng). Mẫu bản cũ không rõ cửa sổ → điền như cũ
+        if (!exactWin) fields.push(f);
+        else {
+          offNames.push(`${f.name} (không có trong mẫu)`);
+          if (!f.optional) skip.push({ f, rows: null });
+        }
         continue;
       }
       const on = fr.filter((r) => r.use === 'tb');
@@ -1815,8 +1844,14 @@
           continue;
         }
         if (f.kind === 'checkbox') r = setCheck(c, v && v !== 'false', f);
-        else if (c.tagName === 'SELECT') r = setSelect(c, String(v), f);
-        else r = setText(c, String(v), f);
+        else if (c.tagName === 'SELECT') {
+          r = setSelect(c, String(v), f);
+          // ô chọn phụ thuộc ô vừa đổi trong lần điền này (vd. Quy trình theo Phường/Xã): chờ trang nạp danh sách rồi chọn lại (~3 giây)
+          for (let k = 0; k < 10 && !r.ok && /^(không có lựa chọn|danh sách chọn đang trống)/.test(r.msg || '') && results.some((x) => x.changed); k++) {
+            await sleep(300);
+            r = setSelect(c, String(v), f);
+          }
+        } else r = setText(c, String(v), f);
         flash(c, r.ok);
         results.push({ key: f.key, name, value: shown, ok: r.ok, msg: r.msg, el: describe(c), changed: r.ok && !r.same });
         if (r.ok && f.kind !== 'checkbox' && c.tagName !== 'SELECT')

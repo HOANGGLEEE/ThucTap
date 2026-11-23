@@ -20,7 +20,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.19.6'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.20.0'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -71,7 +71,7 @@
   // stage: tiến độ từng TB trên VBDLIS { "<tb>": { tn: lúc tiếp nhận, tnBy, don: lúc nhập đơn xong, donBy, lech: số ô lệch,
   //   xong: lúc xong hẳn (đã lưu kho hồ sơ quét), xongBy } } – nhập đơn xong vẫn là “Đã tiếp nhận” (theo ý bạn)
   // armed: TB vừa chạy xong, đang chờ trang báo “Lưu … thành công” để tự đánh dấu
-  const S = { data: [], cur: null, tab: 'bn', done: {}, stage: {}, armed: null, lastScan: '', busy: false, running: false, pendingData: null, opts: {}, tpl: {}, tplDraft: null, autoSig: '', lastMsg: {}, toasts: [], autoFail: new Set(), autoPend: '', autoHold: new Map(), holdNote: '', tabId: undefined, autoTab: null };
+  const S = { data: [], cur: null, tab: 'bn', done: {}, stage: {}, armed: null, lastScan: '', busy: false, running: false, pendingData: null, opts: {}, tpl: {}, tplDraft: null, autoSig: '', lastMsg: {}, toasts: [], autoFail: new Set(), autoPend: '', autoHold: new Map(), holdNote: '', tabId: undefined, autoTab: null, tplRan: new Set(), tplLast: {}, tplIdx: {} };
   const safeSet = (obj) => {
     try {
       const p = store.set(obj);
@@ -167,13 +167,22 @@
       });
     return stageChain;
   };
-  // Trạng thái hiện ra: ○ Chưa làm → ◐ Đã tiếp nhận (tiếp nhận xong; nhập đơn xong VẪN là đây) → ✓ Xong (đã lưu kho hồ sơ quét)
+  // Trạng thái của chuỗi: ○ chưa tiếp nhận → ◐ đã tiếp nhận (nhập đơn xong VẪN là đây) → ✓ Xong. Chữ hiện cho bạn: showStage (4 mức)
   const stageOf = (tb) => {
     const s = tb && S.stage[String(tb.tb)];
     return s && s.xong ? 'xong' : s && s.hoan ? 'hoan' : s && (s.tn || s.don) ? 'tn' : 'chua';
   };
   const STAGE_ICON = { chua: '○', tn: '◐', xong: '✓', hoan: '⏸' };
-  const STAGE_TEXT = { chua: 'Chưa làm', tn: 'Đã tiếp nhận', xong: 'Xong', hoan: 'Tạm hoãn' };
+  // Trạng thái HIỆN cho bạn (bạn yêu cầu 23/11 – 4 mức): ○ Chưa xong (cả TB đã tiếp nhận / đã nhập đơn mà chưa chuyển lãnh đạo) →
+  // ◐ Đã nhập nhưng chưa xong (đã Thực thi chuyển lãnh đạo) → ✓ Xong; ⏸ Tạm hoãn. Chỉ để hiện: chuỗi tự động vẫn dùng stageOf
+  // (TB đã tiếp nhận chưa – không tiếp nhận lại TB đã tiếp nhận)
+  const STAGE_TEXT = { chua: 'Chưa xong', tn: 'Đã nhập nhưng chưa xong', xong: 'Xong', hoan: 'Tạm hoãn' };
+  const showStage = (tb) => {
+    const st = stageOf(tb);
+    if (st === 'xong' || st === 'hoan') return st;
+    const s = tb && S.stage[String(tb.tb)];
+    return s && s.ld ? 'tn' : 'chua';
+  };
   const BY_TEXT = {
     auto: 'tự ghi nhận',
     tay: 'đánh dấu tay',
@@ -476,7 +485,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
 .sq{padding:3px 0;border-bottom:1px dashed #e2e8f0}.sq:last-child{border-bottom:0}
 .chip{display:inline-flex;align-items:center;gap:2px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:10px;padding:0 2px 0 7px;margin:1px 2px;font-size:11px;color:#155e75}
 .btn.auto{font-weight:600}.btn.auto.on{background:#16a34a;border-color:#16a34a;color:#fff}
-.tpl td input,.tpl td select{font-size:11.5px;padding:2px 4px}.tpl td:first-child{width:20px;text-align:center}.tpl tr.ban td{color:#94a3b8}
+.tpl td input,.tpl td select{font-size:11.5px;padding:2px 4px}.tpl td:first-child{width:20px;text-align:center}.tpl tr.ban td{color:#94a3b8}.tpl td textarea{font-size:11.5px;padding:2px 4px;width:100%;resize:vertical;box-sizing:border-box}.tpl tr.vang td{opacity:.6}.tpl .btn.del{padding:0 5px;font-size:11px}
 .chip .x{border:0;background:none;color:#64748b;cursor:pointer;padding:0 4px;font-size:11px;line-height:16px}.chip .x:hover{color:#b91c1c}
 .hd button#dock{font-size:12px}.hd button#dock.on{background:#f59e0b}
 .pn.dock{width:var(--dw,420px) !important;height:100vh !important;max-height:100vh !important;border-radius:0;border-width:0 0 0 1px;box-shadow:-6px 0 18px rgba(15,23,42,.18)}
@@ -501,7 +510,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   <div class="hd"><b>VBDLIS Điền Nhanh <small style="font-weight:400;opacity:.8">v${PANEL_VERSION}</small></b><button id="miniAuto" title="🤖 Tự động hết: bấm để bật (tự chạy luôn màn hình đang mở) / tắt">🤖</button><button id="rec" title="Ghi thao tác: ghi lại những gì bạn làm trên VBDLIS rồi xuất ra file để gửi người hỗ trợ">●</button><button id="dock" title="Gắn bảng sát cạnh phải, cao hết màn hình (trang VBDLIS dồn sang trái nhường chỗ)">📌</button><button id="min" title="Thu nhỏ">–</button><button id="close" title="Ẩn (Alt+Q để mở lại)">×</button></div>
   <div class="bd">
     <div class="row"><button class="btn" id="prev" title="TB trước">‹</button><select id="tbSel"></select><button class="btn" id="next" title="TB sau">›</button></div>
-    <div class="row"><span class="muted" style="flex:none">Trạng thái:</span><select id="tbStage" title="Tiện ích tự đánh dấu: ◐ Đã tiếp nhận khi trang báo “Lưu hồ sơ thành công” (nhập đơn xong – “Lưu đơn đăng ký thành công” – vẫn là Đã tiếp nhận, chỉ ghi thêm giờ); ✓ Xong khi đã có cả nhập đơn xong và lưu kho hồ sơ quét (“Cập nhật thành công”). Sai thì sửa tay ở đây."><option value="chua">○ Chưa làm</option><option value="tn">◐ Đã tiếp nhận (kể cả đã nhập đơn)</option><option value="xong">✓ Xong – đã nhập đơn và lưu kho hồ sơ quét</option><option value="hoan">⏸ Tạm hoãn (chưa nhập được)</option></select><span id="stageInfo" class="muted"></span></div>
+    <div class="row"><span class="muted" style="flex:none">Trạng thái:</span><select id="tbStage" title="Tiện ích tự đánh dấu: ○ Chưa xong tới khi Thực thi chuyển lãnh đạo (đã tiếp nhận, đã nhập đơn vẫn là Chưa xong – dòng bên cạnh ghi giờ từng bước); ◐ Đã nhập nhưng chưa xong khi đã chuyển lãnh đạo; ✓ Xong khi Trả hồ sơ (hoặc đủ nhập đơn + lưu kho hồ sơ quét với TB không đi chuyển tiếp). Sai thì sửa tay ở đây."><option value="chua">○ Chưa xong</option><option value="tn">◐ Đã nhập nhưng chưa xong (đã chuyển lãnh đạo)</option><option value="xong">✓ Xong</option><option value="hoan">⏸ Tạm hoãn</option></select><span id="stageInfo" class="muted"></span></div>
     <div class="row prog"><span id="progTxt" class="muted"></span><span class="sp"></span><button class="btn" id="scanQBtn" style="display:none" title="Hàng chờ file quét (DDK, TBXN) – bấm để xem">📎 0</button><button class="btn" id="nextTodo" title="Chọn TB chưa tiếp nhận tiếp theo">→ TB chưa làm</button><button class="btn" id="progList" title="Bảng tiến độ tất cả TB – lọc TB chưa xong, xuất ra Excel">☰ Tiến độ</button></div>
     <div class="evt" id="evt" style="display:none"></div>
     <div class="row"><button class="btn" id="scan" title="Kiểm tra tiện ích còn tìm thấy đủ ô, nút cần dùng trên màn hình đang mở (khi VBDLIS đổi giao diện) – kèm danh sách nhãn → ô">Kiểm tra trang</button><button class="btn" id="dataBtn">Dữ liệu</button><button class="btn run" id="runAll" title="Màn hình Tiếp nhận hồ sơ: chọn Phường/Xã, quy trình, Số biên nhận, thêm thửa đầu, điền người nộp. Cửa sổ Nhập đơn đăng ký: chọn Điều kiện cấp giấy, tích Đăng ký lần đầu, rồi lần lượt tự bấm Thêm → Cá nhân / Thửa đất và điền từng chủ (tự Lưu chủ khi khớp), từng thửa (bạn bấm Lưu). Cửa sổ Quy trình xử lý: tự làm tác vụ Cập nhật dữ liệu pháp lý (Thực hiện, Đồng ý) và Lưu kho hồ sơ quét từ hàng chờ file (Cập nhật), tích Đã xử lý.">▶ Chạy cả TB</button><button class="btn auto" id="autoBtn" title="Tự động hết: bật lên thì tiện ích tự chạy khi bạn mở màn hình Tiếp nhận (trống), cửa sổ Nhập đơn đăng ký, Quy trình xử lý – tự bấm Lưu, Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, tác vụ 2–3, Chuyển tiếp / Thực thi (đúng tài khoản trong cài đặt), Trả hồ sơ. Ô lệch / hộp hỏi lạ / lỗi thì dừng, kêu ting chờ bạn. Kết ISO: chỉ khi bạn bật “Tự Kết ISO” (tab Biên nhận).">🤖 Tự động: TẮT</button><span class="sp"></span><button class="btn" id="resetDone" title="Xóa dấu ✓ của TB này">Xóa dấu ✓</button></div>
@@ -639,34 +648,127 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   };
 
   // ---------- tab “Trường”: lấy tất cả các trường của màn hình đang mở, tích trường cần điền ----------
-  // Ô không được điền (quy tắc của bạn): Ngày sinh, Ngày cấp, Ngày hết hạn
+  // Ô không được điền (quy tắc của bạn): Ngày sinh, Ngày cấp, Ngày hết hạn – xét trên nhãn đã bỏ *, :, (, ) và ký hiệu đầu dòng
   const TPL_BAN = /^(ngay sinh|ngay cap|ngay het han)\b/;
+  const banNorm = (s) => norm(s).replace(/[*:：?()（）[\]]/g, ' ').replace(/^[^a-z0-9]+/, '').replace(/\s+/g, ' ').trim();
+  const tplBan = (label) => TPL_BAN.test(banNorm(label));
   const TPL_NAME = { chu: 'Cửa sổ chủ sử dụng', thua: 'Cửa sổ thửa đất', donDK: 'Cửa sổ Nhập đơn đăng ký', bienNhan: 'Màn hình Tiếp nhận hồ sơ', giayTo: 'Cửa sổ hồ sơ quét / giấy tờ' };
-  const tplKeyOf = (d) => d.secKey || 'w:' + (d.titleKey || 'trang');
-  // phần đầu tên cửa sổ trước chữ số đầu tiên (vd. “cap nhat ho so - kh 2959…” → “cap nhat ho so”) – mẫu dùng lại cho mọi hồ sơ
+  // khóa cửa sổ (giống winKey của bộ điền): số hồ sơ / mã / ngày (đổi theo hồ sơ) → '#'; số ngắn là phần tên (vd. “tác vụ 2”) – giữ
+  const winKey = (k) =>
+    String(k || '')
+      .replace(/[\u200b-\u200d\ufeff]/g, '')
+      .replace(/[\u2010-\u2015\u2212]/g, '-')
+      .replace(/kh\s*\d+(?:\s*[.\-]\s*\d+)+[.\-]*/g, '#')
+      .replace(/\d+(?:\s*[.\-\/]\s*\d+){2,}/g, '#')
+      .replace(/\d{4,}/g, '#')
+      .replace(/\(\s*\d+\s*\)/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  // cách đặt khóa của bản trước 1.20 (phần trước chữ số đầu tiên) – mẫu cũ vẫn dùng được
   const tplStem = (tk) => {
     const k = String(tk || '');
     const st = k.split(/\d/)[0].replace(/(\s|-|–|:|\||\(|kh)+$/g, '').trim();
     return st.length >= 6 ? st : k;
   };
+  // mẫu t có phải của cửa sổ (tên đã bỏ dấu k): 2 = khóa bản 1.20, 1 = khóa bản cũ, 0 = không
+  const tplMatch = (k, t) => {
+    const tk = t && t.titleKey;
+    if (!tk || !k || /^d:/.test(tk)) return 0;
+    if (winKey(k) === tk) return 2;
+    return k === tk || tplStem(k) === tk ? 1 : 0;
+  };
+  // khóa mẫu: hộp hỏi = khóa hộp (d:…); cửa sổ chính của tiện ích = phần + tên cửa sổ (mỗi cửa sổ một mẫu, vd. “thua|them thua dat”);
+  // màn hình Tiếp nhận = bienNhan; cửa sổ khác = w:tên cửa sổ; màn hình chính khác = w:path:địa chỉ trang
+  const tplKeyOf = (fr) =>
+    fr.dlg
+      ? fr.titleKey
+      : fr.secKey
+        ? fr.scope === 'modal'
+          ? `${fr.secKey}|${fr.winKey || winKey(fr.titleKey)}`
+          : fr.secKey
+        : 'w:' + ((fr.scope === 'modal' ? fr.winKey || winKey(fr.titleKey) : fr.titleKey) || 'trang');
+  // tên hiện cho bạn: bỏ số hồ sơ, không lồng ngoặc kép
+  const cleanTitle = (s) =>
+    String(s || '')
+      .replace(/KH\s*2959[\d.\-\s]*/gi, '…')
+      .replace(/\d{4,}/g, '…')
+      .replace(/[“”"]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const qn = (s) => (/[“”]/.test(String(s)) ? String(s) : `“${s}”`);
+  function tplNameOf(fr) {
+    if (fr.dlg) return `Hộp hỏi ${cleanTitle(fr.title) || 'của trang'}: ${cleanTitle(fr.dlgText).slice(0, 60)}`;
+    if (fr.secKey === 'bienNhan') return TPL_NAME.bienNhan;
+    if (fr.secKey) return `${TPL_NAME[fr.secKey] || 'Cửa sổ'} – ${cleanTitle(fr.title) || 'không tên'}`;
+    if (fr.scope === 'modal') return `Cửa sổ ${cleanTitle(fr.title) || 'không tên'}`;
+    return `Màn hình ${cleanTitle(fr.heading) || 'chính'}`;
+  }
+  // mẫu được dùng thế nào (đúng như tiện ích chạy) – hiện cạnh mẫu và trong bảng tích
+  const T_CHO = /^chon nguoi xu ly\b/;
+  const T_QT = /^quy trinh xu ly\b/;
+  const T_TRA = /^tra ho so\b/;
+  const T_ISO = /^ket iso\b/;
+  function tplUse(t) {
+    if (!t) return '';
+    const base = t.base != null ? t.base : t.secKey || '';
+    const k = String(t.titleKey || '');
+    if (/^d:/.test(t.key || k)) return '🤖 bật: tự trả lời đúng hộp hỏi này bằng nút đã tích (hộp báo lỗi thì không)';
+    if (base === 'bienNhan')
+      return '▶ / 🤖 điền theo tích; ô bắt buộc bỏ tích (Phường/Xã, Quy trình, Số biên nhận, Người nộp) tiện ích không điền – trống / khác dữ liệu TB thì dừng trước Lưu hồ sơ';
+    if (base === 'chu' || base === 'thua' || base === 'donDK') return '▶ / 🤖 điền theo tích; 🤖 bấm thêm nút đã tích trước nút Lưu (ô bắt buộc bỏ tích mà trống / khác dữ liệu TB → không tự Lưu)';
+    if (base === 'giayTo') return '🤖 (tác vụ lưu kho): điền thêm ô / bấm thêm nút đã tích trước nút Lưu / Cập nhật';
+    if (t.scope === 'page') return '🤖 bật: tự chạy mẫu mỗi lần vào màn hình này (màn hình tiện ích tự làm thì không)';
+    if (T_CHO.test(k)) return '🤖: tích “Thực thi” = tự chọn đúng tài khoản trong cài đặt rồi Thực thi (đủ kiểm tra); ô / nút khác đã tích 🤖 làm thêm trước Thực thi';
+    if (T_QT.test(k)) return 'Quy trình xử lý: 🤖 làm theo bước riêng – mẫu chỉ dùng khi bạn bấm “Điền”';
+    if (T_TRA.test(k) || T_ISO.test(k)) return '🤖 (khi tự Trả hồ sơ / Kết ISO): điền thêm ô / bấm thêm nút đã tích trước “Thực hiện”; cửa sổ bạn tự mở: Kết ISO → 🤖 chạy mẫu';
+    return '🤖 bật: tự điền + bấm theo mẫu mỗi lần cửa sổ mở';
+  }
+  // tên dòng: bỏ * : ở cuối (mẫu vẫn giữ nhãn gốc để tìm lại đúng ô)
+  const tplLabel = (x) => String(x.label || '').replace(/[\s*:：]+$/, '') + (x.nth && x.by !== 'idx' ? ` (${x.nth + 1})` : '');
+  // tên nút: chữ (+ chú thích khi nút chỉ có ký hiệu / nhiều nút cùng chữ) + tác vụ của dòng
+  function tplBtnName(x) {
+    if (x.key === 'sym:close') return '× – đóng cửa sổ';
+    const sym = !/[a-z0-9]/.test(norm(x.text || ''));
+    let s = x.text || x.key;
+    if (x.tip && (sym || x.nth > 0)) s += ` – ${x.tip}`;
+    else if (x.nth > 0) s += ` (${x.nth + 1})`;
+    if (x.ctx) s += ` – ${x.ctx}`;
+    return s;
+  }
   function tplRows(d, editable) {
     return d.items
       .map((x, i) => {
         const ban = !!x.ban;
         const src = x.src === 'tb' && x.key ? 'tb' : 'fix';
+        const dis = ban ? ' disabled' : '';
         const srcSel = x.key
-          ? `<select data-tpl-src="${i}"${ban ? ' disabled' : ''}><option value="tb"${src === 'tb' ? ' selected' : ''}>Dữ liệu TB (${esc(x.kname)})</option><option value="fix"${src === 'fix' ? ' selected' : ''}>Giá trị mẫu</option></select>`
+          ? `<select data-tpl-src="${i}"${dis}><option value="tb"${src === 'tb' ? ' selected' : ''}>Dữ liệu TB (${esc(x.kname)})</option><option value="fix"${src === 'fix' ? ' selected' : ''}>Giá trị mẫu</option></select>`
           : '<span class="muted">Giá trị mẫu</span>';
         let val;
-        if (src === 'tb') val = '<span class="muted">theo TB</span>';
+        if (src === 'tb') val = '<span class="muted">theo TB từng hồ sơ</span>';
         else if (x.kind === 'checkbox')
-          val = `<select data-tpl-val="${i}"${ban ? ' disabled' : ''}><option value="true"${x.val === true || x.val === 'true' ? ' selected' : ''}>☑ tích</option><option value="false"${x.val === true || x.val === 'true' ? '' : ' selected'}>☐ bỏ tích</option></select>`;
-        else if (x.kind === 'select' && x.opts && x.opts.length)
-          val = `<select data-tpl-val="${i}"${ban ? ' disabled' : ''}>${x.opts.map((o) => `<option${o === x.val ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
-        else val = `<input data-tpl-val="${i}" value="${esc(x.val ?? '')}"${ban ? ' disabled' : ''}>`;
-        return `<tr class="${ban ? 'ban' : ''}"><td><input type="checkbox" data-tpl-on="${i}"${x.on && !ban ? ' checked' : ''}${ban || !editable ? ' disabled' : ''} style="width:auto"></td><td>${esc(x.label)}${x.nth ? ` (${x.nth + 1})` : ''}${
-          ban ? ' <span class="muted">– không điền (quy tắc)</span>' : x.locked ? ' <span class="muted">– ô đang khóa</span>' : ''
-        }</td><td>${srcSel}</td><td>${val}</td></tr>`;
+          val = `<select data-tpl-val="${i}"${dis}><option value="true"${x.val === true || x.val === 'true' ? ' selected' : ''}>☑ tích</option><option value="false"${x.val === true || x.val === 'true' ? '' : ' selected'}>☐ bỏ tích</option></select>`;
+        else if ((x.kind === 'select' || x.kind === 'radio') && x.opts && x.opts.length) {
+          const cur = x.val == null ? '' : String(x.val);
+          const list = cur && !x.opts.includes(cur) ? [cur, ...x.opts] : x.opts;
+          val = `<select data-tpl-val="${i}"${dis}>${cur ? '' : '<option value="" selected>(trống – không điền)</option>'}${list
+            .map((o) => `<option value="${esc(o)}"${o === cur ? ' selected' : ''}>${esc(o)}</option>`)
+            .join('')}</select>`;
+        } else if (x.multi || /[\r\n]/.test(String(x.val ?? '')))
+          val = `<textarea data-tpl-val="${i}" rows="2" placeholder="(trống – không điền)"${dis}>\n${esc(x.val ?? '')}</textarea>`;
+        else val = `<input data-tpl-val="${i}" value="${esc(x.val ?? '')}" placeholder="(trống – không điền)"${dis}>`;
+        const notes = [
+          ban && 'không điền (quy tắc)',
+          !ban && x.locked && 'ô đang khóa – chỉ đúng khi trang đã có sẵn giá trị này',
+          x.vang && 'không thấy lần lấy này',
+          !ban && src === 'fix' && x.on && 'giống nhau mọi hồ sơ',
+          x.lostTb && 'trước lấy từ TB, nay không có dữ liệu TB – đã bỏ tích',
+          x.amb && 'nhãn trùng – tìm theo id / tên ô',
+        ].filter(Boolean);
+        const rm = x.vang ? ` <button class="btn del" data-tpl-rm="${i}" title="Bỏ dòng này khỏi mẫu">✕</button>` : '';
+        return `<tr class="${ban ? 'ban' : ''}${x.vang ? ' vang' : ''}"><td><input type="checkbox" data-tpl-on="${i}"${x.on && !ban ? ' checked' : ''}${
+          ban || !editable ? ' disabled' : ''
+        } style="width:auto"></td><td>${esc(tplLabel(x))}${notes.length ? ` <span class="muted">– ${esc(notes.join('; '))}</span>` : ''}${rm}</td><td>${srcSel}</td><td>${val}</td></tr>`;
       })
       .join('');
   }
@@ -674,171 +776,408 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   function tplBtnRows(d) {
     return (d.btns || [])
       .map((x, i) => {
-        const note = x.lock === 'link' ? 'đường link – bấm là sang trang khác' : x.off ? 'đang mờ' : '';
-        return `<tr><td><input type="checkbox" data-tplb-on="${i}"${x.on ? ' checked' : ''} style="width:auto"></td><td>${esc(x.text)}${x.nth ? ` (${x.nth + 1})` : ''}${
-          note ? ` <span class="muted">– ${note}</span>` : ''
-        }</td><td><input data-tplb-ord="${i}" value="${esc(x.on ? x.ord || '' : '')}" placeholder="–" style="width:44px"${x.on ? '' : ' disabled'}></td></tr>`;
+        const notes = [x.lock === 'link' && 'đường link – bấm là sang trang khác', x.off && 'đang mờ', x.pos && 'theo vị trí dòng', x.vang && 'không thấy lần lấy này'].filter(Boolean);
+        const rm = x.vang ? ` <button class="btn del" data-tplb-rm="${i}" title="Bỏ nút này khỏi mẫu">✕</button>` : '';
+        return `<tr class="${x.vang ? 'vang' : ''}"><td><input type="checkbox" data-tplb-on="${i}"${x.on ? ' checked' : ''} style="width:auto"></td><td>${esc(tplBtnName(x))}${
+          notes.length ? ` <span class="muted">– ${esc(notes.join('; '))}</span>` : ''
+        }${rm}</td><td><input data-tplb-ord="${i}" value="${esc(x.on ? x.ord || '' : '')}" placeholder="–" style="width:44px"${x.on ? '' : ' disabled'}></td></tr>`;
       })
       .join('');
   }
+  // số chủ / thửa / giấy tờ của mẫu (ô cạnh nút Điền) – nhớ theo từng mẫu
+  const tplIdxOf = (key) => Math.max(1, parseInt((S.tplIdx || {})[key], 10) || 1);
   function tplTabHtml() {
     const d = S.tplDraft;
-    const saved = Object.values(S.tpl || {});
-    const idxBox = (base) =>
+    const saved = Object.values(S.tpl || {})
+      .filter((t) => t && t.items)
+      .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    const idxBox = (base, key) =>
       base === 'chu' || base === 'thua' || base === 'giayTo'
-        ? `<label class="muted" style="flex:none">${base === 'chu' ? 'Chủ' : base === 'thua' ? 'Thửa' : 'Giấy tờ'} số</label><input id="tplIdx" type="number" min="1" value="1" style="width:56px;flex:none">`
+        ? `<label class="muted" style="flex:none">${base === 'chu' ? 'chủ' : base === 'thua' ? 'thửa' : 'giấy tờ'} số</label><input data-tplidx="${esc(key)}" type="number" min="1" value="${tplIdxOf(
+            key
+          )}" style="width:48px;flex:none">`
         : '';
+    const savedRow = (t) => {
+      const nOn = t.items.filter((x) => x.on && !x.ban).length;
+      const nB = (t.btns || []).filter((b) => b.on).length;
+      const nE = t.items.filter((x) => x.on && !x.ban && x.src !== 'tb' && x.kind !== 'checkbox' && String(x.val ?? '') === '').length;
+      return `<div class="row" style="flex-wrap:wrap"><span style="flex:1">${esc(t.name)} · ${nOn}/${t.items.length} ô được tích${nB ? ` · bấm ${nB} nút` : ''}${
+        nE ? ` · ${nE} ô giá trị mẫu trống` : ''
+      }<br><span class="muted">${esc(tplUse(t))}</span></span>${idxBox(t.base, t.key)}<button class="btn" data-tplfill="${esc(t.key)}">Điền</button><button class="btn" data-tpledit="${esc(
+        t.key
+      )}">Sửa</button><button class="btn del" data-tpldel="${esc(t.key)}">Xóa</button></div>`;
+    };
+    const wait = d && S.autoWaitNote && S.autoWaitNote.key === d.key && AUTO() ? `<div class="hint ok">${esc(S.autoWaitNote.text)}</div>` : '';
     return (
       `<div class="card"><div class="ct">Lấy tất cả các trường</div>
-        <div class="hint">Mở màn hình / cửa sổ cần điền trên VBDLIS (cửa sổ chủ, cửa sổ thửa, Nhập đơn đăng ký, màn hình Tiếp nhận…) rồi bấm. Tiện ích liệt kê mọi ô nhập và mọi <b>nút</b>. <b>Tích ô cần điền</b>, chọn lấy từ <b>dữ liệu TB</b> hay <b>giá trị mẫu</b> (giá trị đang có trên trang, sửa được), rồi <b>Lưu mẫu</b>: từ đó “▶ Chạy cả TB” / “🤖 Tự động” chỉ điền các ô đã tích của cửa sổ đó, thêm các ô giá trị mẫu.<br><b>Nút</b>: nút nào cũng tích được – tích nút cần bấm (ô số = thứ tự bấm). Khi bạn bấm “Điền” / “Điền ngay” ở tab này, tiện ích điền các ô rồi bấm lần lượt các nút đó – và <b>🤖 Tự động hết tự làm theo mẫu</b> mỗi khi cửa sổ đó mở (cửa sổ tiện ích không tự làm). Ở cửa sổ tiện ích tự làm (đơn, chủ, thửa, Quy trình, Trả hồ sơ) 🤖 vẫn làm theo cách riêng: dùng các ô đã tích, không bấm nút của mẫu. Riêng <b>cửa sổ chọn người nhận</b>: tích “Thực thi” = 🤖 tự chọn đúng tài khoản trong cài đặt rồi bấm Thực thi, kể cả khi cửa sổ do bạn mở (vẫn kiểm đúng bước, đúng hồ sơ; bạn đang chọn người khác thì không bấm). Nút bấm theo mẫu (vd. Thực thi, Chuyển tiếp, Kết ISO, Lưu hồ sơ) tiện ích <b>không kiểm tra thêm</b> – vd. Thực thi theo mẫu không kiểm người nhận: bạn chọn đúng người trước khi bấm Điền.</div>
+        <div class="hint">Mở màn hình / cửa sổ / hộp hỏi cần điền trên VBDLIS rồi bấm. Tiện ích liệt kê mọi ô (cả ô tròn, ô chỉ có chữ mờ, ô trong bảng) và mọi <b>nút</b>. <b>Tích ô cần điền</b>: ô tiện ích biết lấy từ <b>dữ liệu TB</b> từng hồ sơ; ô khác điền <b>giá trị mẫu</b> (giống nhau mọi hồ sơ, sửa được). Tích nút cần bấm (ô số = thứ tự bấm). <b>Tích / sửa là tự lưu</b> – lần sau không phải tích lại; lấy lại trường lần nữa vẫn giữ tích cũ (ô lần đó không thấy cũng giữ, có ✕ để bỏ).<br>
+        Dùng: bấm <b>Điền</b> ở mẫu (mọi lúc). <b>🤖 Tự động hết</b>: cửa sổ / màn hình tiện ích không tự làm → tự điền + bấm theo mẫu mỗi lần mở; cửa sổ tiện ích tự làm (chủ, thửa, đơn, chọn người, Trả hồ sơ, hồ sơ quét) → 🤖 làm như cũ, đủ kiểm tra, rồi điền thêm ô / bấm thêm nút đã tích <b>trước</b> nút chốt (Lưu / Thực thi / Thực hiện); Quy trình xử lý → 🤖 theo bước riêng. <b>Hộp hỏi lạ</b>: lấy hộp đó lúc đang hiện, tích nút trả lời – từ đó 🤖 tự trả lời đúng hộp đó. Ô bắt buộc bỏ tích: tiện ích không điền; ô đó trống / khác dữ liệu TB thì 🤖 dừng trước Lưu. Không bao giờ điền Ngày sinh, Ngày cấp, Ngày hết hạn.</div>
         <button class="btn pri full" id="tplScan">Lấy tất cả các trường trên màn hình đang mở</button></div>` +
       (d
-        ? `<div class="card"><div class="ct">${esc(d.name)} – ${d.items.length} ô · ${(d.btns || []).length} nút<span class="sp"></span><button class="btn" id="tplAll" title="Tích hết các ô (không tích nút)">Tích hết</button><button class="btn" id="tplNone">Bỏ hết</button></div>
-            ${d.items.length ? `<div style="overflow:auto;max-height:40vh"><table class="sh tpl"><tr><th>✓</th><th>Trường</th><th>Lấy từ</th><th>Giá trị</th></tr>${tplRows(d, true)}</table></div>` : '<div class="muted">Màn hình này không có ô nhập.</div>'}
+        ? `<div class="card"><div class="ct">${esc(d.name)} – ${d.items.length} ô · ${(d.btns || []).length} nút<span class="sp"></span><button class="btn" id="tplAll" title="Tích các ô lấy từ dữ liệu TB và ô bạn đã gõ giá trị mẫu (ô giá trị mẫu khác: tích tay)">Tích hết</button><button class="btn" id="tplNone">Bỏ hết</button></div>
+            <div class="hint">${esc(tplUse(d))}</div>${wait}
+            ${
+              d.items.length
+                ? `<div id="tplItemsBox" data-key="${esc(d.key)}" style="overflow:auto;max-height:40vh"><table class="sh tpl"><tr><th>✓</th><th>Trường</th><th>Lấy từ</th><th>Giá trị</th></tr>${tplRows(d, true)}</table></div>`
+                : '<div class="muted">Không có ô nhập.</div>'
+            }
             ${
               (d.btns || []).length
-                ? `<div class="ct" style="margin-top:8px">Nút trên màn hình – ${(d.btns || []).length} nút <span class="muted" style="font-weight:400">· tích nút cần bấm, ô số = thứ tự bấm</span></div>
-            <div style="overflow:auto;max-height:32vh"><table class="sh tpl"><tr><th>✓</th><th>Nút</th><th>Thứ tự</th></tr>${tplBtnRows(d)}</table></div>`
+                ? `<div class="ct" style="margin-top:8px">Nút – ${(d.btns || []).length} nút <span class="muted" style="font-weight:400">· tích nút cần bấm, ô số = thứ tự bấm</span></div>
+            <div id="tplBtnsBox" data-key="${esc(d.key)}" style="overflow:auto;max-height:32vh"><table class="sh tpl"><tr><th>✓</th><th>Nút</th><th>Thứ tự</th></tr>${tplBtnRows(d)}</table></div>`
                 : ''
             }
-            <div class="row" style="margin-top:6px;flex-wrap:wrap">${idxBox(d.secKey)}<button class="btn pri" id="tplSave" title="Mẫu đã tự lưu mỗi khi bạn tích / sửa – nút này lưu rồi đóng bảng tích">Lưu mẫu</button><button class="btn" id="tplFillNow">Điền ngay</button><button class="btn" id="tplCancel" title="Đóng bảng tích (mẫu đã tự lưu)">Đóng</button></div>
-            <div class="hint">Tích / sửa là <b>tự lưu mẫu</b> – 🤖 Tự động hết dùng luôn, lần sau mở lại không phải tích lại.</div>
-            ${
-              d.secKey
-                ? ''
-                : d.scope === 'modal'
-                  ? CHOOSER_MODAL.test(d.titleKey || '')
-                    ? '<div class="hint">Cửa sổ chọn người nhận: tích “Thực thi” = 🤖 tự chọn đúng tài khoản trong cài đặt rồi bấm Thực thi (cả khi cửa sổ do bạn mở).</div>'
-                    : '<div class="hint">Cửa sổ này: 🤖 Tự động hết tự điền + bấm theo mẫu mỗi khi cửa sổ mở (đóng bảng tích này trước). 🤖 tắt thì bấm “Điền” ở danh sách mẫu.</div>'
-                  : '<div class="hint">Màn hình này: mẫu dùng bằng nút “Điền” ở danh sách mẫu bên dưới.</div>'
-            }</div>`
+            ${d.cut ? `<div class="muted">… còn ${d.cut} ô / nút nữa không hiện (màn hình quá nhiều).</div>` : ''}
+            <div class="row" style="margin-top:6px;flex-wrap:wrap">${idxBox(d.secKey, d.key)}<button class="btn pri" id="tplSave" title="Tích / sửa đã tự lưu – nút này lưu rồi đóng bảng tích">Lưu mẫu</button><button class="btn" id="tplFillNow">Điền ngay</button><button class="btn" id="tplCancel" title="Đóng bảng tích (đã tự lưu)">Đóng</button></div></div>`
         : '') +
       `<div class="card"><div class="ct">Mẫu đã lưu (${saved.length})</div>` +
-      (saved.length
-        ? saved
-            .map(
-              (t) =>
-                `<div class="row" style="flex-wrap:wrap"><span style="flex:1">${esc(t.name)} · ${t.items.filter((x) => x.on && !x.ban).length}/${t.items.length} ô được tích${
-                  (t.btns || []).some((b) => b.on) ? ` · bấm ${(t.btns || []).filter((b) => b.on).length} nút` : ''
-                }${t.base ? ' · <span class="ok">dùng khi chạy</span>' : ''}</span>${
-                  ['chu', 'thua', 'giayTo'].includes(t.base)
-                    ? `<label class="muted" style="flex:none">${t.base === 'chu' ? 'chủ' : t.base === 'thua' ? 'thửa' : 'giấy tờ'} số</label><input data-tplidx="${esc(t.key)}" type="number" min="1" value="1" style="width:44px;flex:none">`
-                    : ''
-                }<button class="btn" data-tplfill="${esc(t.key)}">Điền</button><button class="btn" data-tpledit="${esc(t.key)}">Sửa</button><button class="btn del" data-tpldel="${esc(t.key)}">Xóa</button></div>`
-            )
-            .join('')
-        : '<div class="muted">Chưa có mẫu. Không có mẫu thì tiện ích điền như cũ (mọi ô có dữ liệu).</div>') +
+      (saved.length ? saved.map(savedRow).join('') : '<div class="muted">Chưa có mẫu. Không có mẫu thì tiện ích điền như cũ (mọi ô có dữ liệu).</div>') +
       '</div>'
     );
   }
-  // lấy các ô của màn hình đang mở (khung có nhiều ô nhất)
+  // gộp dòng mới lấy với dòng của mẫu cũ: giữ tích / nguồn / giá trị; dòng cũ lần này không thấy → GIỮ, ghi “không thấy lần lấy này”
+  function tplMergeItems(oldItems, scanItems) {
+    const used = new Set();
+    const nl = (s) => norm(s).replace(/[*:：?]/g, ' ').replace(/\s+/g, ' ').trim();
+    const ctlOf = (x) => (x.ctl && (x.ctl.id || x.ctl.name) ? `${x.ctl.id || ''}|${x.ctl.name || ''}` : '');
+    const out = scanItems.map((x) => {
+      const ban = tplBan(x.label);
+      let prev = null;
+      const tryM = (test, one) => {
+        if (prev) return;
+        const c = oldItems.map((o, i) => [o, i]).filter(([o, i]) => !used.has(i) && (o.kind || 'text') === x.kind && test(o));
+        if (c.length === 1 || (c.length > 1 && !one)) {
+          prev = c[0][0];
+          used.add(c[0][1]);
+        }
+      };
+      const xc = ctlOf(x);
+      if (xc) tryM((o) => ctlOf(o) === xc && JSON.stringify(o.loc || null) === JSON.stringify(x.loc || null), true);
+      tryM((o) => o.label === x.label && (o.nth || 0) === (x.nth || 0));
+      if (x.loc) tryM((o) => !!o.loc && o.loc.col === x.loc.col && o.loc.row === x.loc.row && (!!x.loc.row || o.loc.idx === x.loc.idx), true);
+      tryM((o) => nl(o.label) === nl(x.label) && (o.nth || 0) === (x.nth || 0), true);
+      // ô Giới tính của mẫu bản cũ (“Giới tính:Nam”, ô tích không có dữ liệu TB) → ô Giới tính lấy từ dữ liệu TB
+      if (x.key === 'gioiTinhNam') tryM((o) => (!o.key || o.key === 'gioiTinhNam') && /^gioi tinh/.test(nl(o.label)), true);
+      let on = prev ? !!prev.on && !ban : !!x.key && !ban;
+      let src = prev ? prev.src || 'fix' : x.key ? 'tb' : 'fix';
+      let lostTb = false;
+      if (prev && x.key === 'gioiTinhNam' && !prev.key) src = 'tb'; // ô giới tính cũ → theo TB
+      if (src === 'tb' && !x.key) {
+        // trước lấy từ dữ liệu TB, nay ô này không có dữ liệu TB → bỏ tích (không tự điền giá trị đọc trên trang)
+        src = 'fix';
+        on = false;
+        lostTb = true;
+      }
+      const sameKind = prev && (prev.kind || 'text') === x.kind;
+      return {
+        label: x.label,
+        nth: x.nth || 0,
+        kind: x.kind,
+        key: x.key || '',
+        kname: x.kname || '',
+        opts: x.opts,
+        multi: !!x.multi,
+        locked: !!x.locked,
+        by: x.by || '',
+        loc: x.loc || null,
+        ctl: x.ctl || null,
+        amb: !!x.amb,
+        ban,
+        on,
+        src,
+        val: sameKind && prev.src !== 'tb' && prev.val !== undefined && !lostTb ? prev.val : x.full,
+        uv: !!(prev && prev.uv),
+        lostTb,
+      };
+    });
+    oldItems.forEach((o, i) => {
+      if (used.has(i)) return;
+      const ban = tplBan(o.label);
+      out.push({ ...o, vang: true, ban, on: !!o.on && !ban });
+    });
+    return out;
+  }
+  // nút: nhận lại theo id, theo dòng bảng (mã / tác vụ), theo chữ + thứ tự; nút đã tích lần này không thấy → giữ
+  function tplMergeBtns(oldBtns, scanBtns) {
+    const used = new Set();
+    const out = scanBtns.map((x) => {
+      let pi = -1;
+      const find = (test) => {
+        if (pi < 0) pi = oldBtns.findIndex((o, i) => !used.has(i) && test(o));
+      };
+      if (x.row) find((o) => o.key === x.key && o.row === x.row && (o.rnth || 0) === (x.rnth || 0));
+      if (x.id) find((o) => o.id && o.id === x.id && o.key === x.key && (!o.row || o.row === x.row));
+      if (x.nth >= 0) find((o) => !o.row && o.key === x.key && (o.nth || 0) === x.nth);
+      // khóa kiểu cũ (trước 1.18.6 / 1.20: số trong chữ nút) → theo đúng chữ của nút
+      find((o) => !o.row && o.text && legacyBtnKey(o) && norm(o.text) === norm(x.text) && !scanBtns.some((y) => y.key === o.key && (y.nth || 0) === (o.nth || 0)));
+      const prev = pi >= 0 ? oldBtns[pi] : null;
+      if (pi >= 0) used.add(pi);
+      const on = !!(prev && prev.on);
+      return {
+        text: x.text,
+        key: x.key,
+        nth: x.nth,
+        id: x.id || '',
+        tip: x.tip || '',
+        row: x.row || '',
+        rnth: x.rnth || 0,
+        ctx: x.ctx || '',
+        pos: !!x.pos,
+        lock: x.lock || '',
+        off: !!x.off,
+        on,
+        ord: on ? prev.ord || '' : '',
+      };
+    });
+    oldBtns.forEach((o, i) => {
+      if (!used.has(i) && o.on) out.push({ ...o, vang: true });
+    });
+    return out;
+  }
+  // lấy các ô của màn hình đang mở: khung có cửa sổ / hộp hỏi đang mở trước khung màn hình phía sau, rồi khung nhiều ô nhất
   async function tplScan() {
     const resp = await send({ type: 'vbdlis-scan' });
     if (!resp || !resp.ok) throw new Error(friendly((resp && resp.error) || 'Không quét được.'));
     const cnt = (f) => (f.items || []).length;
+    const rank = (f) => (f.dlg || (f.scope === 'modal' && cnt(f)) ? 2 : f.scope === 'modal' ? 1 : 0);
     const fr = (resp.frames || [])
       .filter((f) => f && (cnt(f) || (f.buttons || []).length))
-      .sort((a, b) => cnt(b) - cnt(a) || (b.buttons || []).length - (a.buttons || []).length)[0];
+      .sort((a, b) => rank(b) - rank(a) || cnt(b) - cnt(a) || (b.buttons || []).length - (a.buttons || []).length)[0];
     if (!fr) throw new Error('không thấy ô nhập / nút nào trên màn hình đang mở');
-    const tk = fr.secKey || fr.scope === 'page' ? fr.titleKey : tplStem(fr.titleKey); // màn hình chính: khóa theo địa chỉ trang
-    const key = tplKeyOf({ secKey: fr.secKey, titleKey: tk });
-    const old = S.tpl[key] || S.tpl[tplKeyOf(fr)]; // mẫu lưu theo tên cửa sổ đầy đủ (bản cũ) vẫn dùng được
-    const items = (fr.items || [])
-      .filter((x) => x.kind !== 'radio')
-      .map((x) => {
-        const ban = TPL_BAN.test(norm(x.label));
-        const prev = old && old.items.find((o) => o.label === x.label && (o.nth || 0) === (x.nth || 0));
-        return {
-          label: x.label,
-          nth: x.nth || 0,
-          kind: x.kind,
-          key: x.key,
-          kname: x.kname,
-          opts: x.opts,
-          locked: x.locked,
-          ban,
-          on: prev ? prev.on : !!x.key && !ban, // mặc định: tích ô tiện ích vẫn điền từ dữ liệu TB
-          src: prev ? prev.src : x.key ? 'tb' : 'fix',
-          val: prev && prev.src !== 'tb' ? prev.val : x.full,
-        };
-      });
-    // nút của màn hình: mặc định KHÔNG tích (bạn tự tích nút cần bấm); giữ lựa chọn của mẫu cũ
-    const btns = (fr.buttons || []).map((x) => {
-      const prev =
-        old &&
-        ((old.btns || []).find((o) => o.key === x.key && (o.nth || 0) === (x.nth || 0)) ||
-          // mẫu lưu ở bản trước (khóa nút khác, vd. “Tác vụ 2” từng lưu là “tac vu”) → nhận lại theo đúng chữ của nút
-          // (chỉ khóa kiểu cũ – nút cùng chữ khác vị trí của mẫu bản này không nhận tích của nút đang vắng)
-          (old.btns || []).find(
-            (o) =>
-              o.text &&
-              legacyBtnKey(o) &&
-              norm(o.text) === norm(x.text) &&
-              !(fr.buttons || []).some((y) => y.key === o.key && (y.nth || 0) === (o.nth || 0))
-          ));
-      const on = !!(prev && prev.on);
-      return { text: x.text, key: x.key, nth: x.nth || 0, id: x.id || '', lock: x.lock || '', off: !!x.off, on, ord: on ? prev.ord || '' : '' };
-    });
-    S.tplDraft = { key, name: TPL_NAME[fr.secKey] || fr.scopeName, secKey: fr.secKey, scope: fr.scope, titleKey: tk, items, btns };
+    const key = tplKeyOf(fr);
+    const tk = fr.dlg ? fr.titleKey : fr.scope === 'modal' ? fr.winKey || winKey(fr.titleKey) : fr.titleKey;
+    // mẫu cũ của cửa sổ này: khóa bản 1.20, không thì khóa bản trước (phần chưa tách cửa sổ; tên cắt ở chữ số đầu; tên đầy đủ)
+    let old = S.tpl[key] || null;
+    let oldKey = old ? key : '';
+    if (!old && !fr.dlg) {
+      const legacy = fr.secKey
+        ? fr.scope === 'modal' && S.tpl[fr.secKey] && (!S.tpl[fr.secKey].titleKey || tplMatch(fr.titleKey, S.tpl[fr.secKey]))
+          ? [fr.secKey]
+          : []
+        : fr.scope === 'modal'
+          ? ['w:' + tplStem(fr.titleKey), 'w:' + fr.titleKey]
+          : [];
+      for (const k of legacy)
+        if (S.tpl[k] && k !== key) {
+          old = S.tpl[k];
+          oldKey = k;
+          break;
+        }
+    }
+    const items = tplMergeItems(old ? old.items || [] : [], fr.items || []);
+    const btns = tplMergeBtns(old ? old.btns || [] : [], fr.buttons || []);
+    S.tplDraft = {
+      key,
+      oldKey: oldKey && oldKey !== key ? oldKey : '',
+      name: tplNameOf(fr),
+      secKey: fr.secKey || '',
+      scope: fr.scope,
+      titleKey: tk,
+      dlg: !!fr.dlg,
+      items,
+      btns,
+      cut: (fr.cutItems || 0) + (fr.cutBtns || 0),
+      merged: !!old,
+    };
   }
-  // nút đã tích lưu với khóa kiểu cũ (trước 1.18.6: bỏ cả số không trong ngoặc, vd. “Tác vụ 2” → “tac vu”)
+  // khóa nút đã bỏ dấu: mã hồ sơ / số từ 4 chữ số → '#' (giống bộ điền)
+  const numKeyP = (k) =>
+    String(k || '')
+      .replace(/\bkh( \d+)+/g, 'kh #')
+      .replace(/\d{4,}/g, '#')
+      .replace(/(# )+#/g, '#')
+      .replace(/\s+/g, ' ')
+      .trim();
+  // nút đã tích lưu với khóa kiểu cũ (trước 1.18.6: bỏ cả số không trong ngoặc; trước 1.20: giữ số dài trong chữ nút)
   function legacyBtnKey(o) {
     const k = String(o.key || '');
-    if (/^icon:/.test(k)) return false;
+    if (/^(icon|sym):/.test(k)) return false;
     const nb = (s) => norm(s).replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
     const t = String(o.text || '');
-    const kn = /\(\s*\d+\s*\)\s*$/.test(t) ? nb(t).replace(/(\s\d+)+$/, '') : nb(t);
+    if (!nb(t)) return false;
+    const kn = numKeyP(/\(\s*\d+\s*\)\s*$/.test(t) ? nb(t).replace(/(\s\d+)+$/, '') : nb(t));
     return k !== kn && k !== 'title:' + kn;
   }
-  // tab Trường: bạn tích / sửa là LƯU MẪU LUÔN – 🤖 / ▶ dùng ngay, lần sau mở lại không phải tích lại
-  // lưu ngay phần tích / sửa đang chờ (trước khi đóng, mở mẫu khác, quét lại…)
+  // mẫu đã lưu: sửa cờ “không điền” (Ngày sinh / Ngày cấp / Ngày hết hạn) theo cách xét mới; mẫu chủ bản cũ có ô “Giới tính:Nam”
+  // đã tích giá trị mẫu → ô Giới tính theo dữ liệu TB. Trả về true nếu có đổi
+  function tplFix(t) {
+    if (!t || !Array.isArray(t.items)) return false;
+    let ch = false;
+    t.items.forEach((x) => {
+      const ban = tplBan(x.label);
+      if (!!x.ban !== ban) {
+        x.ban = ban;
+        ch = true;
+      }
+      if (ban && x.on) {
+        x.on = false;
+        ch = true;
+      }
+    });
+    if (t.base === 'chu' && !t.items.some((x) => x.key === 'gioiTinhNam')) {
+      const g = t.items.find((x) => !x.key && x.kind === 'checkbox' && /^gioi tinh/.test(norm(x.label)));
+      if (g && g.on) {
+        Object.assign(g, { key: 'gioiTinhNam', kname: 'Giới tính (ô Nam)', src: 'tb' });
+        ch = true;
+      }
+    }
+    return ch;
+  }
+  // chuyển mẫu đã lưu sang khóa bản 1.20 (mỗi cửa sổ một mẫu; tên cửa sổ bỏ số hồ sơ). Trùng khóa → gộp: lấy bản mới nhất, cộng tích
+  function tplMigrateAll(all) {
+    let ch = false;
+    const put = (k, t) => {
+      const o = all[k];
+      if (!o) {
+        all[k] = t;
+        return;
+      }
+      const [a, b] = (o.at || 0) >= (t.at || 0) ? [o, t] : [t, o];
+      a.items = (a.items || []).map((x) => {
+        const y = (b.items || []).find((z) => z.label === x.label && (z.nth || 0) === (x.nth || 0));
+        return y && y.on && !x.on ? { ...x, on: true, src: y.src, val: y.val } : x;
+      });
+      a.btns = (a.btns || []).map((x) => {
+        const y = (b.btns || []).find((z) => z.key === x.key && (z.nth || 0) === (x.nth || 0) && (z.row || '') === (x.row || ''));
+        return y && y.on && !x.on ? { ...x, on: true, ord: y.ord } : x;
+      });
+      all[k] = { ...a, key: k };
+    };
+    for (const [k, t] of Object.entries(all)) {
+      if (!t || !Array.isArray(t.items)) continue;
+      if (tplFix(t)) ch = true;
+      let nk = k;
+      let ntk = t.titleKey || '';
+      if (['chu', 'thua', 'donDK', 'giayTo'].includes(k) && t.titleKey) {
+        ntk = winKey(t.titleKey);
+        nk = `${k}|${ntk}`;
+      } else if (/^w:/.test(k) && t.scope === 'modal' && /\d/.test(t.titleKey || '')) {
+        ntk = winKey(t.titleKey);
+        nk = 'w:' + ntk;
+      }
+      if (nk !== k) {
+        delete all[k];
+        put(nk, { ...t, key: nk, titleKey: ntk, name: cleanTitle(t.name) || t.name });
+        ch = true;
+      }
+    }
+    return ch;
+  }
+  function tplRec(d) {
+    return { key: d.key, name: d.name, base: d.secKey || '', scope: d.scope, titleKey: d.titleKey, dlg: !!d.dlg, items: d.items, btns: d.btns || [], at: Date.now(), kv: 2 };
+  }
+  // tab Trường: bạn tích / sửa là LƯU MẪU LUÔN – 🤖 / ▶ dùng ngay, lần sau mở lại không phải tích lại.
+  // Lưu vào bộ nhớ bảng ngay; ghi kho → true / false (tiện ích vừa tải lại thì false)
+  function tplSaveDraft() {
+    const d = S.tplDraft;
+    if (!d) return Promise.resolve(true);
+    const n = { ...S.tpl, [d.key]: tplRec(d) };
+    if (d.oldKey && d.oldKey !== d.key) delete n[d.oldKey]; // mẫu khóa cũ của cửa sổ này → sang khóa mới
+    d.oldKey = '';
+    S.tpl = n;
+    S.tplWrote = { key: d.key, at: n[d.key].at };
+    try {
+      return Promise.resolve(store.set({ tbTpl: n })).then(
+        () => true,
+        () => false
+      );
+    } catch (e) {
+      return Promise.resolve(false);
+    }
+  }
+  // tiện ích vừa được tải lại → bảng này không lưu được nữa: báo rõ, không làm như đã lưu
+  const tplDead = () => {
+    if (isAlive()) return false;
+    setResult(
+      '<div class="bad">✗ Chưa lưu được mẫu: tiện ích vừa được tải lại nên bảng này đã mất kết nối – tích / thứ tự / giá trị vừa đổi CHƯA được lưu. Bấm biểu tượng tiện ích (Alt+Q) mở bảng mới, vào tab Trường bấm “Sửa” ở mẫu (hoặc lấy lại các trường) rồi tích lại.</div>'
+    );
+    setStatus('✗ Chưa lưu được mẫu – xem dòng đỏ.', true);
+    return true;
+  };
+  // lưu ngay phần đang chờ (trước khi đóng, mở mẫu khác, lấy lại trường, rời trang…)
   function tplFlush() {
     if (!S.tplSaveT) return;
     clearTimeout(S.tplSaveT);
     S.tplSaveT = null;
-    if (S.tplDraft) tplSaveDraft();
+    if (S.tplDraft && isAlive()) tplSaveDraft();
   }
-  function tplAutoSave() {
+  // tích / đổi nguồn / thứ tự: lưu ngay (now); gõ giá trị: lưu 0,5 giây sau lần gõ cuối
+  function tplAutoSave(now) {
     clearTimeout(S.tplSaveT);
-    S.tplSaveT = setTimeout(() => {
+    const go = async () => {
       S.tplSaveT = null;
       const d = S.tplDraft;
-      if (!d) return;
-      tplSaveDraft();
-      setStatus(`✓ Đã lưu mẫu “${d.name}” – 🤖 Tự động hết / ▶ dùng luôn, lần sau không phải tích lại.`);
+      if (!d || tplDead()) return;
+      const ok = await tplSaveDraft();
+      if (!ok) {
+        if (!tplDead()) setStatus('✗ Chưa lưu được mẫu – tích lại hoặc bấm “Lưu mẫu”.', true);
+        return;
+      }
+      setStatus(`✓ Đã lưu mẫu ${qn(d.name)} – lần sau không phải tích lại.`);
       const a = root.activeElement;
       if (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.type === 'checkbox') render(); // đang gõ thì không vẽ lại
-    }, 500);
+    };
+    if (now) go();
+    else S.tplSaveT = setTimeout(go, 500);
   }
-  function tplSaveDraft() {
-    const d = S.tplDraft;
-    if (!d) return;
-    S.tpl = { ...S.tpl, [d.key]: { key: d.key, name: d.name, base: d.secKey, scope: d.scope, titleKey: d.titleKey, items: d.items, btns: d.btns || [], at: Date.now() } };
-    safeSet({ tbTpl: S.tpl });
-  }
-  // điền theo mẫu vào màn hình đang mở (nút “Điền ngay” / “Điền”): các ô đã tích, rồi bấm lần lượt các nút đã tích.
-  // Có ô chưa điền được → không bấm nút nào (tránh lưu thiếu)
+  // số thứ tự bấm của nút (không có số → cuối, theo thứ tự trên màn hình)
+  const tplOrd = (b) => (String(b.ord || '').trim() === '' || isNaN(+b.ord) ? 1e9 : +b.ord);
+  // điền theo mẫu vào màn hình đang mở (“Điền” / “Điền ngay”, 🤖 chạy mẫu, 🤖 làm thêm ở cửa sổ tiện ích tự làm):
+  // các ô đã tích, rồi bấm lần lượt các nút đã tích. Có ô chưa điền được → không bấm nút nào (tránh lưu thiếu).
+  // o: { auto (🤖), only (lọc nút), noTail (không xem hộp hỏi sau cùng) }
   async function tplFill(t, idx, o = {}) {
     const anyField = (t.items || []).some((x) => x.on && !x.ban);
-    const anyBtn = (t.btns || []).some((b) => b.on);
+    const anyBtn = (t.btns || []).some((b) => b.on && (!o.only || o.only(b)));
     if (!anyField && !anyBtn) throw new Error('mẫu chưa có ô / nút nào được tích');
-    const f = anyField ? await tplFillFields(t, idx) : { results: [] };
+    const f = anyField ? await tplFillFields(t, idx, o) : { results: [], notes: [], empty: [] };
     if (!anyBtn) f.clicks = [];
+    else if (f.wrongWin) f.clicks = [{ ok: false, name: 'các nút đã tích', why: 'cửa sổ vừa mở không phải cửa sổ của mẫu – tiện ích không bấm nút' }];
     else if (f.results.some((r) => !r.ok)) f.clicks = [{ ok: false, name: 'các nút đã tích', why: 'có ô chưa điền được – tiện ích không bấm nút; bạn kiểm tra rồi tự bấm' }];
     else if ((f.missing || []).length)
       f.clicks = [{ ok: false, name: 'các nút đã tích', why: `ô ${f.missing.join(', ')} chưa có dữ liệu TB – tiện ích không bấm nút; bạn điền rồi tự bấm` }];
     else f.clicks = await tplClicks(t, o);
+    // trang còn hỏi sau ô / nút cuối → báo (🤖: hộp đã biết / đã dạy thì trả lời; hộp lạ → ✗, kêu ting chờ bạn)
+    const last = f.clicks[f.clicks.length - 1];
+    f.answered = [];
+    if (!o.noTail && !(last && (!last.ok || last.link)) && !(o.auto && S.stopReq) && host.isConnected && host.style.display !== 'none') {
+      const q = await tplTailDialog(t, f.answered, anyBtn);
+      if (q) f.clicks.push(q);
+    }
     return f;
   }
+  // sau ô / nút cuối của mẫu: chờ ~3 giây xem trang có hỏi gì không (hộp hỏi chính của mẫu hộp hỏi thì không tính)
+  async function tplTailDialog(t, answered, clicked) {
+    const until = Date.now() + (clicked ? 3000 : 1200) * slowK();
+    const skip = /^d:/.test(t.key || '') ? t.key : '';
+    while (Date.now() < until) {
+      const rs = await act('answerDialog', { rules: AUTO() ? AUTO_DIALOGS : [], skip });
+      const hit = rs.find((x) => x.ok);
+      if (hit) {
+        answered.push(`Trang hỏi “${hit.title}” – tiện ích bấm “${hit.btn}”${hit.learned ? ' (hộp bạn đã dạy)' : ''}`);
+        await sleep(900);
+        continue;
+      }
+      const op = rs.find((x) => x.open && !x.own);
+      if (op)
+        return {
+          ok: false,
+          q: true,
+          name: 'câu hỏi của trang',
+          why: `trang đang hỏi “${String(op.text || op.title || '').slice(0, 120)}” – tiện ích không tự trả lời hộp này, bạn trả lời (muốn 🤖 tự trả lời: lấy hộp này ở tab Trường, tích nút trả lời)`,
+        };
+      await sleep(300);
+    }
+    return null;
+  }
   // bấm lần lượt các nút đã tích của mẫu (theo số thứ tự bạn đặt; không có số thì theo thứ tự trên màn hình).
-  // Trước mỗi nút: trang đang hỏi → 🤖 bật thì trả lời hộp đã biết, không thì dừng. Chỉ bấm khi thấy đúng MỘT nút ở đúng MỘT khung.
+  // Trước mỗi nút: trang đang hỏi → 🤖 bật thì trả lời hộp đã biết / đã dạy rồi xem lại, không thì dừng. Chỉ bấm khi thấy đúng MỘT nút ở đúng MỘT khung.
   async function tplClicks(t, o = {}) {
-    const list = (t.btns || []).map((b, i) => ({ ...b, i })).filter((b) => b.on);
-    const ordOf = (b) => (String(b.ord || '').trim() === '' || isNaN(+b.ord) ? 1e9 : +b.ord);
-    list.sort((a, b) => ordOf(a) - ordOf(b) || a.i - b.i);
+    const list = (t.btns || []).map((b, i) => ({ ...b, i })).filter((b) => b.on && (!o.only || o.only(b)));
+    list.sort((a, b) => tplOrd(a) - tplOrd(b) || a.i - b.i);
     const out = [];
+    const skip = /^d:/.test(t.key || '') ? t.key : ''; // mẫu hộp hỏi: hộp đó do chính mẫu này trả lời
     for (const b of list) {
-      const name = b.text + (b.nth ? ` (${b.nth + 1})` : '');
+      const name = tplBtnName(b);
       const panelGone = !host.isConnected || host.style.display === 'none';
       // ■ Dừng chỉ chặn lần 🤖 chạy mẫu (Điền / Điền ngay bạn bấm tay không bị dấu Dừng của lần chạy trước chặn)
       const stopped = !!o.auto && S.stopReq;
@@ -850,32 +1189,100 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         });
         break;
       }
-      const dl = await act('answerDialog', { rules: AUTO() ? AUTO_DIALOGS : [] });
-      if (dl.some((x) => x.ok)) await sleep(900);
-      const open = !dl.some((x) => x.ok) && dl.find((x) => x.open);
+      let open = null;
+      for (let k = 0; k < 4; k++) {
+        const dl = await act('answerDialog', { rules: AUTO() ? AUTO_DIALOGS : [], skip });
+        if (dl.some((x) => x.ok)) {
+          await sleep(900);
+          continue;
+        }
+        open = dl.find((x) => x.open && !x.own) || null;
+        break;
+      }
       if (open) {
         out.push({ ok: false, name, why: `trang đang hỏi “${open.title}” – bạn trả lời rồi bấm Điền lại (các nút sau chưa bấm)` });
         break;
       }
       const token = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      const fs = await act('tplClick', { dry: true, token, scope: t.scope, titleKey: t.titleKey, base: t.base || '', btn: { key: b.key, nth: b.nth, id: b.id, text: b.text } });
+      const fs = await act('tplClick', {
+        dry: true,
+        token,
+        scope: t.scope,
+        titleKey: t.titleKey,
+        base: t.base || '',
+        btn: { key: b.key, nth: b.nth, id: b.id, text: b.text, tip: b.tip || '', row: b.row || '', rnth: b.rnth || 0, ctx: b.ctx || '' },
+      });
       const okF = fs.filter((x) => x.ok);
       if (okF.length !== 1 || fs.some((x) => (x.found || 0) > 1)) {
+        // nút lần lấy trường gần nhất không thấy (cửa sổ ở trạng thái khác): không có thì bỏ qua, bấm tiếp nút sau
+        if (b.vang && !okF.length && !fs.some((x) => (x.found || 0) > 0)) {
+          out.push({ ok: true, skip: true, name, why: 'không có trên cửa sổ lúc này – bỏ qua' });
+          continue;
+        }
         const w = fs.find((x) => x.why && x.found) || fs.find((x) => x.why);
         out.push({ ok: false, name, why: okF.length > 1 ? `thấy nút ở ${okF.length} khung – không bấm` : (w && w.why) || 'không thấy nút' });
         break;
       }
       const r = (await act('tplClick', { token }))[0];
-      out.push(r && r.ok ? { ok: true, name, why: r.link ? 'đường link – trang chuyển, các nút sau (nếu có) không bấm' : '' } : { ok: false, name, why: (r && r.why) || 'không bấm được' });
+      out.push(r && r.ok ? { ok: true, name, link: !!r.link, why: r.link ? 'đường link – trang chuyển, các nút sau (nếu có) không bấm' : '' } : { ok: false, name, why: (r && r.why) || 'không bấm được' });
       if (!(r && r.ok) || r.link) break;
       await sleep(1000); // chờ trang xử lý nút vừa bấm
     }
     return out;
   }
-  async function tplFillFields(t, idx) {
+  // mẫu → lệnh điền cho bộ điền. ts: các mẫu cùng phần (bộ điền chọn đúng mẫu của cửa sổ mở ra – mỗi cửa sổ một mẫu).
+  // rows: ô dữ liệu TB của mẫu (tb = điền từ TB, fix = giá trị mẫu, off = bỏ tích); extra: ô giá trị mẫu đã tích (giá trị trống → không điền)
+  function tplMsgOf(ts, kind, values, o = {}) {
+    const v = { ...values };
+    const empty = [];
+    let anyField = false;
+    const per = ts.map((t, j) => {
+      const rows = (t.items || [])
+        .filter((x) => x.key)
+        .map((x) => ({ key: x.key, label: x.label, nth: x.nth || 0, use: !x.on || x.ban || tplBan(x.label) ? 'off' : x.src === 'tb' ? 'tb' : 'fix', vang: !!x.vang }));
+      const extra = [];
+      (t.items || []).forEach((x, i) => {
+        if (!x.on || x.ban || tplBan(x.label)) return;
+        anyField = true;
+        if (x.src === 'tb' && x.key) return;
+        if (o.noExtra) return;
+        const val = x.kind === 'checkbox' ? x.val === true || x.val === 'true' : String(x.val ?? '');
+        if (x.kind !== 'checkbox' && val === '') {
+          empty.push(tplLabel(x));
+          return;
+        }
+        const k = `x${j}_${i}`;
+        v[k] = val;
+        extra.push({ key: k, label: x.label, nth: x.nth || 0, kind: x.kind, by: x.by || '', loc: x.loc || null, ctl: x.ctl || null, vang: !!x.vang });
+      });
+      return { titleKey: t.key === t.base ? '' : t.titleKey || '', rows, extra };
+    });
+    const t0 = ts[0] || {};
+    return { msg: { section: { tpl: true, base: kind, per, scope: t0.scope, titleKey: t0.titleKey || '', strict: !!o.strict }, values: v }, empty, anyField };
+  }
+  // hồ sơ đang mở là của TB nào (Số biên nhận trên trang; cửa sổ Nhập đơn đăng ký: ô Mã đơn) – để không điền dữ liệu TB khác vào hồ sơ
+  async function openDossierTbs() {
+    let so = '';
+    try {
+      so = await dossierSo();
+    } catch (e) {}
+    if (!so)
+      try {
+        const f = (await act('donRead')).find((x) => x.ok);
+        so = (f && f.maDon) || '';
+      } catch (e) {}
+    return so ? tbOfSo(so).list : [];
+  }
+  async function tplFillFields(t, idx, o = {}) {
     const tb = curTB();
     const base = t.base || '';
     if (base && !tb) throw new Error('chưa chọn TB');
+    if (base) {
+      // mẫu lấy dữ liệu TB: hồ sơ đang mở phải là của TB đang chọn (rõ là TB khác → không điền)
+      const l = await openDossierTbs();
+      if (l.length === 1 && String(l[0].tb) !== String(tb.tb))
+        throw new Error(`hồ sơ đang mở là của TB ${l[0].tb}, không phải TB ${tb.tb} đang chọn – chọn TB ${l[0].tb} rồi bấm Điền (tiện ích không điền dữ liệu TB khác vào hồ sơ này)`);
+    }
     let values = {};
     if (base === 'chu' || base === 'thua' || base === 'giayTo') {
       const arr = (tb && (base === 'chu' ? tb.chu : base === 'thua' ? tb.thua : tb.giayTo)) || [];
@@ -883,26 +1290,250 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       values = buildValues(base, tb, idx);
     } else if (base === 'bienNhan') values = { ...buildValues('bienNhan', tb), phuongXa: tb.phuongXa || DEFAULT_PHUONG, quyTrinh: tb.quyTrinh || DEFAULT_QUY_TRINH };
     else if (base === 'donDK') values = buildValues('donDK', tb);
-    const keep = S.tpl;
-    S.tpl = { ...S.tpl, [t.key]: t }; // điền đúng bản đang xem (kể cả chưa lưu)
-    let m;
-    try {
-      m = tplMsg(t.key, values);
-    } finally {
-      S.tpl = keep;
-    }
-    if (typeof m.section === 'string' || !t.items.some((x) => x.on && !x.ban)) throw new Error('mẫu chưa có ô nào được tích');
-    // ô bạn đã tích mà màn hình không có nhãn đó → báo ✗ (không lặng lẽ bỏ qua) – có ô ✗ thì tiện ích không bấm nút của mẫu
-    m.section.strict = true;
-    const r = await send({ type: 'vbdlis-fill', ...m });
+    const m = tplMsgOf([t], base, values, { strict: true });
+    if (!m.anyField) throw new Error('mẫu chưa có ô nào được tích');
+    const r = await send({ type: 'vbdlis-fill', ...m.msg });
     if (!r || !r.ok) throw new Error(friendly((r && r.error) || 'Không chạy được'));
-    const p = pickFrame(r, base || 'mẫu');
+    const p = pickFrame(r, base || 'mẫu', t.name);
     if (!p.f) throw new Error(p.err);
     // ô đã tích lấy từ dữ liệu TB mà TB không có giá trị (bộ điền bỏ qua, không báo lỗi) → ghi lại để không bấm nút của mẫu
     p.f.missing = (t.items || [])
       .filter((x) => x.on && !x.ban && x.src === 'tb' && x.key && (values[x.key] == null || String(values[x.key]).trim() === ''))
-      .map((x) => x.label);
+      .map((x) => tplLabel(x));
+    p.f.empty = m.empty; // ô giá trị mẫu trống: không điền (ô giữ nguyên), không chặn nút
+    p.f.notes = p.f.notes || [];
     return p.f;
+  }
+  // mẫu của cửa sổ đang mở (tên k): khóa bản 1.20 trước, rồi khóa cũ; base: phần của tiện ích ('' = cửa sổ khác).
+  // Mẫu phần cũ chưa tách theo cửa sổ (không có tên cửa sổ): dùng khi không có mẫu đúng tên
+  function tplForWin(k, base) {
+    let best = null;
+    let bs = 0;
+    for (const t of Object.values(S.tpl || {})) {
+      if (!t || !t.items || (t.base || '') !== (base || '') || t.scope !== 'modal' || /^d:/.test(t.key || '')) continue;
+      const s = t.titleKey && t.key !== t.base ? tplMatch(k, t) : base ? 0.5 : 0;
+      if (s > bs || (s && s === bs && String(t.titleKey || '').length > String(best.titleKey || '').length)) {
+        best = t;
+        bs = s;
+      }
+    }
+    return bs > 0 ? best : null;
+  }
+  const tplOn = (t) => !!t && ((t.items || []).some((x) => x.on && !x.ban) || (t.btns || []).some((b) => b.on));
+
+  // ---- mẫu tab Trường trong file sao lưu tiến độ: tích, thứ tự nút, giá trị mẫu bạn đặt ----
+  // Không đưa vào file: giá trị có thể là dữ liệu cá nhân (dãy số dài, ô họ tên / giấy tờ / địa chỉ / điện thoại / email…)
+  const PII_LAB = /(ho ten|ho va ten|so giay to|dinh danh|cccd|cmnd|can cuoc|dien thoai|email|dia chi|ngay sinh|nam sinh)/;
+  function tplForBackup(all) {
+    let dropped = 0;
+    const out = {};
+    for (const [k, t] of Object.entries(all || {})) {
+      if (!t || !Array.isArray(t.items)) continue;
+      const items = t.items.map((x) => {
+        const y = { label: x.label, nth: x.nth || 0, kind: x.kind, key: x.key || '', kname: x.kname || '', ban: !!x.ban, on: !!x.on, src: x.src, by: x.by || '', loc: x.loc || null, ctl: x.ctl || null, multi: !!x.multi };
+        if (x.on && !x.ban && x.src !== 'tb' && x.val !== undefined) {
+          if (/\d{9,}/.test(String(x.val)) || PII_LAB.test(norm(x.label))) dropped++;
+          else y.val = x.val;
+        }
+        return y;
+      });
+      const btns = (t.btns || [])
+        .filter((b) => b.on && !/\d{9,}/.test(String(b.text || '') + String(b.key || '')))
+        .map((b) => ({ text: b.text, key: b.key, nth: b.nth, id: b.id || '', tip: b.tip || '', row: b.row || '', rnth: b.rnth || 0, ctx: b.ctx || '', on: true, ord: b.ord || '' }));
+      out[k] = { key: t.key, name: t.name, base: t.base || '', scope: t.scope, titleKey: t.titleKey || '', dlg: !!t.dlg, items, btns, at: t.at || 0, kv: t.kv || 1 };
+    }
+    return { out, dropped };
+  }
+  // nạp file sao lưu: chỉ THÊM mẫu máy này chưa có (mẫu đang có giữ nguyên; mẫu bạn đã xóa sau lúc sao lưu không sống lại)
+  async function tplRestore(inc) {
+    if (!inc || typeof inc !== 'object' || Array.isArray(inc)) return { tplAdd: 0, tplKeep: 0 };
+    const r = await store.get(['tbTpl', 'tbTplDel']);
+    const cur = { ...(r.tbTpl || {}) };
+    const del = r.tbTplDel || {};
+    let tplAdd = 0;
+    let tplKeep = 0;
+    for (const [k, t] of Object.entries(inc)) {
+      if (/^(__proto__|constructor|prototype)$/.test(k) || !t || typeof t !== 'object' || t.key !== k || !Array.isArray(t.items) || !Array.isArray(t.btns || [])) continue;
+      if (!/^(w:|d:|chu|thua|donDK|giayTo|bienNhan)/.test(k)) continue;
+      if (cur[k]) {
+        tplKeep++;
+        continue;
+      }
+      if (del[k] && del[k] >= (t.at || 0)) continue;
+      cur[k] = { ...t, btns: t.btns || [] };
+      tplAdd++;
+    }
+    if (tplAdd) {
+      tplMigrateAll(cur);
+      S.tpl = cur;
+      await store.set({ tbTpl: cur });
+    }
+    return { tplAdd, tplKeep };
+  }
+  // ghi chú của lần điền theo mẫu: ô bỏ tích (không điền), ô bắt buộc bỏ tích mà trang trống / khác, ô mẫu không thấy lúc này
+  const tplNoteHtml = (f) =>
+    [
+      (f.off || []).length && `• Bỏ qua theo mẫu tab Trường (ô bỏ tích): ${f.off.join(', ')}`,
+      (f.tplSkip || []).length && `⚠ Ô bắt buộc bỏ tích mà trên trang đang trống / khác dữ liệu TB: ${f.tplSkip.join(', ')} – bạn điền tay`,
+      ...(f.notes || []).map((n) => `• ${n}`),
+    ]
+      .filter(Boolean)
+      .map((s) => `<div class="ln muted">${esc(s)}</div>`)
+      .join('');
+  // dòng nhật ký của một lần chạy mẫu (ô, ô trống, ghi chú, nút, hộp hỏi đã trả lời)
+  function tplLogInto(log, f) {
+    (f.results || []).forEach((r) =>
+      log.push({ icon: r.ok ? '✓' : '✗', cls: r.ok ? 'ok' : 'bad', html: `<b>${esc(r.name)}</b> = ${esc(r.value)}${r.msg ? ` <span class="muted">(${esc(r.msg)})</span>` : ''}` })
+    );
+    (f.empty || []).forEach((n) => log.push({ icon: '•', cls: 'muted', html: `${esc(n)} – giá trị mẫu trống, không điền (ô giữ nguyên)` }));
+    (f.notes || []).forEach((n) => log.push({ icon: '•', cls: 'muted', html: esc(n) }));
+    (f.clicks || []).forEach((c) =>
+      log.push(
+        c.q
+          ? { icon: '✗', cls: 'bad', html: `Trang còn hỏi sau khi làm theo mẫu <span class="muted">(${esc(c.why)})</span>` }
+          : {
+              icon: c.skip ? '•' : c.ok ? '✓' : '✗',
+              cls: c.skip ? 'muted' : c.ok ? 'ok' : 'bad',
+              html: `${c.skip ? 'Bỏ qua' : c.ok ? 'Đã bấm' : 'Chưa bấm'} <b>“${esc(c.name)}”</b>${c.why ? ` <span class="muted">(${esc(c.why)})</span>` : ''}`,
+            }
+      )
+    );
+    (f.answered || []).forEach((n) => log.push({ icon: '•', cls: 'muted', html: esc(n) }));
+  }
+  // hộp hỏi bạn đã dạy (mẫu hộp hỏi ở tab Trường): khóa hộp → nút trả lời (nút đã tích, số thứ tự nhỏ nhất)
+  function learnedDialogs() {
+    const out = [];
+    for (const t of Object.values(S.tpl || {})) {
+      if (!t || !/^d:/.test(t.key || '')) continue;
+      const b = (t.btns || []).filter((x) => x.on).sort((a, c) => tplOrd(a) - tplOrd(c))[0];
+      if (b) out.push({ key: t.key, btn: { key: b.key, nth: b.nth, id: b.id || '' } });
+    }
+    return out;
+  }
+  // màn hình Tiếp nhận + mẫu “Màn hình Tiếp nhận hồ sơ” (tab Trường): mỗi ô chính lấy gì –
+  // tb (dữ liệu TB), fix (giá trị mẫu), off (bỏ tích: tiện ích không điền; ô bắt buộc vẫn phải đúng dữ liệu TB trước khi Lưu hồ sơ)
+  const RECEP_REQ = ['phuongXa', 'quyTrinh', 'soBienNhan', 'nguoiNop'];
+  function recepPlan() {
+    const t = S.tpl && S.tpl.bienNhan;
+    const plan = {};
+    for (const k of ['phuongXa', 'quyTrinh', 'soBienNhan', 'diaChiTaiSan', 'nguoiNop', 'soGiayTo', 'diaChi']) {
+      const x = t && (t.items || []).find((y) => y.key === k);
+      if (!x) plan[k] = { use: 'tb' };
+      else if (!x.on || x.ban) plan[k] = { use: 'off', label: tplLabel(x) };
+      else if (x.src === 'tb') plan[k] = { use: 'tb' };
+      else {
+        const v = String(x.val ?? '');
+        plan[k] = v === '' ? { use: 'off', label: tplLabel(x) } : { use: 'fix', value: v };
+      }
+    }
+    return plan;
+  }
+  // 🤖 + cửa sổ tiện ích tự làm (bạn chọn 23/11): làm thêm phần bạn đã tích trong mẫu của cửa sổ đó, TRƯỚC nút chốt.
+  // o: { base: phần ('' = cửa sổ khác), decide: [khóa nút chốt – chuỗi tự bấm một lần, không bấm theo mẫu], fields: điền thêm ô giá trị mẫu
+  //      đã tích (ô dữ liệu TB chuỗi tự điền), skipKeys: ô chuỗi tự điền, step: (tên) → dòng nhật ký }
+  // Nút đóng cửa sổ (Đóng, ×, Hủy…) và đường link không bấm. Trả về '' (xong / không có gì) hoặc lý do (chuỗi dừng trước nút chốt)
+  async function tplChainExtras(o) {
+    if (!AUTO()) return '';
+    const top = (await act('modalState')).find((x) => x.open);
+    if (!top) return '';
+    const t = tplForWin(modalKey(top), o.base || '');
+    if (!t) return '';
+    const decide = new Set(o.decide || []);
+    const only = (b) => !decide.has(b.key) && b.key !== 'sym:close' && !/^(dong|huy|thoat|bo qua|close|cancel|x)$/.test(b.key) && b.lock !== 'link';
+    const items = (t.items || []).map((x) =>
+      o.fields && x.on && !x.ban && !x.locked && (x.src !== 'tb' || !x.key) && !(o.skipKeys || []).includes(x.key) ? x : { ...x, on: false }
+    );
+    const anyF = items.some((x) => x.on);
+    const anyB = (t.btns || []).some((b) => b.on && only(b));
+    if (!anyF && !anyB) return '';
+    const c = o.step(`Theo mẫu tab Trường – ${t.name}`);
+    let f;
+    try {
+      f = await tplFill({ ...t, base: '', items }, 0, { auto: true, only, noTail: true });
+    } catch (e) {
+      c.bad(friendly(e));
+      return `mẫu tab Trường chưa làm được (${friendly(e)})`;
+    }
+    const lines = [
+      ...(f.results || []).map((r) => `${r.ok ? '✓' : '✗'} ${r.name}${r.ok ? '' : ` (${r.msg})`}`),
+      ...(f.empty || []).map((n) => `• ${n}: giá trị mẫu trống`),
+      ...(f.clicks || []).map((x) => `${x.skip ? '• bỏ qua' : x.ok ? '✓ bấm' : '✗ chưa bấm'} “${x.name}”${x.why ? ` (${x.why})` : ''}`),
+    ];
+    if ((f.results || []).some((r) => !r.ok) || (f.clicks || []).some((x) => !x.ok)) {
+      c.bad(lines.join('; '));
+      return 'mẫu tab Trường chưa làm trọn: ' + lines.filter((l) => /^✗/.test(l)).join('; ');
+    }
+    c.ok(lines.join('; '));
+    return '';
+  }
+  // “Điền” / “Điền ngay” mẫu của cửa sổ đang mở lúc 🤖 bật → coi như mẫu đã chạy ở lần mở này (đóng bảng tích không chạy lại)
+  async function tplMarkRan(t) {
+    try {
+      if (t.scope === 'page') S.tplRan.add(`${t.key}|${pageVisitId()}`);
+      else if (!/^d:/.test(t.key || '')) {
+        const top = (await act('modalState')).find((x) => x.open);
+        if (top && top.oid) S.tplRan.add(`${t.key}|${top.oid}`);
+      }
+    } catch (e) {}
+  }
+  // khóa màn hình chính (giống bộ điền): địa chỉ trang; mỗi lần vào màn hình = một lần (địa chỉ + lúc trang tải)
+  const pageTplKey = () => 'path:' + (location.pathname.replace(/\/+$/, '') + (location.hash || '').split('?')[0]).toLowerCase();
+  const pageVisitId = () => {
+    let h = 5381;
+    const s = location.href;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+    return 'v' + (h >>> 0).toString(36) + '.' + Math.round(performance.timeOrigin % 1e9).toString(36);
+  };
+  // chữ ký 🤖 chạy mẫu: 'tpl:<số lần mở>:<khóa mẫu>' | 'ptpl:<lần vào màn hình>:<khóa mẫu>'
+  const tplSigKey = (sig) => {
+    const a = sig.indexOf(':');
+    return sig.slice(sig.indexOf(':', a + 1) + 1);
+  };
+  // 🤖 chạy mẫu (tab Trường): mỗi lần cửa sổ / hộp hỏi mở (màn hình chính: mỗi lần vào) đúng MỘT lần.
+  // null = giữ nguyên (đang chờ bạn / đã chạy lần mở này), còn lại = chữ ký để chạy
+  function tplSigOf(t, id, kind) {
+    const ran = `${t.key}|${id}`;
+    if (!id || S.tplRan.has(ran)) return null;
+    // bảng tích của mẫu này đang mở ở tab Trường (bạn đang tích) → chờ bạn đóng bảng tích
+    if (S.tplDraft && S.tplDraft.key === t.key && S.tab === 'tr' && !pn.classList.contains('min')) {
+      autoWaitNote(t, `🤖 sẽ điền + bấm theo mẫu ${qn(t.name)} khi bạn đóng bảng tích (Lưu mẫu / Đóng)`);
+      return null;
+    }
+    // chống lặp: mẫu có nút đã tích vừa tự chạy (20 giây) mà bạn chưa đụng vào trang → không chạy lại, báo bạn
+    const last = S.tplLast[t.key];
+    if (last && (t.btns || []).some((b) => b.on) && USER.at < last.at && Date.now() - last.at < 20000) {
+      if (S.holdNote !== 'loop|' + ran) {
+        S.holdNote = 'loop|' + ran;
+        setStatus(`🤖 Mẫu ${qn(t.name)} vừa tự chạy mà cửa sổ lại mở ngay (không do bạn) – không chạy lại để tránh lặp; cần thì bấm “Điền” ở tab Trường.`, true);
+        needYou('Mẫu vừa chạy – cửa sổ lại mở', 'bad');
+      }
+      return null;
+    }
+    return `${kind}:${id}:${t.key}`;
+  }
+  // 🤖 đang chờ bạn đóng bảng tích → ghi một dòng (một lần) và hiện trong bảng tích
+  function autoWaitNote(t, text) {
+    const was = S.autoWaitNote && S.autoWaitNote.key === t.key && S.autoWaitNote.text === text;
+    S.autoWaitNote = { key: t.key, text };
+    if (was) return;
+    setStatus(text);
+    if (S.tab === 'tr') {
+      const a = root.activeElement;
+      if (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.type === 'checkbox') render();
+    }
+  }
+  // tab khác vừa sửa mẫu đang mở bảng tích → lấy tích / nguồn / giá trị / thứ tự của bản đó (giữ dòng của lần lấy trường này)
+  function tplAdopt(d, t) {
+    const sameI = (a, b) => a.label === b.label && (a.nth || 0) === (b.nth || 0) && (a.kind || 'text') === (b.kind || 'text');
+    d.items.forEach((x) => {
+      const y = (t.items || []).find((z) => sameI(x, z));
+      if (y) Object.assign(x, { on: y.on, src: y.src, val: y.val, uv: y.uv });
+    });
+    const sameB = (a, b) => a.key === b.key && (a.nth || 0) === (b.nth || 0) && (a.row || '') === (b.row || '') && (a.rnth || 0) === (b.rnth || 0);
+    (d.btns || []).forEach((x) => {
+      const y = (t.btns || []).find((z) => sameB(x, z));
+      if (y) Object.assign(x, { on: y.on, ord: y.ord });
+    });
   }
 
   const whoOf = (x) => (x && ((x.nguoiNop && x.nguoiNop.hoTen) || (x.chu && x.chu[0] && x.chu[0].hoTen))) || '';
@@ -915,19 +1546,20 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       ? S.data
           .map(
             (x) =>
-              `<option value="${esc(x.tb)}">${STAGE_ICON[stageOf(x)]} TB ${esc(x.tb)} – ${esc(whoOf(x))} (${(x.thua || []).length} thửa)${dups.has(String(x.tb)) ? ' ⚠ trùng thửa' : ''}</option>`
+              `<option value="${esc(x.tb)}">${STAGE_ICON[showStage(x)]} TB ${esc(x.tb)} – ${esc(whoOf(x))} (${(x.thua || []).length} thửa)${dups.has(String(x.tb)) ? ' ⚠ trùng thửa' : ''}</option>`
           )
           .join('')
       : '<option>(chưa có dữ liệu)</option>';
     if (tb) sel.value = String(tb.tb);
     const cnt = { chua: 0, tn: 0, xong: 0, hoan: 0 };
-    S.data.forEach((x) => cnt[stageOf(x)]++);
-    const nDon = S.data.filter((x) => stageOf(x) === 'tn' && (S.stage[String(x.tb)] || {}).don).length;
+    S.data.forEach((x) => cnt[showStage(x)]++);
+    // trong số “Chưa xong”: bao nhiêu TB đã tiếp nhận trên VBDLIS (chưa chuyển lãnh đạo)
+    const nTn = S.data.filter((x) => showStage(x) === 'chua' && stageOf(x) === 'tn').length;
     $('#progTxt').textContent = S.data.length
-      ? `✓ ${cnt.xong} xong · ◐ ${cnt.tn} tiếp nhận${nDon ? ` (${nDon} đã nhập đơn)` : ''}` + (cnt.hoan ? ` · ⏸ ${cnt.hoan} hoãn` : '') + ` · ○ ${cnt.chua} chưa làm`
+      ? `✓ ${cnt.xong} xong · ◐ ${cnt.tn} đã nhập chưa xong` + (cnt.hoan ? ` · ⏸ ${cnt.hoan} hoãn` : '') + ` · ○ ${cnt.chua} chưa xong${nTn ? ` (${nTn} đã tiếp nhận)` : ''}`
       : '';
     const ss = $('#tbStage');
-    ss.value = tb ? stageOf(tb) : 'chua';
+    ss.value = tb ? showStage(tb) : 'chua';
     ss.disabled = !tb || !!S.running;
     const s = tb && S.stage[String(tb.tb)];
     const info = s
@@ -1088,9 +1720,22 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const tb = curTB();
     renderTop();
     root.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === S.tab));
+    // tab Trường: danh sách ô / nút cuộn riêng – tích xong vẫn ở chỗ cũ (cùng mẫu)
+    const keep =
+      S.tab === 'tr' && S.tplDraft
+        ? ['#tplItemsBox', '#tplBtnsBox'].map((s) => {
+            const e = $(s);
+            return e && e.dataset.key === S.tplDraft.key ? e.scrollTop : 0;
+          })
+        : null;
     $('#content').innerHTML = tb || S.tab === 'tr'
       ? TABS[S.tab](tb)
       : '<p class="muted">Chưa có dữ liệu. Bấm “Dữ liệu” để dán dữ liệu TB.</p>' + (S.tab === 'gt' ? scanCardHtml() : '');
+    if (keep)
+      ['#tplItemsBox', '#tplBtnsBox'].forEach((s, i) => {
+        const e = $(s);
+        if (e) e.scrollTop = keep[i];
+      });
     bd.scrollTop = scroll;
     if (S.running) applyRunLock();
   }
@@ -1255,7 +1900,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   }
 
   // Chọn kết quả tốt nhất trong các khung; báo rõ khi cửa sổ sai / không mở được
-  function pickFrame(resp, section) {
+  function pickFrame(resp, section, tplName) {
     const all = (resp.frames || []).filter(Boolean);
     const good = all.filter((f) => !f.noScope && !f.wrongScope);
     if (good.length) {
@@ -1272,11 +1917,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         err: `Đã bấm “${late.opened}” nhưng sau 15 giây cửa sổ chưa hiện (máy chủ chậm?) – chờ cửa sổ hiện ra rồi bấm Điền lại, hoặc Hủy bỏ rồi chạy lại.`,
       };
     const w = all.find((f) => f.wrongScope);
-    if (w) return { err: `Đang mở ${w.wrongScope}, không phải ${TITLES[section] || 'cửa sổ cần điền'} – đóng cửa sổ đó rồi bấm lại.` };
+    if (w) return { err: `Đang mở ${w.wrongScope}, không phải ${TITLES[section] || (tplName ? 'cửa sổ của mẫu ' + qn(tplName) : 'cửa sổ cần điền')} – đóng cửa sổ đó rồi bấm lại.` };
     const o = all.find((f) => f.openerErr);
     if (o) return { err: o.openerErr };
     const extra = section === 'thua' ? ', cũng không thấy nút “Thêm thửa đất” trên trang' : '';
-    return { err: `Không thấy ${TITLES[section] || 'màn hình cần điền'} đang mở${extra}. Mở nó trên VBDLIS rồi bấm lại.` };
+    return { err: `Không thấy ${TITLES[section] || (tplName ? 'cửa sổ / màn hình của mẫu ' + qn(tplName) : 'màn hình cần điền')} đang mở${extra}. Mở nó trên VBDLIS rồi bấm lại.` };
   }
 
   async function doFill(section, i, doneKey) {
@@ -1300,7 +1945,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const inDon = !!(st && st.ok && (st.frames || []).some((x) => x && x.open && DON_MODAL.test(modalKey(x))));
         const dv = buildValues('donDK', tb);
         if (inDon && (dv.dieuKienCapGiay || dv.dangKyLanDau)) {
-          const r0 = await send({ type: 'vbdlis-fill', section: 'donDK', values: dv });
+          const r0 = await send({ type: 'vbdlis-fill', ...tplMsg('donDK', dv) });
           const p0 = r0 && r0.ok ? pickFrame(r0, 'donDK') : { err: friendly((r0 && r0.error) || 'Không chạy được') };
           const res0 = p0.f ? p0.f.results : [{ name: 'Nhập đơn đăng ký', ok: false, msg: p0.err }];
           preBad = res0.some((x) => !x.ok);
@@ -1308,7 +1953,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           if (res0.some((x) => x.changed)) await sleep(800); // trang tự điền Mã đơn… sau khi tích Đăng ký lần đầu
         }
       }
-      const resp = await send({ type: 'vbdlis-fill', section, values: buildValues(section, tb, i) });
+      const resp = await send({ type: 'vbdlis-fill', ...tplMsg(section, buildValues(section, tb, i)) });
       if (!resp || !resp.ok) {
         setResult(preHtml + `<div class="bad">✗ ${esc(friendly((resp && resp.error) || 'Không chạy được – bấm lại biểu tượng tiện ích.'))}</div>`);
         return;
@@ -1327,7 +1972,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const lines = f.results.map(lineOf).join('');
       setResult(
         preHtml +
-          `<div class="sum">${ok}/${f.results.length} ô đã điền – ${esc(f.scopeName)}${f.opened ? ` <span class="muted">(đã tự bấm “${esc(f.opened)}”)</span>` : ''}</div>${lines}<div class="hint">Kiểm tra lại trên VBDLIS rồi tự bấm “Lưu”. Ô báo ✗ thì dùng nút ⧉ để sao chép và dán tay.</div>`
+          `<div class="sum">${ok}/${f.results.length} ô đã điền – ${esc(f.scopeName)}${f.opened ? ` <span class="muted">(đã tự bấm “${esc(f.opened)}”)</span>` : ''}</div>${lines}${tplNoteHtml(f)}<div class="hint">Kiểm tra lại trên VBDLIS rồi tự bấm “Lưu”. Ô báo ✗ thì dùng nút ⧉ để sao chép và dán tay.</div>`
       );
       if (f.results.length && ok === f.results.length && !preBad) {
         S.done[`${tb.tb}|${doneKey}`] = true;
@@ -1538,19 +2183,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     ...AUTO_DIALOGS,
     { re: '(ban co chac|co chac chan|xac nhan|co muon).*(chuyen tiep|thuc thi|da xu ly|xu ly xong|hoan thanh|chuyen ho so)', btn: ['Đồng ý', 'Có', 'OK', 'Xác nhận'] },
   ];
-  // mẫu trường (tab “Trường”) của phần kind → lệnh điền: chỉ điền ô dữ liệu TB đã tích + ô giá trị mẫu
+  // chuỗi tự điền (▶ / 🤖) phần kind → mọi mẫu tab Trường của phần đó (bộ điền chọn mẫu của đúng cửa sổ mở ra – mỗi cửa sổ một mẫu).
+  // Màn hình Tiếp nhận: các bước Phường/Xã, Quy trình, Số biên nhận, Người nộp điền theo recepPlan (đã tính mẫu) – không qua đây
   function tplMsg(kind, values) {
-    const t = S.tpl && S.tpl[kind];
-    if (!t || !t.items) return { section: kind, values };
-    const on = t.items.filter((x) => x.on && !x.ban);
-    const keys = uniq(on.filter((x) => x.src === 'tb' && x.key).map((x) => x.key));
-    const extra = on.filter((x) => x.src !== 'tb').map((x, i) => ({ key: 'x' + i, label: x.label, nth: x.nth || 0, kind: x.kind, value: x.val }));
-    const v = { ...values };
-    extra.forEach((x) => (v[x.key] = x.kind === 'checkbox' ? !!x.value && x.value !== 'false' : String(x.value ?? '')));
-    return {
-      section: { tpl: true, base: t.base || '', keys, extra: extra.map(({ key, label, nth, kind }) => ({ key, label, nth, kind })), scope: t.scope, titleKey: t.titleKey },
-      values: v,
-    };
+    const ts = Object.values(S.tpl || {}).filter((t) => t && t.items && kind && (t.base || '') === kind);
+    if (!ts.length) return { section: kind, values };
+    return tplMsgOf(ts, kind, values).msg;
   }
 
   // ---------- đọc cây Chủ sử dụng / Thửa đất của cửa sổ “Nhập đơn đăng ký” ----------
@@ -1751,7 +2389,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   }
 
   async function act(action, extra = {}) {
-    const r = await send({ type: 'vbdlis-act', action, ...extra });
+    const msg = { type: 'vbdlis-act', action, ...extra };
+    // 🤖 bật: hộp hỏi bạn đã dạy (lấy hộp ở tab Trường, tích nút trả lời) được tự trả lời ở mọi chỗ tiện ích xem hộp hỏi
+    if (action === 'answerDialog' && AUTO() && !msg.learned) msg.learned = learnedDialogs();
+    const r = await send(msg);
     if (!r || !r.ok) throw new Error(friendly((r && r.error) || 'Không chạy được lệnh trên trang'));
     return (r.frames || []).filter(Boolean);
   }
@@ -1767,9 +2408,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const f = (await act('readField', { label })).find((x) => x.ok);
     return f ? f.value : null;
   }
-  async function fillSec(section, values) {
-    // cửa sổ “Nhập đơn đăng ký” có mẫu trường (tab Trường) → điền theo mẫu
-    const r = await send({ type: 'vbdlis-fill', ...tplMsg(section, values) });
+  async function fillSec(section, values, plain) {
+    // cửa sổ “Nhập đơn đăng ký” có mẫu trường (tab Trường) → điền theo mẫu; plain: các bước màn hình Tiếp nhận (đã tính mẫu ở recepPlan)
+    const r = await send({ type: 'vbdlis-fill', ...(plain ? { section, values } : tplMsg(section, values)) });
     if (!r || !r.ok) throw new Error(friendly((r && r.error) || 'Không chạy được'));
     const p = pickFrame(r, section);
     if (!p.f) throw new Error(p.err);
@@ -1842,7 +2483,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // fromAuto: chữ ký màn hình khi bộ theo dõi Tự động hết tự chạy (chạy dừng giữa chừng → không tự chạy lại màn hình đó)
   async function runAll(fromAuto) {
     let tb = curTB();
-    if (S.running || S.busy || (!tb && !S.scanQ.length)) return;
+    const tplSig = !!fromAuto && /^p?tpl:/.test(fromAuto); // 🤖 chạy mẫu tab Trường (cửa sổ / màn hình / hộp hỏi): không cần TB
+    if (S.running || S.busy || (!tb && !S.scanQ.length && !tplSig)) return;
     S.running = true;
     S.stopReq = false;
     S.armed = null; // lần chạy trước bỏ dở → không còn chờ tự ghi nhận cho TB đó
@@ -2258,10 +2900,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         }
         if (!pf.f) throw new Error(pf.err);
         const bad = pf.f.results.filter((x) => !x.ok);
+        // mẫu tab Trường bỏ tích ô bắt buộc mà trên trang ô đó trống / khác dữ liệu TB → không tự Lưu, chờ bạn
+        const skipT = pf.f.tplSkip || [];
         S.done[pendKey] = true; // đang chờ bạn bấm Lưu cho mục này
         saveUi();
         const gapsHere = !!(it.gaps && it.gaps.length);
-        const allOk = !bad.length && !gapsHere;
+        const allOk = !bad.length && !gapsHere && !skipT.length;
         // CHỦ SỬ DỤNG, mọi ô đã khớp dữ liệu → tiện ích tự bấm “Lưu” của cửa sổ chủ (bạn yêu cầu “nhập chủ tự động”).
         // Thiếu dữ liệu / ô chưa điền được / trang đang hỏi → không bấm, dừng chờ bạn như cũ.
         let autoSaved = false;
@@ -2277,16 +2921,22 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           if (d0) noAuto = 'trang đang hỏi';
           else if (!tp0 || !it.win.test(modalKey(tp0))) noAuto = `cửa sổ ${it.kind === 'chu' ? 'chủ' : 'thửa'} không nằm trên cùng`;
           else {
-            const ms = await act('markSave', { win: it.kind });
-            const marks = ms.filter((x) => x.ok);
-            if (marks.length === 1) autoSaved = anyOk(await act('clickMark', { id: marks[0].id }));
-            else noAuto = marks.length ? 'thấy nút Lưu ở nhiều khung' : (ms.find((x) => x.why) || {}).why || 'không thấy nút Lưu';
+            // 🤖: nút bạn tích thêm trong mẫu cửa sổ này (tab Trường) – bấm trước nút Lưu
+            const ex = await tplChainExtras({ base: it.kind, decide: ['luu'], step });
+            if (ex) noAuto = ex;
+            else {
+              const ms = await act('markSave', { win: it.kind });
+              const marks = ms.filter((x) => x.ok);
+              if (marks.length === 1) autoSaved = anyOk(await act('clickMark', { id: marks[0].id }));
+              else noAuto = marks.length ? 'thấy nút Lưu ở nhiều khung' : (ms.find((x) => x.why) || {}).why || 'không thấy nút Lưu';
+            }
           }
         }
         // còn lại: mọi ô đã khớp → con trỏ nằm sẵn ở nút “Lưu” (không bấm): bạn liếc dòng tóm tắt rồi nhấn Enter
         const focused = !autoSaved && allOk && S.opts.enterLuu !== false && anyOk(await act('focusSave', {}));
         const waitMsg =
           (noAuto ? `không tự Lưu (${noAuto}); ` : '') +
+          (skipT.length ? `mẫu tab Trường bỏ tích ô bắt buộc ${skipT.join(', ')} mà trên trang đang trống / khác dữ liệu TB – bạn điền tay; ` : '') +
           (gapsHere ? `dữ liệu chưa có ${it.gaps.join(', ')} – bạn điền tay; ` : '') +
           (bad.length && !gapsHere ? `chưa điền được ${bad.map((x) => `${x.name} (${x.msg})`).join(', ')} – điền tay; ` : '') +
           (allOk ? `đã điền: ${quickLine(it.kind, it.values, pf.f.results)} – ` : '') +
@@ -2470,6 +3120,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           );
         if (s1.don) step('Lưu thông tin đăng ký, Hoàn tất').skip(`đơn đã hoàn tất lúc ${fmtTime(s1.don)} – không bấm lại`);
         else {
+          // 🤖 (bạn chọn 23/11): nút bạn tích thêm trong mẫu cửa sổ Nhập đơn đăng ký (tab Trường) – bấm trước “Lưu thông tin đăng ký”
+          const exD = await tplChainExtras({ base: 'donDK', decide: ['luu thong tin dang ky', 'hoan tat'], step });
+          if (exD) throw new Error(`${exD} – tiện ích dừng trước “Lưu thông tin đăng ký”, bạn xem rồi bấm “▶ Chạy cả TB”`);
           await pressDon('Lưu thông tin đăng ký', 'lt', 'Cập nhật đơn đăng ký thành công');
           S.armed = { tb: String(tb.tb), stage: 'don', at: Date.now(), lech: 0 };
           await pressDon('Hoàn tất', 'don', 'Lưu đơn đăng ký thành công', 'htClick');
@@ -2493,7 +3146,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         '<div class="hint">Xong bước Nhập đơn đăng ký: bạn kiểm tra rồi tự bấm <b>Lưu thông tin đăng ký</b>, sau đó <b>Hoàn tất</b> (bấm 1 lần, thấy “Lưu đơn đăng ký thành công” là xong). Khi trang báo câu đó, tiện ích ghi giờ nhập đơn – ' +
         ((S.stage[String(tb.tb)] || {}).quet
           ? 'hồ sơ quét đã lưu kho trước đó nên TB thành <b>✓ Xong</b>.</div>'
-          : 'trạng thái TB vẫn là <b>◐ Đã tiếp nhận</b>; <b>✓ Xong</b> khi đã lưu kho hồ sơ quét (thả file DDK + TBXN vào bảng, mở Quy trình xử lý rồi bấm “▶ Chạy cả TB”).</div>');
+          : 'trạng thái TB vẫn là <b>○ Chưa xong</b>; <b>✓ Xong</b> khi đã lưu kho hồ sơ quét (thả file DDK + TBXN vào bảng, mở Quy trình xử lý rồi bấm “▶ Chạy cả TB”).</div>');
     };
 
     // ---------- Chuyển tiếp hồ sơ, Trả hồ sơ (Tự động hết – ảnh 1–10 của bạn) ----------
@@ -2764,6 +3417,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         throw new Error('bấm “Xử lý tác vụ” rồi mà chưa nhận ra cửa sổ “Kết ISO” – bạn tự Kết ISO (Thực hiện → Đồng ý), 🤖 làm tiếp; chụp dòng “Để báo lỗi” gửi người hỗ trợ');
       }
       cur.ok();
+      // 🤖 (bạn chọn 23/11): ô / nút bạn tích thêm trong mẫu cửa sổ Kết ISO (tab Trường) – làm trước “Thực hiện”
+      {
+        const ex = await tplChainExtras({ base: '', decide: ['thuc hien'], fields: true, step });
+        if (ex) throw ask(`${ex} – tiện ích không bấm “Thực hiện” Kết ISO; bạn xem rồi bấm “▶ Chạy cả TB”`, '');
+      }
       cur = step('Bấm “Thực hiện”, “Đồng ý” (Kết ISO)');
       const go = [...im.querySelectorAll('button, a, input[type="button"], input[type="submit"]')].find((b) => shownEl(b) && btnText(b) === 'thuc hien');
       if (!go) throw new Error('không thấy nút “Thực hiện” của cửa sổ Kết ISO');
@@ -2994,8 +3652,17 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const m = chooserModal();
       if (!m) throw new Error('không thấy cửa sổ “Chọn người xử lý tác vụ tiếp theo”');
       cur = step('Chọn người nhận');
-      const info0 = await chooserSettled(m, alive);
+      let info0 = await chooserSettled(m, alive);
       if (!info0) throw new Error('danh sách người nhận chưa tải xong (hoặc còn đang thay đổi)');
+      // 🤖 sẽ tự bấm Thực thi (bạn chọn 23/11): trước đó điền thêm ô / bấm thêm nút bạn tích trong mẫu cửa sổ này (tab Trường), rồi đọc
+      // lại cửa sổ – mọi kiểm tra (đúng bước, đúng hồ sơ, đúng tài khoản) vẫn làm sau đó
+      if (AUTO() && !S.opts.thuThucThi && (k0 || byTpl)) {
+        const ex = await tplChainExtras({ base: '', decide: ['thuc thi'], fields: true, step });
+        if (ex) throw ask(`${ex} – tiện ích không bấm Thực thi; bạn xem rồi bấm “▶ Chạy cả TB”`, '');
+        if (!(m.isConnected && shownEl(m))) throw new Error('cửa sổ chọn người vừa đóng sau khi làm theo mẫu tab Trường');
+        info0 = await chooserSettled(m, alive);
+        if (!info0) throw new Error('danh sách người nhận chưa tải xong (hoặc còn đang thay đổi)');
+      }
       const st = norm(info0.step);
       const k = k0 || Object.keys(STEP_OF).find((key) => STEP_OF[key].test(st)) || '';
       if (!k || !STEP_OF[k].test(st) || !/\(tiep theo\)/.test(st) || /tra ve|\(truoc\)/.test(st))
@@ -3071,7 +3738,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       cur.ok(r.sure ? `trang báo “${r.say.slice(0, 80)}”` : 'cửa sổ chọn người đã đóng (chưa thấy câu báo thành công – kiểm lại ở bước sau)');
       if (k === 'ld') {
         if (!r.sure) return verifyLd();
-        setEvt(`✓ TB ${esc(tb.tb)} – ${esc(whoOf(tb))}: đã chuyển lãnh đạo (${esc(p.row.acc)}) – <b>◐ Đã tiếp nhận</b>.`);
+        setEvt(`✓ TB ${esc(tb.tb)} – ${esc(whoOf(tb))}: đã chuyển lãnh đạo (${esc(p.row.acc)}) – <b>◐ Đã nhập nhưng chưa xong</b>.`);
         return goNext(false);
       }
       // cv: về màn hình hồ sơ (ảnh 1); trk: về danh sách hồ sơ thụ lý (ảnh 8) → bấm lại dòng hồ sơ → “Xử lý hồ sơ” lần nữa
@@ -3318,7 +3985,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         }
         if (Date.now() - t0 > 30 * 60 * 1000)
           throw new Error(
-            `30 phút vẫn chưa thấy hồ sơ ${x.soBienNhan} trong Danh sách hồ sơ thụ lý – bấm “▶ Chạy cả TB” để tìm tiếp (hồ sơ chưa có trên VBDLIS? đổi Trạng thái TB ${x.tb} thành “Chưa làm” rồi bấm ▶ ở màn hình Tiếp nhận để tiếp nhận lại)`
+            `30 phút vẫn chưa thấy hồ sơ ${x.soBienNhan} trong Danh sách hồ sơ thụ lý – bấm “▶ Chạy cả TB” để tìm tiếp (hồ sơ chưa có trên VBDLIS? đổi Trạng thái TB ${x.tb} về “Chưa xong”, chọn xóa hết dấu, rồi bấm ▶ ở màn hình Tiếp nhận để tiếp nhận lại)`
           );
         cur.wait(`chưa có trong danh sách (lãnh đạo chưa trả về?) – đã tìm ${n} lần, 5 giây sau tìm lại · bấm “■ Dừng” để thôi`);
         for (let k = 0; k < 10; k++) {
@@ -3443,7 +4110,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         await act('answerDialog', { rules: [{ re: '.', btn: ['Đóng', 'OK'] }] });
         markStage(tb.tb, 'ld', 'suy');
         cur.ok(`trang báo “${d.text.slice(0, 80)}” → đã chuyển lãnh đạo`);
-        setEvt(`✓ TB ${esc(tb.tb)} – ${esc(whoOf(tb))}: đã chuyển lãnh đạo – <b>◐ Đã tiếp nhận</b>.`);
+        setEvt(`✓ TB ${esc(tb.tb)} – ${esc(whoOf(tb))}: đã chuyển lãnh đạo – <b>◐ Đã nhập nhưng chưa xong</b>.`);
         return goNext(true);
       }
       needYou('Chưa chắc đã chuyển – bạn xem', 'bad');
@@ -3518,6 +4185,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         throw new Error('bấm “Xử lý tác vụ” rồi mà chưa nhận ra cửa sổ “Trả hồ sơ” – bạn tự bấm Thực hiện → Đồng ý (TB vẫn thành ✓ Xong); chụp dòng “Để báo lỗi” gửi người hỗ trợ');
       }
       cur.ok();
+      // 🤖 (bạn chọn 23/11): ô / nút bạn tích thêm trong mẫu cửa sổ Trả hồ sơ (tab Trường) – làm trước “Thực hiện”
+      {
+        const ex = await tplChainExtras({ base: '', decide: ['thuc hien'], fields: true, step });
+        if (ex) throw ask(`${ex} – tiện ích không bấm “Thực hiện” Trả hồ sơ; bạn xem rồi bấm “▶ Chạy cả TB”`, '');
+      }
       cur = step('Bấm “Thực hiện”, “Đồng ý” (Trả hồ sơ)');
       const go = [...tm.querySelectorAll('button, a, input[type="button"], input[type="submit"]')].find((b) => shownEl(b) && btnText(b) === 'thuc hien');
       if (!go) throw new Error('không thấy nút “Thực hiện” của cửa sổ Trả hồ sơ');
@@ -3642,7 +4314,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (x !== tb) setTb(x);
       markStage(tb.tb, 'ld', 'suy');
       cur.ok(`${so} – TB ${tb.tb}: sau khi bấm Thực thi, hồ sơ không còn nút “Xử lý hồ sơ” → đã chuyển lãnh đạo`);
-      setEvt(`✓ TB ${esc(tb.tb)} – ${esc(whoOf(tb))}: đã chuyển lãnh đạo – <b>◐ Đã tiếp nhận</b>.`);
+      setEvt(`✓ TB ${esc(tb.tb)} – ${esc(whoOf(tb))}: đã chuyển lãnh đạo – <b>◐ Đã nhập nhưng chưa xong</b>.`);
       return goNext(true);
     };
     // xong TB (đã chuyển lãnh đạo) → TB chưa làm tiếp theo: bấm “Về trang tiếp nhận hồ sơ”; màn hình tiếp nhận trống hiện ra là tự chạy TB đó
@@ -3708,23 +4380,18 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     };
 
     try {
-      // 🤖 + cửa sổ có mẫu đã lưu (tab Trường) → điền ô đã tích, bấm nút đã tích theo thứ tự
-      if (fromAuto && fromAuto.startsWith('tpl:')) {
-        const t = S.tpl[fromAuto.slice(4)];
+      // 🤖 + cửa sổ / màn hình / hộp hỏi có mẫu đã lưu (tab Trường) → điền ô đã tích, bấm nút đã tích theo thứ tự
+      if (tplSig) {
+        const t = S.tpl[tplSigKey(fromAuto)];
         if (!t) return;
         title = `🤖 Theo mẫu – ${t.name}`;
-        cur = step(`Điền theo mẫu “${t.name}”`);
+        cur = step(`Điền theo mẫu ${qn(t.name)}`);
         const f = await tplFill(t, 0, { auto: true });
-        const cl = f.clicks || [];
-        f.results.forEach((r) =>
-          log.push({ icon: r.ok ? '✓' : '✗', cls: r.ok ? 'ok' : 'bad', html: `<b>${esc(r.name)}</b> = ${esc(r.value)}${r.msg ? ` <span class="muted">(${esc(r.msg)})</span>` : ''}` })
-        );
-        cl.forEach((c) =>
-          log.push({ icon: c.ok ? '✓' : '✗', cls: c.ok ? 'ok' : 'bad', html: `${c.ok ? 'Đã bấm' : 'Chưa bấm'} <b>“${esc(c.name)}”</b>${c.why ? ` <span class="muted">(${esc(c.why)})</span>` : ''}` })
-        );
+        tplLogInto(log, f);
         show();
+        const cl = f.clicks || [];
         if (f.results.some((r) => !r.ok) || cl.some((c) => !c.ok)) throw new Error('mẫu chưa chạy trọn – xem các dòng ✗ (sửa mẫu ở tab Trường, hoặc tự làm tiếp)');
-        cur.ok(`${f.results.length} ô, bấm ${cl.length} nút`);
+        cur.ok(`${f.results.length} ô, bấm ${cl.filter((c) => !c.skip && !c.q).length} nút`);
         tailNeed = '-';
         return;
       }
@@ -3889,6 +4556,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         await runHoso(false);
         return;
       }
+      // ▶ lúc đang mở cửa sổ có mẫu ở tab Trường (cửa sổ tiện ích không tự làm) → nói rõ cách chạy mẫu
+      if (!fromAuto && top0) {
+        const tw = autoTplFor(k0);
+        if (tw)
+          throw new Error(
+            `đang mở ${top0.name} – cửa sổ này có mẫu ở tab Trường (${tw.name}): 🤖 Tự động hết bật thì tự điền + bấm theo mẫu khi cửa sổ mở; 🤖 tắt thì bấm “Điền” ở mẫu đó (tab Trường)`
+          );
+      }
       if (!tb) throw new Error('chưa có dữ liệu TB – bấm “Dữ liệu” để nạp');
       if (top0 && /^quy trinh xu ly\b/.test(k0))
         throw new Error(
@@ -3923,10 +4598,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         throw new Error(
           `bảng thửa trên trang đang có thửa không thuộc TB này (${foreign.map((r) => `${r.soThua}/${r.soTo}`).join(', ')}) – mở hồ sơ mới hoặc xóa các thửa đó`
         );
+      // mẫu “Màn hình Tiếp nhận hồ sơ” (tab Trường): mỗi ô chính điền gì (dữ liệu TB / giá trị mẫu / bỏ tích – không điền)
+      const rp = recepPlan();
       for (const [label, want] of [
         ['Số biên nhận', tb.soBienNhan],
-        ['Người nộp hồ sơ', tb.nguoiNop && tb.nguoiNop.hoTen],
+        ['Người nộp hồ sơ', rp.nguoiNop.use === 'off' ? '' : rp.nguoiNop.use === 'fix' ? rp.nguoiNop.value : tb.nguoiNop && tb.nguoiNop.hoTen],
       ]) {
+        if (!String(want || '').trim()) continue; // ô bỏ tích ở mẫu: không so ở đây (kiểm trước khi Lưu hồ sơ)
         const have = await readField(label);
         if (have && normVal(have) !== normVal(want)) {
           // màn hình đang là hồ sơ của TB khác (chưa mở hồ sơ mới?) → nói rõ TB nào; KHÔNG tự đổi (tránh lưu hồ sơ đó 2 lần)
@@ -3945,7 +4623,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const s0 = S.stage[String(tb.tb)] || {};
         if ((s0.tn || s0.don) && !consume('confirmTn', tb.tb))
           throw ask(
-            `TB ${tb.tb} đã ${s0.don ? 'nhập đơn xong' : 'tiếp nhận'} lúc ${fmtTime(s0.tn || s0.don)} (${BY_TEXT[s0.tnBy] || 'đã đánh dấu'}). Tiếp nhận lần nữa sẽ tạo hồ sơ TRÙNG trên VBDLIS. Đánh dấu nhầm thì đổi ô Trạng thái về “Chưa làm”.`,
+            `TB ${tb.tb} đã ${s0.don ? 'nhập đơn xong' : 'tiếp nhận'} lúc ${fmtTime(s0.tn || s0.don)} (${BY_TEXT[s0.tnBy] || 'đã đánh dấu'}). Tiếp nhận lần nữa sẽ tạo hồ sơ TRÙNG trên VBDLIS. Đánh dấu nhầm thì đổi ô Trạng thái về “Chưa xong” và chọn xóa hết dấu.`,
             actBtn('confirmTn', tb.tb, `Vẫn tiếp nhận TB ${tb.tb}`)
           );
         if (s0.tnClick && !s0.tn && !consume('confirmTn', tb.tb))
@@ -3960,30 +4638,34 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (skip.size) show();
       stopIf();
 
-      // 1. Phường/Xã (đã có quy trình trong bảng thì coi như đã chọn)
+      // 1. Phường/Xã (đã có quy trình trong bảng thì coi như đã chọn). Mẫu tab Trường: ô bỏ tích → tiện ích không chọn (bạn chọn tay;
+      // trước khi 🤖 Lưu hồ sơ phải đúng dữ liệu TB); ô giá trị mẫu → chọn giá trị đó
+      const qtR = rp.quyTrinh.use === 'fix' ? rp.quyTrinh.value : qt; // quy trình sẽ chọn
       cur = step('Chọn Phường/Xã');
-      if (anyOk(await act('hasCellText', { text: qt }))) cur.skip('đã chọn từ trước');
+      if (anyOk(await act('hasCellText', { text: qtR }))) cur.skip('đã chọn từ trước');
+      else if (rp.phuongXa.use === 'off') cur.skip('bỏ tích ở mẫu tab Trường – tiện ích không chọn (bạn chọn tay)');
       else {
-        const f = mustFill(await fillSec('donVi', { phuongXa: tb.phuongXa || DEFAULT_PHUONG }));
+        const f = mustFill(await fillSec('donVi', { phuongXa: rp.phuongXa.use === 'fix' ? rp.phuongXa.value : tb.phuongXa || DEFAULT_PHUONG }, true));
         cur.ok(f.results[0] && f.results[0].msg);
         if (f.results.some((x) => x.changed)) await sleep(1500); // trang tự điền địa chỉ mặc định sau khi đổi Phường/Xã
       }
       stopIf();
 
       // 2. Quy trình XA_KH2959 → trang thêm 1 dòng vào bảng quy trình
-      cur = step('Chọn quy trình ' + qt);
-      if (anyOk(await act('hasCellText', { text: qt }))) cur.skip('đã có trong bảng quy trình');
+      cur = step('Chọn quy trình ' + qtR);
+      if (anyOk(await act('hasCellText', { text: qtR }))) cur.skip('đã có trong bảng quy trình');
+      else if (rp.quyTrinh.use === 'off') cur.skip('bỏ tích ở mẫu tab Trường – tiện ích không chọn (bạn chọn tay)');
       else {
         for (let i = 0; i < 25; i++) {
           // chờ trang nạp danh sách quy trình sau khi chọn Phường/Xã
-          if (anyOk(await act('selectHasOption', { label: 'Quy trình/Thủ tục', text: qt }))) break;
+          if (anyOk(await act('selectHasOption', { label: 'Quy trình/Thủ tục', text: qtR }))) break;
           await sleep(300);
         }
-        mustFill(await fillSec('quyTrinh', { quyTrinh: qt }));
+        mustFill(await fillSec('quyTrinh', { quyTrinh: qtR }, true));
         const added = async () => {
           for (let i = 0; i < 8; i++) {
             await sleep(250);
-            if (anyOk(await act('hasCellText', { text: qt }))) return true;
+            if (anyOk(await act('hasCellText', { text: qtR }))) return true;
           }
           return false;
         };
@@ -3999,8 +4681,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
 
       // 3. Số biên nhận
       cur = step('Số biên nhận');
-      mustFill(await fillSec('soBN', { soBienNhan: tb.soBienNhan }));
-      cur.ok(tb.soBienNhan);
+      if (rp.soBienNhan.use === 'off') cur.skip('bỏ tích ở mẫu tab Trường – tiện ích không điền (trước khi Lưu hồ sơ ô phải đúng dữ liệu TB)');
+      else {
+        const sbn = rp.soBienNhan.use === 'fix' ? rp.soBienNhan.value : tb.soBienNhan;
+        mustFill(await fillSec('soBN', { soBienNhan: sbn }, true));
+        cur.ok(sbn);
+      }
 
       // 4. Thửa: mở “Thêm thửa đất”, điền, chờ bạn bấm Lưu.
       //    Mặc định chỉ 1 THỬA (đủ để lưu hồ sơ; các thửa nhập đầy đủ ở bước “Nhập đơn đăng ký”).
@@ -4077,25 +4763,32 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           f = pf.f;
         }
         const bad = f.results.filter((x) => !x.ok);
+        const skipT = f.tplSkip || []; // mẫu tab Trường bỏ tích ô bắt buộc mà ô trên trang trống / khác dữ liệu TB
         S.done[pendKey] = true; // đang chờ bạn bấm Lưu cho thửa này
         saveUi();
         // Tự động hết: mọi ô khớp → tiện ích tự bấm “Lưu” cửa sổ thửa
         let autoSavedT = false;
         let noAutoT = '';
-        if (AUTO() && !bad.length) {
+        if (AUTO() && !bad.length && !skipT.length) {
           await sleep(600);
           stopIf();
           if ((await act('dialogState')).some((x) => x.open)) noAutoT = 'trang đang hỏi';
           else {
-            const ms = await act('markSave', { win: 'thua' });
-            const marks = ms.filter((x) => x.ok);
-            if (marks.length === 1) autoSavedT = anyOk(await act('clickMark', { id: marks[0].id }));
-            else noAutoT = marks.length ? 'thấy nút Lưu ở nhiều khung' : (ms.find((x) => x.why) || {}).why || 'không thấy nút Lưu';
+            // 🤖: nút bạn tích thêm trong mẫu cửa sổ thửa (tab Trường) – bấm trước nút Lưu
+            const ex = await tplChainExtras({ base: 'thua', decide: ['luu'], step });
+            if (ex) noAutoT = ex;
+            else {
+              const ms = await act('markSave', { win: 'thua' });
+              const marks = ms.filter((x) => x.ok);
+              if (marks.length === 1) autoSavedT = anyOk(await act('clickMark', { id: marks[0].id }));
+              else noAutoT = marks.length ? 'thấy nút Lưu ở nhiều khung' : (ms.find((x) => x.why) || {}).why || 'không thấy nút Lưu';
+            }
           }
         }
-        const focused = !autoSavedT && !bad.length && S.opts.enterLuu !== false && anyOk(await act('focusSave', {}));
+        const focused = !autoSavedT && !bad.length && !skipT.length && S.opts.enterLuu !== false && anyOk(await act('focusSave', {}));
         cur.wait(
           (noAutoT ? `không tự Lưu (${noAutoT}); ` : '') +
+            (skipT.length ? `mẫu tab Trường bỏ tích ô bắt buộc ${skipT.join(', ')} mà trên trang đang trống / khác dữ liệu TB – bạn điền tay; ` : '') +
             (bad.length
               ? `chưa điền được ${bad.map((x) => `${x.name} (${x.msg})`).join(', ')} – điền tay; `
               : `đã điền: ${quickLine('thua', buildValues('thua', tb, i), f.results)} – `) +
@@ -4162,31 +4855,76 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
       stopIf();
 
-      // 5. Người nộp hồ sơ (địa chỉ theo mục 1c của TBXN)
+      // 5. Người nộp hồ sơ (địa chỉ theo mục 1c của TBXN) – theo mẫu tab Trường: ô bỏ tích không điền, ô giá trị mẫu điền giá trị mẫu
       cur = step('Người nộp hồ sơ, số giấy tờ, địa chỉ');
       await waitDialogs(cur);
       const v = buildValues('bienNhan', tb);
-      mustFill(await fillSec('nguoiNop', { diaChiTaiSan: v.diaChiTaiSan, nguoiNop: v.nguoiNop, soGiayTo: v.soGiayTo, diaChi: v.diaChi }));
-      cur.ok(v.nguoiNop);
+      const nv = {};
+      const offR = [];
+      for (const k of ['diaChiTaiSan', 'nguoiNop', 'soGiayTo', 'diaChi']) {
+        const p = rp[k];
+        if (p.use === 'off') offR.push(p.label || k);
+        else nv[k] = p.use === 'fix' ? p.value : v[k];
+      }
+      mustFill(await fillSec('nguoiNop', nv, true));
+      cur.ok((nv.nguoiNop || '') + (offR.length ? ` · bỏ tích ở mẫu (không điền): ${offR.join(', ')}` : ''));
 
-      // 5b. Đọc lại các ô đầu hồ sơ sau khi trang "lắng" (trang có thể tự đổi lại giá trị)
-      cur = step('Kiểm tra lại số biên nhận và người nộp');
+      // 5a. ô giá trị mẫu khác của màn hình tiếp nhận (tab Trường) – điền TRƯỚC khi đọc lại các ô
+      {
+        const t0 = S.tpl.bienNhan;
+        const exR = t0 && t0.items ? t0.items.filter((x) => x.on && !x.ban && !x.key && x.src !== 'tb') : [];
+        if (exR.length) {
+          cur = step('Ô theo mẫu (tab Trường)');
+          const mm = tplMsgOf([{ ...t0, items: t0.items.map((x) => (x.key ? { ...x, on: false } : x)) }], 'bienNhan', {});
+          const r = await send({ type: 'vbdlis-fill', ...mm.msg });
+          const pf = r && r.ok ? pickFrame(r, 'bienNhan') : { err: friendly((r && r.error) || 'Không chạy được') };
+          if (!pf.f) throw new Error(pf.err);
+          const badT = pf.f.results.filter((x) => !x.ok);
+          if (badT.length) throw new Error('ô theo mẫu chưa điền được: ' + badT.map((x) => `${x.name} (${x.msg})`).join(', '));
+          cur.ok(pf.f.results.map((x) => `${x.name}: ${x.value}`).join(', ') + (mm.empty.length ? ` · giá trị mẫu trống, không điền: ${mm.empty.join(', ')}` : ''));
+        }
+      }
+
+      // 5b. Đọc lại các ô đầu hồ sơ sau khi trang "lắng" (trang có thể tự đổi lại giá trị). Ô bắt buộc bỏ tích ở mẫu tab Trường:
+      // tiện ích không điền nhưng ô đó vẫn phải đúng dữ liệu TB (trống / khác → dừng, không tô / bấm Lưu hồ sơ)
+      cur = step('Kiểm tra lại các ô đầu hồ sơ');
       await sleep(1200);
-      for (const [label, want, required] of [
-        ['Số biên nhận', tb.soBienNhan, true],
-        ['Người nộp hồ sơ', v.nguoiNop, true],
-        ['Số giấy tờ', v.soGiayTo, true],
-        ['Địa chỉ', v.diaChi, true],
-        ['Địa chỉ tài sản', v.diaChiTaiSan, false],
+      for (const [label, k, tbv, mustRead] of [
+        ['Số biên nhận', 'soBienNhan', tb.soBienNhan, true],
+        ['Người nộp hồ sơ', 'nguoiNop', v.nguoiNop, true],
+        ['Số giấy tờ', 'soGiayTo', v.soGiayTo, true],
+        ['Địa chỉ', 'diaChi', v.diaChi, true],
+        ['Địa chỉ tài sản', 'diaChiTaiSan', v.diaChiTaiSan, false],
       ]) {
+        const p = rp[k];
+        if (p.use === 'off' && !RECEP_REQ.includes(k)) continue; // ô không bắt buộc bỏ tích: không so
+        const want = p.use === 'fix' ? p.value : tbv;
         if (!String(want || '').trim()) continue; // dữ liệu trống → bạn điền tay, không so
         const have = await readField(label);
         if (have === null) {
-          if (required) throw new Error(`không đọc lại được ô “${label}” trên trang`);
+          if (mustRead) throw new Error(`không đọc lại được ô “${label}” trên trang`);
           continue;
         }
-        if (normVal(have) !== normVal(want)) throw new Error(`ô “${label}” trên trang đang là “${have}”, khác dữ liệu “${want}” – sửa trước khi Lưu hồ sơ`);
+        if (normVal(have) !== normVal(want))
+          throw new Error(
+            p.use === 'off'
+              ? `ô “${label}” bỏ tích ở mẫu tab Trường (tiện ích không điền) mà trên trang đang ${String(have).trim() ? `là “${have}”` : 'trống'}, khác dữ liệu “${want}” – bạn điền đúng rồi bấm “▶ Chạy cả TB” lại`
+              : `ô “${label}” trên trang đang là “${have}”, khác dữ liệu “${want}” – sửa trước khi Lưu hồ sơ`
+          );
       }
+      // Phường/Xã, Quy trình bỏ tích ở mẫu: trên trang phải đúng dữ liệu TB
+      if (rp.phuongXa.use === 'off') {
+        const want = tb.phuongXa || DEFAULT_PHUONG;
+        let r = null;
+        for (const label of ['Phường/Xã', 'Phường/Xã/Thị trấn']) {
+          r = (await act('readSel', { label, want, exact: true })).find((x) => x.ok);
+          if (r) break;
+        }
+        if (!r || !r.same)
+          throw new Error(`ô “Phường/Xã” bỏ tích ở mẫu tab Trường mà trên trang đang ${r && r.value ? `là “${r.value}”` : 'trống'}, khác dữ liệu “${want}” – bạn chọn đúng rồi bấm “▶ Chạy cả TB” lại`);
+      }
+      if (rp.quyTrinh.use === 'off' && !anyOk(await act('hasCellText', { text: qtR })))
+        throw new Error(`bảng quy trình chưa có “${qtR}” (ô Quy trình/Thủ tục bỏ tích ở mẫu tab Trường – tiện ích không chọn) – bạn chọn rồi bấm “▶ Chạy cả TB” lại`);
       cur.ok();
 
       // 6. Đối chiếu bảng thửa trên trang với dữ liệu – lệch thì DỪNG, không tô nút Lưu hồ sơ
@@ -4230,19 +4968,6 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         ].filter(Boolean);
         if (issues.length) throw new Error('bảng thửa KHÔNG khớp: ' + issues.join('; ') + ' – sửa trên trang trước khi Lưu hồ sơ');
         cur.ok(allMode ? `${rows.length}/${thua.length} thửa khớp` : `${rows.length} thửa trên bảng khớp dữ liệu (tiếp nhận chỉ cần 1 thửa)`);
-      }
-
-      // 6b. mẫu trường của màn hình tiếp nhận (tab Trường): điền thêm các ô giá trị mẫu bạn đã tích
-      if (S.tpl.bienNhan && S.tpl.bienNhan.items && S.tpl.bienNhan.items.some((x) => x.on && !x.ban && x.src !== 'tb')) {
-        cur = step('Ô theo mẫu (tab Trường)');
-        const m = tplMsg('bienNhan', {});
-        m.section.keys = []; // ô chính của màn hình tiếp nhận đã điền ở trên
-        const r = await send({ type: 'vbdlis-fill', ...m });
-        const pf = r && r.ok ? pickFrame(r, 'bienNhan') : { err: friendly((r && r.error) || 'Không chạy được') };
-        if (!pf.f) throw new Error(pf.err);
-        const badT = pf.f.results.filter((x) => !x.ok);
-        if (badT.length) throw new Error('ô theo mẫu chưa điền được: ' + badT.map((x) => `${x.name} (${x.msg})`).join(', '));
-        cur.ok(pf.f.results.map((x) => `${x.name}: ${x.value}`).join(', '));
       }
 
       // 7 (Tự động hết). Tự bấm “Lưu hồ sơ”, chờ “Lưu hồ sơ thành công”, chọn TB chưa làm tiếp theo
@@ -4310,7 +5035,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       S.armed = { tb: String(tb.tb), stage: 'tn', at: Date.now() };
       cur = null;
       tailOk =
-        '<div class="hint">Bạn bấm <b>Lưu hồ sơ</b>; khi trang báo “Lưu hồ sơ thành công”, tiện ích tự đánh dấu TB này <b>◐ đã tiếp nhận</b>. Bước sau (Xử lý hồ sơ → <b>Nhập đơn đăng ký</b>): bấm “▶ Chạy cả TB” – tiện ích tự nhận hồ sơ đó là của TB nào, thêm đủ chủ và thửa, rồi lập phiếu đối chiếu.</div>';
+        '<div class="hint">Bạn bấm <b>Lưu hồ sơ</b>; khi trang báo “Lưu hồ sơ thành công”, tiện ích tự ghi nhận TB này đã tiếp nhận (trạng thái vẫn <b>○ Chưa xong</b> tới khi chuyển lãnh đạo). Bước sau (Xử lý hồ sơ → <b>Nhập đơn đăng ký</b>): bấm “▶ Chạy cả TB” – tiện ích tự nhận hồ sơ đó là của TB nào, thêm đủ chủ và thửa, rồi lập phiếu đối chiếu.</div>';
     } catch (e) {
       const m = String((e && e.message) || e);
       if (e && e.actHtml) actHtml = e.actHtml; // tiện ích dừng để hỏi bạn → hiện nút xác nhận
@@ -4320,18 +5045,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     } finally {
       S.running = false;
       S.listRun = false;
-      if (fromAuto && failMsg && !fromAuto.startsWith('tpl:')) S.autoFail.add(fromAuto);
+      if (fromAuto && failMsg && !tplSig) S.autoFail.add(fromAuto);
       if (failMsg) safeRemove('tbGoList'); // lần chạy dừng / lỗi → trang tải lại sau đó không tự tìm tiếp TB đó
-      if (fromAuto && fromAuto.startsWith('tpl:')) {
-        try {
-          const tp = (await act('modalState')).find((x) => x.open);
-          const t2 = tp ? autoTplFor(modalKey(tp)) : null;
-          if (!t2 || `tpl:${t2.key}` !== fromAuto) S.autoSig = ''; // cửa sổ của mẫu đã đóng → lần mở sau chạy lại
-        } catch (e) {}
-      }
+      // 🤖 chạy mẫu: mỗi lần cửa sổ / hộp hỏi mở (màn hình: mỗi lần vào) chỉ chạy một lần – đã ghi ở S.tplRan lúc bắt đầu
+      if (tplSig) S.autoSig = '';
       // dừng vì lỗi / hỏi bạn → bộ theo dõi không tự chạy lại TB này (ở mọi màn hình) cho tới khi bạn bấm ▶ / bật lại 🤖.
       // Chỉ tạm giữ TB đã biết chắc (lỗi trước khi nhận ra hồ sơ thì không giữ nhầm TB đang chọn)
-      if (failMsg && tb && tbKnown && !(fromAuto && fromAuto.startsWith('tpl:'))) setHold(tb.tb, { kind: 'err' });
+      if (failMsg && tb && tbKnown && !tplSig) setHold(tb.tb, { kind: 'err' });
       // chặng cuối (hồ sơ lãnh đạo trả về – TB cũ): trả lại TB đang chọn như trước (không làm lệch “TB chưa làm tiếp theo”)
       if (stage3 && curAtStart != null && String(S.cur) !== String(curAtStart) && S.data.some((x) => String(x.tb) === String(curAtStart))) {
         S.cur = curAtStart;
@@ -4475,10 +5195,29 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) render();
         else renderTop();
       }
-      // mẫu tab Trường đổi ở tab khác
+      // mẫu tab Trường đổi (tab khác, hoặc chính tab này vừa ghi)
       if (ch.tbTpl) {
-        S.tpl = { ...(ch.tbTpl.newValue || {}) };
-        if (S.tab === 'tr' && !S.tplDraft) render();
+        const nv = { ...(ch.tbTpl.newValue || {}) };
+        const ov = ch.tbTpl.oldValue || {};
+        Object.values(nv).forEach(tplFix);
+        S.tpl = nv;
+        const d = S.tplDraft;
+        if (d) {
+          const t = nv[d.key];
+          if (!t && ov[d.key]) {
+            // mẫu đang mở bảng tích vừa bị xóa ở tab khác → đóng bảng tích (lần tích sau không tạo lại mẫu đã xóa)
+            clearTimeout(S.tplSaveT);
+            S.tplSaveT = null;
+            S.tplDraft = null;
+            setStatus(`Mẫu ${qn(d.name)} vừa bị xóa ở tab khác – đã đóng bảng tích.`, true);
+            if (S.tab === 'tr') render();
+          } else if (t && !(S.tplWrote && S.tplWrote.key === d.key && S.tplWrote.at >= (t.at || 0))) {
+            // tab khác vừa sửa mẫu này → lấy tích / nguồn / giá trị / thứ tự của bản đó vào bảng đang mở
+            tplAdopt(d, t);
+            const a = root.activeElement;
+            if (S.tab === 'tr' && (!a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.type === 'checkbox')) render();
+          }
+        } else if (S.tab === 'tr') render();
       }
       // tiến độ đổi ở tab VBDLIS khác → cập nhật dấu ○ ◐ ✓ (không vẽ lại ô đang gõ)
       if (ch.tbStage) {
@@ -4912,15 +5651,25 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   };
   root.addEventListener('input', (e) => {
     const el = e.target;
+    // tab Trường: số chủ / thửa / giấy tờ của mẫu (nhớ theo từng mẫu)
+    if (el && el.dataset && el.dataset.tplidx != null) {
+      S.tplIdx = { ...S.tplIdx, [el.dataset.tplidx]: Math.max(1, parseInt(el.value, 10) || 1) };
+      return;
+    }
     if (el && el.dataset && el.dataset.tplbOrd != null && S.tplDraft) {
+      if (tplDead()) return;
       const x = (S.tplDraft.btns || [])[+el.dataset.tplbOrd];
       if (x) x.ord = String(el.value || '').replace(/[^\d.]/g, '');
       tplAutoSave();
       return;
     }
     if (el && el.dataset && el.dataset.tplVal != null && S.tplDraft) {
+      if (tplDead()) return;
       const x = S.tplDraft.items[+el.dataset.tplVal];
-      if (x) x.val = el.value;
+      if (x) {
+        x.val = el.value;
+        x.uv = true; // giá trị mẫu do bạn gõ
+      }
       tplAutoSave();
       return;
     }
@@ -4936,9 +5685,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   root.addEventListener('change', (e) => {
     if (e.target.closest && e.target.closest('.dlg')) return; // ô trong hộp Dữ liệu / Tiến độ: hộp tự xử lý
     {
-      // tab Trường: tích ô / đổi nguồn / đổi giá trị mẫu
+      // tab Trường: tích ô / đổi nguồn / đổi giá trị mẫu / tích nút – lưu ngay
       const ds = e.target.dataset || {};
       const d = S.tplDraft;
+      if (d && (ds.tplbOn != null || ds.tplbOrd != null || ds.tplOn != null || ds.tplSrc != null || ds.tplVal != null) && tplDead()) {
+        render(); // bảng đã mất kết nối: ô trở về như đã lưu
+        return;
+      }
       if (d && (ds.tplbOn != null || ds.tplbOrd != null)) {
         // nút: tích → thứ tự bấm = sau nút cuối cùng đang tích; bỏ tích → bỏ số
         const x = (d.btns || [])[+(ds.tplbOn ?? ds.tplbOrd)];
@@ -4949,7 +5702,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           if (!x.on) x.ord = '';
           render();
         } else x.ord = String(e.target.value || '').replace(/[^\d.]/g, '');
-        tplAutoSave();
+        tplAutoSave(true);
         return;
       }
       if (d && (ds.tplOn != null || ds.tplSrc != null || ds.tplVal != null)) {
@@ -4959,9 +5712,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         else if (ds.tplSrc != null) {
           x.src = e.target.value;
           if (x.src === 'tb') x.on = true;
+          else x.uv = true; // bạn chọn giá trị mẫu cho ô này
           render();
-        } else x.val = e.target.value;
-        tplAutoSave();
+        } else {
+          x.val = e.target.value;
+          x.uv = true;
+        }
+        tplAutoSave(true);
         return;
       }
     }
@@ -5079,15 +5836,46 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const tb = curTB();
       if (!tb || S.running) return renderTop();
       const v = e.target.value;
+      const id = String(tb.tb);
+      const s0 = S.stage[id] || {};
       if (v === 'hoan') {
         // tạm hoãn: ghi lý do (vd. “chưa rõ chủ”, “trùng TB 1527”) để cuối đợt xem lại
         const lyDo = prompt(`Lý do tạm hoãn TB ${tb.tb} (vd. chưa rõ chủ, chờ hỏi lại…) – lý do được lưu cả trong file sao lưu tiến độ, đừng ghi tên hay số CCCD:`, '');
         if (lyDo === null) return renderTop(); // bấm Hủy → giữ trạng thái cũ
         markStage(tb.tb, 'hoan', 'tay', { lyDo: lyDo.trim() });
+      } else if (v === 'tn') {
+        // ◐ Đã nhập nhưng chưa xong = đã chuyển lãnh đạo (ghi mốc chuyển lãnh đạo; bỏ dấu Xong nếu có)
+        if (s0.xong) {
+          const s = { ...s0 };
+          delete s.xong;
+          delete s.xongBy;
+          S.stage[id] = s;
+        }
+        markStage(tb.tb, 'ld', 'tay');
+      } else if (v === 'chua' && (s0.tn || s0.don || s0.tnClick)) {
+        // ○ Chưa xong cho TB đã tiếp nhận: mặc định GIỮ dấu đã tiếp nhận / nhập đơn – tiện ích không tiếp nhận lại (tránh hồ sơ trùng)
+        if (
+          confirm(
+            `TB ${tb.tb} đã tiếp nhận${s0.tn ? ' lúc ' + fmtTime(s0.tn) : ''}. Đổi về “Chưa xong”: bỏ dấu đã chuyển lãnh đạo / xong / tạm hoãn, GIỮ dấu đã tiếp nhận, nhập đơn (tiện ích không tiếp nhận lại TB này). Đồng ý?`
+          )
+        ) {
+          const s = { ...s0 };
+          ['ld', 'ldBy', 'kq', 'trk', 'trkBy', 'tra', 'traBy', 'xong', 'xongBy', 'hoan', 'fwd'].forEach((k) => delete s[k]);
+          S.stage[id] = s;
+          if (S.chainTb && String(S.chainTb.tb) === id) setChainTb(null);
+          saveStage(id);
+          renderTop();
+        } else if (
+          confirm(
+            `Xóa HẾT dấu của TB ${tb.tb}, kể cả dấu đã tiếp nhận? Chỉ làm khi đánh dấu nhầm – tiện ích sẽ TIẾP NHẬN LẠI TB này (dễ tạo hồ sơ TRÙNG trên VBDLIS nếu hồ sơ đã có).`
+          )
+        )
+          markStage(tb.tb, 'chua', 'tay');
+        else return renderTop();
       } else markStage(tb.tb, v, 'tay');
       S.confirmTn = null;
       S.confirmDon = null;
-      setStatus(`TB ${tb.tb}: đã đánh dấu tay “${STAGE_TEXT[v]}”.`);
+      setStatus(`TB ${tb.tb}: đã đánh dấu tay “${STAGE_TEXT[showStage(tb)]}”.`);
     }
   });
 
@@ -5136,7 +5924,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (a === 'markXong') markStage(id, 'xong', 'tay');
         else markStage(id, a === 'markTn' ? 'tn' : 'don', 'tay', a === 'markDon' ? { lech: parseInt(b.dataset.lech || '0', 10) || 0 } : undefined);
         setEvt(
-          `✓ Đã đánh dấu TB ${esc(id)} ${a === 'markTn' ? '◐ đã tiếp nhận' : a === 'markDon' ? (stageOf({ tb: id }) === 'xong' ? 'đã nhập đơn → ✓ xong (đã lưu kho hồ sơ quét từ trước)' : 'đã nhập đơn (vẫn ◐ Đã tiếp nhận)') : '✓ xong'}.`
+          `✓ Đã đánh dấu TB ${esc(id)} ${a === 'markTn' ? 'đã tiếp nhận (○ Chưa xong)' : a === 'markDon' ? (stageOf({ tb: id }) === 'xong' ? 'đã nhập đơn → ✓ xong (đã lưu kho hồ sơ quét từ trước)' : 'đã nhập đơn (vẫn ○ Chưa xong)') : '✓ xong'}.`
         );
         return;
       }
@@ -5149,7 +5937,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (a === 'markLd') {
         // bạn đã kiểm tra trên VBDLIS: hồ sơ đã sang lãnh đạo → ghi nhận rồi làm tiếp (sang TB sau)
         markStage(id, 'ld', 'tay');
-        setEvt(`✓ Đã ghi nhận TB ${esc(id)}: đã chuyển lãnh đạo – <b>◐ Đã tiếp nhận</b>.`);
+        setEvt(`✓ Đã ghi nhận TB ${esc(id)}: đã chuyển lãnh đạo – <b>◐ Đã nhập nhưng chưa xong</b>.`);
       }
       if (a === 'clearFwd') {
         // bạn đã kiểm tra trên VBDLIS: chưa chuyển / chưa trả → bỏ dấu “đang chuyển” và mốc bước đó, chạy lại
@@ -5205,56 +5993,94 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       setResult(`<div class="bad">✗ ${esc(DEAD_MSG)}</div>`);
       return;
     }
-    if (['tplScan', 'tplAll', 'tplNone', 'tplSave', 'tplFillNow', 'tplCancel'].includes(b.id) || b.dataset.tplfill || b.dataset.tpledit || b.dataset.tpldel) {
+    if (
+      ['tplScan', 'tplAll', 'tplNone', 'tplSave', 'tplFillNow', 'tplCancel'].includes(b.id) ||
+      b.dataset.tplfill ||
+      b.dataset.tpledit ||
+      b.dataset.tpldel ||
+      b.dataset.tplRm != null ||
+      b.dataset.tplbRm != null
+    ) {
       if (S.busy) return setStatus('Đang bận – chờ xong đã.', true);
       if (!b.dataset.tpldel) tplFlush();
       const d = S.tplDraft;
-      const idx = () => Math.max(0, (parseInt(($('#tplIdx') || {}).value, 10) || 1) - 1);
       const showFill = (f, name) => {
         const okN = f.results.filter((x) => x.ok).length;
         const cl = f.clicks || [];
+        const lines = [];
+        tplLogInto(lines, f);
+        const nB = cl.filter((x) => !x.skip && !x.q);
         setResult(
-          `<div class="sum">Điền theo mẫu – ${esc(name)}: ${okN}/${f.results.length} ô${cl.length ? ` · bấm ${cl.filter((x) => x.ok).length}/${cl.length} nút` : ''}</div>` +
-            f.results
-              .map((r) => `<div class="ln ${r.ok ? 'ok' : 'bad'}">${r.ok ? '✓' : '✗'} <b>${esc(r.name)}</b> = ${esc(r.value)}${r.msg ? ` <span class="muted">(${esc(r.msg)})</span>` : ''}</div>`)
-              .join('') +
-            cl.map((c) => `<div class="ln ${c.ok ? 'ok' : 'bad'}">${c.ok ? '✓ Đã bấm' : '✗ Chưa bấm'} <b>“${esc(c.name)}”</b>${c.why ? ` <span class="muted">(${esc(c.why)})</span>` : ''}</div>`).join('') +
-            (cl.length ? '' : '<div class="hint">Tiện ích chỉ điền, không bấm Lưu – bạn kiểm tra rồi tự bấm.</div>')
+          `<div class="sum">Điền theo mẫu – ${esc(name)}: ${okN}/${f.results.length} ô${nB.length ? ` · bấm ${nB.filter((x) => x.ok).length}/${nB.length} nút` : ''}</div>` +
+            lines.map((l) => `<div class="ln ${l.cls}">${l.icon} ${l.html}</div>`).join('') +
+            (cl.length ? '' : '<div class="hint">Mẫu không có nút đã tích – tiện ích chỉ điền; bạn kiểm tra rồi tự bấm.</div>')
         );
       };
       S.busy = true;
       try {
-        if (b.id === 'tplScan') {
+        if (b.dataset.tplRm != null || b.dataset.tplbRm != null) {
+          // ✕: bỏ dòng / nút “không thấy lần lấy này” khỏi mẫu
+          if (d && !tplDead()) {
+            if (b.dataset.tplRm != null) d.items.splice(+b.dataset.tplRm, 1);
+            else (d.btns || []).splice(+b.dataset.tplbRm, 1);
+            await tplSaveDraft();
+          }
+        } else if (b.id === 'tplScan') {
           setResult('<div class="muted">Đang lấy các trường…</div>');
           await tplScan();
+          const dd = S.tplDraft;
+          const nV = dd.items.filter((x) => x.vang).length + (dd.btns || []).filter((x) => x.vang).length;
           setResult(
-            `<div class="ok">✓ Lấy được ${S.tplDraft.items.length} trường và ${(S.tplDraft.btns || []).length} nút của ${esc(S.tplDraft.name)} – tích trường / nút cần dùng rồi bấm “Lưu mẫu”.</div>`
+            `<div class="ok">✓ Lấy được ${dd.items.filter((x) => !x.vang).length} trường và ${(dd.btns || []).filter((x) => !x.vang).length} nút của ${esc(dd.name)} – tích / sửa là tự lưu.${
+              dd.merged ? ` Đã giữ tích của mẫu cũ${nV ? `; ${nV} dòng lần này không thấy vẫn giữ (✕ để bỏ)` : ''}.` : ''
+            }</div><div class="hint">${esc(tplUse(dd))}</div>`
           );
         } else if (b.id === 'tplAll' || b.id === 'tplNone') {
-          if (d) {
-            d.items.forEach((x) => (x.on = b.id === 'tplAll' && !x.ban));
-            if (b.id === 'tplNone') (d.btns || []).forEach((x) => ((x.on = false), (x.ord = '')));
-            tplSaveDraft(); // lưu luôn
+          if (d && !tplDead()) {
+            const skipped = [];
+            if (b.id === 'tplAll') {
+              // tích ô lấy từ dữ liệu TB và ô bạn đã đặt giá trị mẫu; ô giá trị mẫu khác (giá trị đọc lúc lấy trường) – bạn tích tay
+              d.items.forEach((x) => {
+                if (x.ban || x.vang) return;
+                if ((x.key && x.src === 'tb') || x.uv) x.on = true;
+                else if (!x.on) skipped.push(tplLabel(x) + (x.locked ? ' (ô khóa)' : ''));
+              });
+            } else {
+              d.items.forEach((x) => (x.on = false));
+              (d.btns || []).forEach((x) => ((x.on = false), (x.ord = '')));
+            }
+            await tplSaveDraft(); // lưu luôn
+            if (skipped.length)
+              setResult(
+                `<div class="hint">Không tự tích ${skipped.length} ô giá trị mẫu – giá trị đọc lúc lấy trường sẽ điền y hệt cho mọi hồ sơ, cần thì tích tay: ${esc(
+                  skipped.slice(0, 20).join(', ')
+                )}${skipped.length > 20 ? '…' : ''}</div>`
+              );
           }
-        }
-        else if (b.id === 'tplSave' && d) {
-          tplSaveDraft();
-          setResult(
-            `<div class="ok">✓ Đã lưu mẫu “${esc(d.name)}”: ${d.items.filter((x) => x.on && !x.ban).length} ô được tích${
-              (d.btns || []).some((x) => x.on) ? `, ${(d.btns || []).filter((x) => x.on).length} nút sẽ bấm khi bạn bấm “Điền”` : ''
-            }.${d.secKey ? ' “▶ Chạy cả TB” / “🤖 Tự động” sẽ chỉ điền các ô này ở cửa sổ đó.' : ''}</div>`
-          );
-          S.tplDraft = null;
+        } else if (b.id === 'tplSave' && d) {
+          if (!tplDead()) {
+            if (!(await tplSaveDraft())) setResult('<div class="bad">✗ Chưa lưu được mẫu – thử lại.</div>');
+            else {
+              setResult(
+                `<div class="ok">✓ Đã lưu mẫu ${esc(qn(d.name))}: ${d.items.filter((x) => x.on && !x.ban).length} ô được tích${
+                  (d.btns || []).some((x) => x.on) ? `, ${(d.btns || []).filter((x) => x.on).length} nút` : ''
+                }.</div><div class="hint">${esc(tplUse(d))}</div>`
+              );
+              S.tplDraft = null;
+            }
+          }
         } else if (b.id === 'tplFillNow' && d) {
-          showFill(await tplFill({ key: d.key, name: d.name, base: d.secKey, scope: d.scope, titleKey: d.titleKey, items: d.items, btns: d.btns || [] }, idx()), d.name);
+          const t = tplRec(d);
+          showFill(await tplFill(t, tplIdxOf(d.key) - 1), d.name);
+          if (AUTO()) await tplMarkRan(t);
         } else if (b.id === 'tplCancel') S.tplDraft = null;
         else if (b.dataset.tplfill) {
           const t = S.tpl[b.dataset.tplfill];
           if (t) {
-            // chủ / thửa / giấy tờ: số thứ tự ở ô bên cạnh nút Điền (mặc định 1)
-            const inp = [...root.querySelectorAll('[data-tplidx]')].find((i) => i.dataset.tplidx === t.key);
-            const i = inp ? Math.max(0, (parseInt(inp.value, 10) || 1) - 1) : 0;
-            showFill(await tplFill(t, i), inp ? `${t.name} – số ${i + 1}` : t.name);
+            // chủ / thửa / giấy tờ: số thứ tự ở ô bên cạnh nút Điền (mặc định 1, nhớ theo mẫu)
+            const i = tplIdxOf(t.key) - 1;
+            showFill(await tplFill(t, i), ['chu', 'thua', 'giayTo'].includes(t.base) ? `${t.name} – số ${i + 1}` : t.name);
+            if (AUTO()) await tplMarkRan(t);
           }
         } else if (b.dataset.tpledit) {
           const t = S.tpl[b.dataset.tpledit];
@@ -5262,15 +6088,17 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             S.tplDraft = {
               key: t.key,
               name: t.name,
-              secKey: t.base,
+              secKey: t.base || '',
               scope: t.scope,
               titleKey: t.titleKey,
+              dlg: !!t.dlg,
               items: t.items.map((x) => ({ ...x })),
               btns: (t.btns || []).map((x) => ({ ...x })),
+              cut: 0,
             };
         } else if (b.dataset.tpldel) {
           const t = S.tpl[b.dataset.tpldel];
-          if (t && confirm(`Xóa mẫu “${t.name}”? (tiện ích sẽ điền cửa sổ đó như cũ)`)) {
+          if (t && confirm(`Xóa mẫu ${qn(t.name)}? (tiện ích sẽ điền cửa sổ đó như cũ)`)) {
             // đang mở bảng tích của chính mẫu này → đóng luôn (không để lần tích sau lưu lại mẫu vừa xóa)
             if (S.tplDraft && S.tplDraft.key === t.key) {
               clearTimeout(S.tplSaveT);
@@ -5281,6 +6109,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             delete n[t.key];
             S.tpl = n;
             safeSet({ tbTpl: S.tpl });
+            // ghi lúc xóa: nạp lại file sao lưu cũ không làm mẫu này sống lại
+            try {
+              const del = (await store.get('tbTplDel')).tbTplDel || {};
+              del[t.key] = Date.now();
+              await store.set({ tbTplDel: del });
+            } catch (e) {}
           }
         }
       } catch (err) {
@@ -6432,7 +7266,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         c.ok(
           'hồ sơ đã có hồ sơ quét (Đơn đăng ký + Thông báo xác nhận) – không thêm nữa' +
             (ids.length ? `; bỏ ${ids.length} file của hồ sơ này khỏi hàng chờ` : '') +
-            (tbx ? `; TB ${tbx.tb}: ${stageOf(tbx) === 'xong' ? '✓ Xong' : 'ghi nhận đã lưu kho (chưa ghi nhận nhập đơn xong nên vẫn ◐)'}` : '')
+            (tbx ? `; TB ${tbx.tb}: ${stageOf(tbx) === 'xong' ? '✓ Xong' : 'ghi nhận đã lưu kho (chưa ghi nhận nhập đơn xong nên vẫn chưa xong)'}` : '')
         );
         c = step('Đóng, tích “Đã xử lý” – Lưu kho hồ sơ quét');
         const tk = await closeAndTick(info.box);
@@ -6481,6 +7315,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       await sleep(300);
       const err = await fillTthsq(kind);
       if (err) throw new Error(`${err} – cửa sổ “Thông tin hồ sơ quét” vẫn mở: bạn tự điền rồi bấm Lưu, sau đó bấm “▶ Chạy cả TB” lại`);
+      // 🤖: ô / nút bạn tích thêm trong mẫu cửa sổ này (tab Trường) – làm trước nút Lưu (Loại giấy tờ, Mô tả, Tên giấy tờ tiện ích tự điền)
+      const exT = await tplChainExtras({ base: 'giayTo', decide: ['luu'], fields: true, skipKeys: ['loai', 'moTa', 'ten'], step });
+      if (exT) throw new Error(`${exT} – cửa sổ “Thông tin hồ sơ quét” vẫn mở: bạn xem rồi tự bấm Lưu, sau đó bấm “▶ Chạy cả TB” lại`);
       const save = tthsqSave();
       if (!save) throw new Error('không thấy nút “Lưu” của cửa sổ “Thông tin hồ sơ quét”');
       stopIf();
@@ -6526,6 +7363,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     if (!cap) throw new Error('không thấy nút “Cập nhật” – bạn tự bấm');
     if (!['don', 'tbxn'].every(kindDone)) throw new Error('chưa đủ 2 dòng có tập tin – không bấm “Cập nhật”');
     if (optOn('tuQT')) {
+      // 🤖: ô / nút bạn tích thêm trong mẫu cửa sổ Hồ sơ quét (tab Trường) – làm trước “Cập nhật”
+      const exH = await tplChainExtras({ base: 'giayTo', decide: ['cap nhat'], fields: true, step });
+      if (exH) throw new Error(`${exH} – tiện ích không bấm “Cập nhật”; bạn xem rồi bấm “▶ Chạy cả TB” lại`);
       // bạn cho phép tự bấm: đúng hồ sơ, đủ 2 dòng có tập tin → Cập nhật → chờ Lưu kho mở lại có hồ sơ quét đủ 2 loại
       const t0 = Date.now();
       S.armedScan = null;
@@ -6554,7 +7394,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const xong = !!tbx && stageOf(tbx) === 'xong';
       c.ok(
         'trang đã lưu hồ sơ quét' +
-          (tbx ? (xong ? ` – TB ${tbx.tb}: ✓ Xong` : ` – TB ${tbx.tb}: đã lưu kho (chưa ghi nhận nhập đơn xong nên vẫn ◐)`) : '')
+          (tbx ? (xong ? ` – TB ${tbx.tb}: ✓ Xong` : ` – TB ${tbx.tb}: đã lưu kho (chưa ghi nhận nhập đơn xong nên vẫn chưa xong)`) : '')
       );
       c = step('Đóng, tích “Đã xử lý” – Lưu kho hồ sơ quét');
       const tk = await closeAndTick(fin.box);
@@ -6579,7 +7419,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     S.armedScan = { tb: tbx ? String(tbx.tb) : '', pairs, ma, at: Date.now() };
     ctx.setTail(
       '<div class="hint">Bạn bấm <b>Cập nhật</b> (Enter). Khi trang báo “Cập nhật thành công”, tiện ích ghi giờ lưu kho' +
-        (tbx ? ` (TB ${esc(tbx.tb)} ${(S.stage[String(tbx.tb)] || {}).don ? 'thành <b>✓ Xong</b>' : 'vẫn ◐ tới khi nhập đơn xong'})` : '') +
+        (tbx ? ` (TB ${esc(tbx.tb)} ${(S.stage[String(tbx.tb)] || {}).don ? 'thành <b>✓ Xong</b>' : 'vẫn chưa xong tới khi nhập đơn xong'})` : '') +
         '.</div>',
       'Bấm “Cập nhật”'
     );
@@ -7511,6 +8351,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // trang bắt đầu chuyển (link vừa bấm có tác dụng) – để biết cú bấm đường link có làm trang chuyển không
   window.addEventListener('beforeunload', () => {
     S.leaving = Date.now();
+    tplFlush(); // tab Trường: tích / giá trị vừa đổi chưa kịp lưu → lưu ngay trước khi trang chuyển
+  });
+  window.addEventListener('pagehide', () => tplFlush());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') tplFlush();
   });
   // bấm đường link chuyển trang (Xử lý công việc, Tiếp nhận hồ sơ, Về trang tiếp nhận…). Link có địa chỉ thật (cùng trang web) → mở địa chỉ đó
   // NGAY TRONG TAB NÀY (location.assign): không bị trình duyệt chặn như mở tab mới khi không có người bấm (trang thật 22/11: 🤖 bấm
@@ -7808,7 +8653,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         ? '✓ Đã lưu kho hồ sơ quét (hồ sơ không có trong dữ liệu TB – không ghi tiến độ).'
         : xong
           ? `✓ TB ${esc(x.tb)} – ${esc(whoOf(x))}: <b>xong</b> (đã lưu kho hồ sơ quét: Đơn đăng ký + Thông báo xác nhận).`
-          : `✓ TB ${esc(x.tb)} – ${esc(whoOf(x))}: đã lưu kho hồ sơ quét. Tiện ích chưa ghi nhận <b>nhập đơn xong</b> nên trạng thái vẫn ◐ – nhập đơn xong (Hoàn tất) là tự thành ✓ Xong; đơn đã xong từ trước thì bấm: ${actBtn('markXong', x.tb, `Đánh dấu TB ${x.tb} xong`)}`;
+          : `✓ TB ${esc(x.tb)} – ${esc(whoOf(x))}: đã lưu kho hồ sơ quét. Tiện ích chưa ghi nhận <b>nhập đơn xong</b> nên trạng thái vẫn chưa xong – nhập đơn xong (Hoàn tất) là tự thành ✓ Xong; đơn đã xong từ trước thì bấm: ${actBtn('markXong', x.tb, `Đánh dấu TB ${x.tb} xong`)}`;
       // Đóng cửa sổ Lưu kho hồ sơ quét → về Quy trình xử lý → tích (hoặc tô vàng) ô “Đã xử lý” của tác vụ
       const close = [...info.box.querySelectorAll('a, button')].find((b) => norm(b.textContent) === 'dong' && shownEl(b));
       if (close) {
@@ -7914,7 +8759,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         setEvt(
           (stageOf({ tb: a.tb }) === 'xong'
             ? `✓ TB ${esc(a.tb)}${who}: <b>xong</b> (trang báo “${esc(ev.say)}”; hồ sơ quét đã lưu kho trước đó).`
-            : `✓ TB ${esc(a.tb)}${who}: <b>đã nhập đơn</b> (trang báo “${esc(ev.say)}”) – trạng thái vẫn ◐ Đã tiếp nhận; ✓ Xong sau khi lưu kho hồ sơ quét.`) +
+            : `✓ TB ${esc(a.tb)}${who}: <b>đã nhập đơn</b> (trang báo “${esc(ev.say)}”) – trạng thái vẫn ○ Chưa xong; ✓ Xong sau khi lưu kho hồ sơ quét (TB đi chuyển tiếp: ◐ khi chuyển lãnh đạo, ✓ khi Trả hồ sơ).`) +
             (a.lech ? ` ⚠ Lúc kiểm tra còn lệch ${a.lech} ô so với dữ liệu.` : ''),
           !!a.lech
         );
@@ -7986,7 +8831,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       traPhase(s) && !s.fwd && 'lãnh đạo đã trả về – chưa Trả hồ sơ',
       x.ghiChu ? `ghi chú: ${x.ghiChu}` : '',
     ].filter(Boolean);
-    return { st: stageOf(x), s, warn };
+    return { st: showStage(x), s, warn };
   }
   // số TB tiếp nhận / nhập đơn / xong theo ngày (7 ngày gần nhất có làm)
   const dayKey = (ts) => {
@@ -8026,7 +8871,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   };
   // sao lưu tiến độ: chỉ số TB + giờ + trạng thái (không có tên, số giấy tờ)
   function backupStage() {
-    const obj = { loai: 'vbdlis-tien-do', phienBan: PANEL_VERSION, luc: new Date().toISOString(), soTB: Object.keys(S.stage).length, tienDo: S.stage };
+    // kèm mẫu tab Trường (tích, thứ tự nút, giá trị mẫu bạn đặt – không lấy giá trị có thể là dữ liệu cá nhân)
+    const mt = tplForBackup(S.tpl);
+    S.bakTpl = { n: Object.keys(mt.out).length, dropped: mt.dropped };
+    const obj = { loai: 'vbdlis-tien-do', phienBan: PANEL_VERSION, luc: new Date().toISOString(), soTB: Object.keys(S.stage).length, tienDo: S.stage, soMau: S.bakTpl.n, mauTruong: mt.out };
     const name = saveFile(`tien-do-vbdlis-${stamp()}.json`, new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' }));
     safeSet({ tbBakAt: Date.now() });
     return name;
@@ -8080,7 +8928,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     S.stage = latest;
     await store.set({ tbStage: latest });
     renderTop();
-    return { add, upd, luc: j.luc };
+    const mt = await tplRestore(j.mauTruong); // mẫu tab Trường: chỉ thêm mẫu máy này chưa có
+    return { add, upd, luc: j.luc, ...mt };
   }
   // hộp đang mở che bảng → khóa phần bên dưới (Tab / Enter không tới được nút bị che)
   const coverPanel = (on) => {
@@ -8152,7 +9001,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const days = ds.days.map(([k, v]) => `${k.slice(8, 10)}/${k.slice(5, 7)}: ${v.tn} tiếp nhận, ${v.don} nhập đơn, ${v.xong} xong`).join(' · ');
       d.innerHTML = `<div class="dh"><b>Tiến độ – ${S.data.length} TB</b><span class="sp"></span><button class="btn x" id="pgClose" title="Đóng (phím Esc)">✕ Đóng</button></div>
         <div class="days">Hôm nay: <b>${ds.today.tn}</b> TB tiếp nhận · <b>${ds.today.don}</b> TB nhập đơn · <b>${ds.today.xong}</b> TB xong${days ? `<br><span class="muted">${esc(days)}</span>` : ''}</div>
-        <div class="row pgf">${fb('all', 'Tất cả')}${fb('chua', '○ Chưa làm')}${fb('tn', '◐ Đã tiếp nhận')}${fb('xong', '✓ Xong')}${cnt.hoan ? fb('hoan', '⏸ Tạm hoãn') : ''}${fb('warn', '⚠ Cần xem')}</div>
+        <div class="row pgf">${fb('all', 'Tất cả')}${fb('chua', '○ Chưa xong')}${fb('tn', '◐ Đã nhập chưa xong')}${fb('xong', '✓ Xong')}${cnt.hoan ? fb('hoan', '⏸ Tạm hoãn') : ''}${fb('warn', '⚠ Cần xem')}</div>
         <div class="pgl"><table class="sh"><tr><th></th><th>TB</th><th>Người nộp</th><th>Thửa</th><th>Tiếp nhận</th><th>Nhập đơn</th><th>Xong</th><th>Cần xem</th></tr>${
           shown
             .map(
@@ -8162,8 +9011,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             .join('') || '<tr><td colspan="8" class="muted">Không có TB nào.</td></tr>'
         }</table></div>
         <div class="row"><button class="btn" id="pgCopy" title="Sao chép cả bảng – dán vào Excel là đúng cột">⧉ Sao chép bảng</button><button class="btn" id="pgCsv" title="Tải file mở bằng Excel">⬇ Tải file Excel</button></div>
-        <div class="row"><button class="btn" id="pgBak" title="Lưu tiến độ ra file: số TB, giờ, trạng thái, thửa đã nhập / bỏ qua và lý do tạm hoãn bạn gõ (không có tên, số giấy tờ trong dữ liệu)">⬇ Sao lưu tiến độ</button><button class="btn" id="pgRes" title="Nạp lại tiến độ từ file sao lưu (gộp với tiến độ hiện có)">⬆ Nạp tiến độ…</button><input type="file" id="pgFile" accept=".json,application/json" style="display:none"><span class="muted" style="font-size:11px">${bakAt ? `Sao lưu gần nhất: ${esc(fmtTime(bakAt))}` : 'Chưa sao lưu lần nào'}</span></div>
-        <div class="hint">Bấm một dòng để chọn TB đó. Tiện ích tự đánh dấu sau khi bạn chạy “▶ Chạy cả TB”: “Lưu hồ sơ thành công” → ◐; “Lưu đơn đăng ký thành công” → ghi giờ nhập đơn (vẫn ◐); “Cập nhật thành công” ở lưu kho hồ sơ quét → ghi giờ lưu kho; đủ cả nhập đơn + lưu kho → ✓ Xong; sai thì đổi ô Trạng thái của TB đó. Gỡ / cài lại tiện ích hay đổi máy thì tiến độ mất – nên <b>Sao lưu tiến độ</b> cuối mỗi ngày.</div>
+        <div class="row"><button class="btn" id="pgBak" title="Lưu tiến độ ra file: số TB, giờ, trạng thái, thửa đã nhập / bỏ qua và lý do tạm hoãn bạn gõ (không có tên, số giấy tờ trong dữ liệu); kèm các mẫu tab Trường (tích, thứ tự nút, giá trị mẫu bạn đặt)">⬇ Sao lưu tiến độ</button><button class="btn" id="pgRes" title="Nạp lại tiến độ từ file sao lưu (gộp với tiến độ hiện có)">⬆ Nạp tiến độ…</button><input type="file" id="pgFile" accept=".json,application/json" style="display:none"><span class="muted" style="font-size:11px">${bakAt ? `Sao lưu gần nhất: ${esc(fmtTime(bakAt))}` : 'Chưa sao lưu lần nào'}</span></div>
+        <div class="hint">Bấm một dòng để chọn TB đó. Tiện ích tự ghi giờ từng bước (tiếp nhận, nhập đơn, lưu kho…); trạng thái: ○ Chưa xong tới khi Thực thi chuyển lãnh đạo → ◐ Đã nhập nhưng chưa xong → ✓ Xong khi Trả hồ sơ (TB không đi chuyển tiếp: đủ nhập đơn + lưu kho → ✓ Xong); sai thì đổi ô Trạng thái của TB đó. Gỡ / cài lại tiện ích hay đổi máy thì tiến độ mất – nên <b>Sao lưu tiến độ</b> cuối mỗi ngày.</div>
         <div id="pgMsg" class="hint"></div>`;
       if (d.isConnected) d.focus({ preventScroll: true }); // vẽ lại → giữ phím Esc đóng được hộp
     };
@@ -8202,7 +9051,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       try {
         const r = await restoreStage(file);
         draw();
-        msg(`Đã nạp tiến độ (bản sao lưu ${r.luc ? fmtTime(Date.parse(r.luc)) : ''}): thêm ${r.add} TB, bổ sung ${r.upd} TB.`);
+        msg(`Đã nạp tiến độ (bản sao lưu ${r.luc ? fmtTime(Date.parse(r.luc)) : ''}): thêm ${r.add} TB, bổ sung ${r.upd} TB${r.tplAdd || r.tplKeep ? `; mẫu tab Trường: thêm ${r.tplAdd}, giữ ${r.tplKeep} mẫu đang có` : ''}.`);
       } catch (err) {
         msg('Không nạp được: ' + friendly(err), true);
       }
@@ -8227,7 +9076,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         try {
           const name = backupStage();
           draw();
-          return msg(`Đã lưu “${name}” vào thư mục Tải xuống – cất file này cẩn thận (cài lại tiện ích thì Nạp tiến độ từ file này).`);
+          return msg(`Đã lưu “${name}” vào thư mục Tải xuống (kèm ${(S.bakTpl || {}).n || 0} mẫu tab Trường${(S.bakTpl || {}).dropped ? `; ${S.bakTpl.dropped} giá trị mẫu có thể là dữ liệu cá nhân không đưa vào file` : ''}) – cất file này cẩn thận (cài lại tiện ích thì Nạp tiến độ từ file này).`);
         } catch (err) {
           return msg('Không sao lưu được: ' + friendly(err), true);
         }
@@ -8251,19 +9100,28 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       (t) => t && t.scope === 'modal' && CHOOSER_MODAL.test(t.titleKey || '') && (t.btns || []).some((b) => b.on && b.key === 'thuc thi')
     );
   }
-  // cửa sổ tiện ích tự làm theo cách riêng (không dùng mẫu khi 🤖 chạy): đơn, chủ, thửa, Quy trình, chọn người, Trả hồ sơ, tìm kiếm
-  const CHAIN_WIN = [DON_MODAL, CHU_MODAL, THUA_MODAL, CHOOSER_MODAL, /^quy trinh xu ly\b/, /^tra ho so\b/, /^tim\b/];
-  // mẫu đã lưu (tab Trường, có ô / nút đã tích) của cửa sổ đang mở trên cùng – chỉ cửa sổ tiện ích không tự làm
+  // cửa sổ tiện ích tự làm theo cách riêng (🤖 không chạy mẫu thay chuỗi – phần bạn tích ở các cửa sổ này 🤖 làm thêm trước nút chốt):
+  // đơn, chủ, thửa, chọn người, Quy trình, Trả hồ sơ
+  const CHAIN_WIN = [DON_MODAL, CHU_MODAL, THUA_MODAL, CHOOSER_MODAL, /^quy trinh xu ly\b/, /^tra ho so\b/];
+  // mẫu đã lưu (tab Trường, có ô / nút đã tích) của cửa sổ đang mở trên cùng – chỉ cửa sổ tiện ích không tự làm.
+  // Cửa sổ hồ sơ quét / lưu kho / cập nhật dữ liệu pháp lý: tiện ích tự làm; Quy trình xử lý nằm DƯỚI cửa sổ trên cùng thì không tính
   function autoTplFor(k) {
-    if (!k || CHAIN_WIN.some((re) => re.test(k)) || scanScreen()) return null;
-    const on = (t) => (t.items || []).some((x) => x.on && !x.ban) || (t.btns || []).some((b) => b.on);
-    const c = Object.values(S.tpl || {}).filter((t) => t && t.scope === 'modal' && !t.base && t.titleKey && (k === t.titleKey || tplStem(k) === t.titleKey) && on(t));
-    c.sort((a, b) => b.titleKey.length - a.titleKey.length); // mẫu khớp tên dài nhất
-    return c[0] || null;
+    if (!k || CHAIN_WIN.some((re) => re.test(k))) return null;
+    const scr = scanScreen();
+    if (scr && scr !== 'quytrinh') return null;
+    const t = tplForWin(k, '');
+    return tplOn(t) ? t : null;
   }
   async function autoScreen() {
     const top = (await act('modalState')).find((x) => x.open);
-    if ((await act('dialogState')).some((x) => x.open)) return null; // trang đang hỏi → chờ (giữ nguyên)
+    const dlg = (await act('dialogState')).find((x) => x.open);
+    if (dlg) {
+      // hộp hỏi bạn đã dạy (lấy hộp ở tab Trường, tích nút trả lời) → 🤖 trả lời bằng mẫu đó, mỗi lần hộp hiện một lần;
+      // hộp khác (hoặc hộp báo lỗi) → chờ (giữ nguyên)
+      const i = (dlg.keys || []).findIndex((kk, j) => !(dlg.errs || [])[j] && S.tpl[kk] && (S.tpl[kk].btns || []).some((b) => b.on));
+      if (i < 0) return null;
+      return tplSigOf(S.tpl[dlg.keys[i]], (dlg.oids || [])[i] || '', 'tpl');
+    }
     const k = top ? modalKey(top) : '';
     if (top && DON_MODAL.test(k)) {
       // chỉ tự chạy đơn của TB đang làm (TB đang chọn): Mã đơn = số biên nhận của đúng TB đó. Đơn của TB khác → bạn bấm ▶
@@ -8289,6 +9147,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (!info || info.loading || !info.rows.length) return '';
       const l = tbOfSo(await dossierSo()).list;
       if (l.length !== 1 || (S.stage[String(l[0].tb)] || {}).hoan) return '';
+      // bảng tích của mẫu cửa sổ chọn người đang mở (bạn đang tích) → chờ bạn đóng bảng tích
+      if (S.tplDraft && S.tplDraft.scope === 'modal' && CHOOSER_MODAL.test(S.tplDraft.titleKey || '') && S.tab === 'tr' && !pn.classList.contains('min')) {
+        autoWaitNote(S.tplDraft, '🤖 sẽ chọn tài khoản trong cài đặt rồi bấm Thực thi khi bạn đóng bảng tích (Lưu mẫu / Đóng)');
+        return null;
+      }
       return `cho:${l[0].tb}:${norm(info.step)}`;
     }
     if (top && /^quy trinh xu ly\b/.test(k)) {
@@ -8338,13 +9201,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       return need2 || need3 ? `qt:${need2}:${k3 && k3.checked}:${S.scanQ.length}:${openDossierNumbers().join(',')}` : '';
     }
     if (top) {
-      // cửa sổ khác mà bạn đã lưu mẫu (tab Trường) → 🤖 điền các ô đã tích + bấm các nút đã tích (mỗi lần cửa sổ mở một lần)
+      // cửa sổ khác mà bạn đã lưu mẫu (tab Trường) → 🤖 điền các ô đã tích + bấm các nút đã tích (mỗi lần cửa sổ mở một lần).
+      // Bạn vừa bấm / gõ trên trang: bộ theo dõi chờ 3 giây (mọi màn hình)
       const t = autoTplFor(k);
       if (!t) return '';
-      // mẫu đang mở trong tab Trường (bạn đang tích) → chờ (null: giữ nguyên – đóng mẫu xong không chạy lại cửa sổ mẫu đã chạy).
-      // Bạn vừa bấm / gõ trên trang: bộ theo dõi chờ 3 giây (mọi màn hình)
-      if (S.tplDraft && S.tplDraft.key === t.key) return null;
-      return `tpl:${t.key}`;
+      return tplSigOf(t, top.oid || '', 'tpl');
     }
     // vừa bấm Thực thi chuyển lãnh đạo, trang tải lại, hồ sơ không còn nút “Xử lý hồ sơ” → ghi nhận đã chuyển, sang TB sau
     {
@@ -8406,6 +9267,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (!isWorkTb(x.tb)) return justOn();
       if (s.ld) return ldRecent(s) && S.opts.tuSangTB !== false ? `next:${x.tb}` : justOn();
       return `hs:${x.tb}:${['tn', 'cv', 'don', 'ld'].map((q) => (s[q] ? 1 : 0)).join('')}`;
+    }
+    // màn hình chính khác (không phải Tiếp nhận / hồ sơ / Danh sách hồ sơ thụ lý – màn hình tiện ích tự làm) có mẫu ở tab Trường →
+    // 🤖 chạy mẫu đó một lần mỗi lần vào màn hình (bạn chọn 23/11)
+    if (!btnLuuHoSo() && !btnXuLyHoSo() && !linkVeTiepNhan()) {
+      const pt = S.tpl['w:' + pageTplKey()];
+      if (pt && pt.scope === 'page' && !pt.base && tplOn(pt)) return tplSigOf(pt, pageVisitId(), 'ptpl');
     }
     // màn hình Tiếp nhận hồ sơ TRỐNG (chưa có thửa, chưa có Số biên nhận) + TB đang chọn chưa làm
     const rows = await readTable();
@@ -8509,6 +9376,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
       S.autoPend = '';
       S.autoSig = sig;
+      if (/^p?tpl:/.test(sig)) {
+        // mẫu tab Trường: ghi “đã chạy lần mở này” TRƯỚC khi chạy (chạy lỗi cũng không chạy lại trên cùng lần mở)
+        const key = tplSigKey(sig);
+        S.tplRan.add(`${key}|${sig.split(':')[1]}`);
+        if (S.tplRan.size > 200) S.tplRan = new Set([...S.tplRan].slice(-100));
+        S.tplLast[key] = { at: Date.now() };
+      }
       setStatus('🤖 Tự động hết: bắt đầu chạy…');
       runAll(sig);
     } catch (e) {
@@ -8559,6 +9433,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // ---------- khởi động ----------
   (async () => {
     const r = await store.get(['tbData', 'tbDone', 'tbCur', 'tbTab', 'tbOpts', 'tbBox', 'tbStage', 'tbTpl', 'tbAutoTab', 'tbRecvUrl', 'tbListUrl', 'tbGoList']);
+    // mẫu tab Trường: nhận ngay (trước các bước chờ – thay đổi từ tab khác đến sau đó không bị bản cũ đè); chuyển sang khóa bản 1.20
+    S.tpl = r.tbTpl && typeof r.tbTpl === 'object' ? { ...r.tbTpl } : {};
+    if (tplMigrateAll(S.tpl)) safeSet({ tbTpl: S.tpl });
     S.opts = r.tbOpts || {};
     S.autoTab = r.tbAutoTab == null ? null : r.tbAutoTab;
     S.recvUrl = r.tbRecvUrl || '';
@@ -8577,7 +9454,6 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       await new Promise((res) => setTimeout(res, 400));
     }
 
-    S.tpl = r.tbTpl && typeof r.tbTpl === 'object' ? r.tbTpl : {};
     try {
       const c = await send({ type: 'vbdlis-config' });
       const cfg = (c && c.ok && c.config) || {};

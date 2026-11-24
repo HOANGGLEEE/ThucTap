@@ -20,7 +20,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.21.6'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.21.7'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -2828,6 +2828,17 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const allMode = S.opts.thuaTN === 'tatca';
     let cur = null;
     let donCertain = false; // bước đơn: hồ sơ đang mở CHẮC CHẮN của TB này (Mã đơn khớp hẳn / cây khớp riêng TB này / bạn xác nhận)
+    // 🤖 vẫn lưu đơn khi chưa chắc hồ sơ (bạn yêu cầu 24/11: “lưu hết cho tôi không cần phải dừng lại”) – mỗi lần chạy ghi MỘT dòng ⚠ để bạn biết
+    const unsureNote = () => {
+      if (donCertain || log.some((l) => l.unsure)) return;
+      log.push({
+        icon: '⚠',
+        cls: 'warn',
+        html: esc(`Chưa chắc chắn hồ sơ đang mở là của TB ${tb.tb} (lý do ở dòng “Nhận hồ sơ đang mở”) – 🤖 vẫn tự Lưu, Lưu thông tin đăng ký, Hoàn tất (bạn yêu cầu 24/11: lưu hết, không dừng)`),
+        unsure: true,
+      });
+      show();
+    };
     // đổi sang TB khớp hồ sơ đang mở (chỉ trước khi ghi gì lên trang)
     const setTb = (x) => {
       tb = x;
@@ -2846,7 +2857,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     // ---------- Hồ sơ đang mở là của TB nào (cửa sổ “Nhập đơn đăng ký”) ----------
     // Đơn đã có sẵn chủ + thửa mang từ bước tiếp nhận → so với dữ liệu: đúng TB đang chọn thì làm tiếp;
     // khớp rõ TB khác thì tự chọn TB đó; không khớp / khớp nhiều TB thì DỪNG (không điền nhầm hồ sơ)
-    const identifyDon = async () => {
+    // known: lần chạy đã biết chắc hồ sơ là TB này TRƯỚC khi mở đơn (Số biên nhận của hồ sơ ở Quy trình khớp đúng 1 TB – chuỗi “Nhập đăng ký”):
+    // đơn không đọc được Mã đơn / cây trống / khớp nhiều TB như nhau (không có gì trái ngược) → coi là chắc chắn (trước đây: “chưa chắc”, không tự Lưu)
+    const identifyDon = async (known) => {
       cur = step('Nhận hồ sơ đang mở');
       donCertain = false;
       // đọc đơn: ô Mã đơn (trang điền sẵn số biên nhận) + cây Chủ sử dụng / Thửa đất (cây có thể đang tải → chờ tối đa ~5 giây)
@@ -2875,7 +2888,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         cur.ok(`bạn xác nhận đây là hồ sơ TB ${tb.tb}`);
         return sure();
       }
-      const NOAUTO = ' – chưa chắc chắn nên tiện ích KHÔNG tự Lưu chủ (bạn xem rồi nhấn Enter)';
+      // 🤖 bật: chưa chắc vẫn tự Lưu (bạn yêu cầu 24/11 – lưu hết, không dừng); 🤖 tắt: không tự Lưu chủ, bạn nhấn Enter
+      const NOAUTO = AUTO() ? ' – chưa chắc chắn, 🤖 vẫn tự Lưu (bạn yêu cầu 24/11)' : ' – chưa chắc chắn nên tiện ích KHÔNG tự Lưu chủ (bạn xem rồi nhấn Enter)';
       // 1) Mã đơn = số biên nhận của hồ sơ → TB có đúng bộ tờ.thửa đó (đơn mới mở thường chưa có chủ / thửa trên cây)
       const maDon = (f && f.maDon) || '';
       const maPairs = uniq(khPairs(maDon) || []);
@@ -2914,6 +2928,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
       // 2) không đọc được Mã đơn: theo cây chủ / thửa. Cây trống / đang tải → làm theo TB đang chọn, không dừng hỏi (theo ý bạn)
       if ((!page.chu.length && !page.thua.length) || (f && f.loading)) {
+        if (known) {
+          cur.ok(`đúng TB ${tb.tb} (số biên nhận của hồ sơ; đơn chưa có chủ / thửa${f && f.loading ? ' – cây đang tải' : ''}, không đọc được Mã đơn)`);
+          return sure();
+        }
         cur.ok(`làm theo TB ${tb.tb} đang chọn (đơn chưa có chủ / thửa${f && f.loading ? ' – cây đang tải' : ''}, không đọc được Mã đơn)${NOAUTO}`);
         return;
       }
@@ -2923,7 +2941,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const extraTxt = extra.length ? ` · đơn có thêm mục không có trong dữ liệu TB: ${extra.join(', ')}` : '';
       const why = pageDesc(page);
       if (r.tie) {
-        // nhiều TB khớp như nhau (vd. cùng chủ, đơn chưa có thửa) → làm theo TB đang chọn (không dừng hỏi), không chắc chắn
+        // nhiều TB khớp như nhau (vd. cùng chủ, đơn chưa có thửa) → làm theo TB đang chọn (không dừng hỏi), không chắc chắn –
+        // trừ khi số biên nhận của hồ sơ đã chỉ đúng TB này (known)
+        if (known) {
+          cur.ok(`đúng TB ${tb.tb} (số biên nhận của hồ sơ; đơn (${why}) khớp như nhau cả TB ${r.tie.join(', ')})${extraTxt}`);
+          return sure();
+        }
         cur.ok(`làm theo TB ${tb.tb} đang chọn – đơn (${why}) khớp cả TB ${r.tie.join(', ')}${extraTxt}${NOAUTO}`);
         return;
       }
@@ -3176,8 +3199,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         let noAuto = ''; // vì sao không tự Lưu được (để bạn biết)
         // Tự động hết: cả cửa sổ THỬA cũng tự Lưu (cùng điều kiện như chủ)
         const canAuto = allOk && (it.kind === 'chu' ? S.opts.tuLuuChu !== false || AUTO() : AUTO());
-        if (canAuto && !donCertain) noAuto = 'chưa chắc hồ sơ của TB này';
+        // chưa chắc hồ sơ: 🤖 bật → vẫn tự Lưu (bạn yêu cầu 24/11: “lưu hết cho tôi không cần phải dừng lại”); 🤖 tắt → không tự Lưu chủ (bạn nhấn Enter)
+        if (canAuto && !donCertain && !AUTO()) noAuto = 'chưa chắc hồ sơ của TB này';
         else if (canAuto) {
+          if (!donCertain) unsureNote();
           await sleep(600); // trang xử lý xong các ô vừa điền (tra số giấy tờ, định dạng…)
           stopIf();
           const d0 = (await act('dialogState')).find((x) => x.open);
@@ -3354,15 +3379,16 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       // 5 (Tự động hết). Mọi ô khớp, chắc chắn đúng hồ sơ, không thiếu dữ liệu → tự bấm “Lưu thông tin đăng ký”, “Hoàn tất”,
       //    rồi sang Quy trình xử lý làm tác vụ 2–3. Có gì chưa chắc → dừng, kêu ting, để bạn bấm.
       if (AUTO()) {
-        // dừng khi: chưa chắc đúng hồ sơ, có thửa không thêm được, trang không hiện số liệu để so. Ô lệch (✗) đã dừng ở phiếu đối chiếu.
+        // dừng khi: có thửa không thêm được, trang không hiện số liệu để so. Ô lệch (✗) đã dừng ở phiếu đối chiếu.
+        // Chưa chắc hồ sơ (tiện ích làm theo TB đoán được – hồ sơ rõ là của TB khác / khớp nhiều TB thì đã dừng ở bước nhận hồ sơ) → vẫn lưu
+        // (bạn yêu cầu 24/11: “lưu hết cho tôi không cần phải dừng lại”)
         // Dữ liệu TB thiếu ô (⚠ – bạn đã điền tay ở cửa sổ chủ / thửa) → vẫn lưu (bạn yêu cầu: điền xong thì Lưu thông tin, Hoàn tất, Đóng)
-        const why = !donCertain
-          ? 'chưa chắc hồ sơ đang mở là của TB này'
-          : noId.length
-            ? `${noId.length} thửa dữ liệu thiếu số thửa / số tờ – bạn tự thêm`
-            : lastSheet && !lastSheet.n.ok
-              ? 'trang không hiện số liệu để đối chiếu'
-              : '';
+        const why = noId.length
+          ? `${noId.length} thửa dữ liệu thiếu số thửa / số tờ – bạn tự thêm`
+          : lastSheet && !lastSheet.n.ok
+            ? 'trang không hiện số liệu để đối chiếu'
+            : '';
+        if (!why) unsureNote();
         if (!why && (gapNote.length || (lastSheet && lastSheet.n.gap))) {
           log.push({
             icon: '⚠',
@@ -3928,7 +3954,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           if (!open) throw new Error('bấm “Xử lý tác vụ” rồi mà chưa thấy cửa sổ “Nhập đơn đăng ký”');
           cur.ok();
           const mine = tb;
-          await identifyDon();
+          await identifyDon(true); // số biên nhận của hồ sơ đã khớp đúng TB này (dossierTb)
           if (tb !== mine) throw ask(`Mã đơn của cửa sổ đơn là của TB ${tb.tb}, khác hồ sơ đang mở (TB ${mine.tb}) – tiện ích dừng`, '');
           gateTb();
           const done = await runDon(true);

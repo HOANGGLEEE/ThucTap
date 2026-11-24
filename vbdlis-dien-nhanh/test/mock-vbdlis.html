@@ -1075,7 +1075,8 @@
   function moDonCuaHoSo(ev){
     const H = window.__mockHoSo;
     log('(' + aiBam(ev) + ' bấm Xử lý tác vụ – Nhập đăng ký)');
-    if (!H.donInit) { donMoi(H.sbn); H.donInit = true; luuHoSoTT(); log('(đơn mới của hồ sơ ' + H.sbn + ': cây chủ / thửa trống, Mã đơn có sẵn)'); }
+    // window.__mockMaDonTrong = true: ô Mã đơn của đơn mới để trống (tiện ích không đọc được Mã đơn – thử đường “số biên nhận của hồ sơ đã khớp TB”)
+    if (!H.donInit) { donMoi(window.__mockMaDonTrong ? '' : H.sbn); H.donInit = true; luuHoSoTT(); log('(đơn mới của hồ sơ ' + H.sbn + ': cây chủ / thửa trống, ' + (window.__mockMaDonTrong ? 'Mã đơn TRỐNG' : 'Mã đơn có sẵn') + ')'); }
     openDonTuQuyTrinh();
   }
   // Đóng của Nhập đơn đăng ký: chỉ đóng cửa sổ đơn (Quy trình xử lý bên dưới vẫn mở)

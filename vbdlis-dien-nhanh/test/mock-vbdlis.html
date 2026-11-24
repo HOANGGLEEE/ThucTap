@@ -1176,6 +1176,9 @@
       const cap = (chonBox.querySelector('input[name="capDonVi"]:checked') || {}).value || 'tatca';
       const ds = CAN_BO[chonTu].filter((r) => LOC_CAP[cap](r[2]));
       tb.innerHTML = ds.length ? ds.map((r, i) => `<tr><td>${i + 1}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('') : '<tr><td colspan="4">Không có dữ liệu</td></tr>';
+      // window.__mockDauCu = { acc, cls, green }: như trang thật 24/11 – một dòng KHÁC còn dấu cũ (lớp, có thể nền xanh) mà không có ✓ ở cột STT
+      const dc = window.__mockDauCu;
+      if (dc && dc.acc) [...tb.children].forEach((tr) => { if (tr.children[1] && tr.children[1].textContent.trim() === dc.acc) { tr.classList.add(dc.cls || 'selectUser'); if (dc.green) tr.style.background = '#dff0d8'; } });
       locCanBo();
       log('(trang tải xong danh sách ' + ds.length + ' tài khoản)');
     }, 600);
@@ -1760,7 +1763,8 @@
     $(document).on('click', function(){ $('.dropdown.open').removeClass('open'); });
     $('#btnThemChuSuDung').next('ul').on('click', 'a', function(){ const t = $(this).text().trim(); log('(trang: Thêm chủ → ' + t + ')'); if (t === 'Cá nhân') { resetCaNhan(); openM('mCaNhan'); window.__fromDon = true; } });
     $('#btnThemTaiSan').next('ul').on('click', 'a', function(){ const t = $(this).text().trim(); log('(trang: Thêm tài sản → ' + t + ')'); if (t === 'Thửa đất') { resetThua(); openM('mThua'); window.__fromDon = true; } });
-    $('#chkdangKyLanDau').on('change', function(){ if (this.checked) { $('#dMaDon').val($('#txtSoBienNhan').val() || 'KH (giả lập)'); log('(trang tự điền Mã đơn)'); } });
+    // window.__mockMaDonSau = 'KH …': số trang điền vào Mã đơn khi tích Đăng ký lần đầu (thử: Mã đơn vừa điền là của TB khác TB đang chọn)
+    $('#chkdangKyLanDau').on('change', function(){ if (this.checked) { $('#dMaDon').val(window.__mockMaDonSau || $('#txtSoBienNhan').val() || 'KH (giả lập)'); log('(trang tự điền Mã đơn)'); } });
     $('#dDieuKien').select2({ dropdownParent: $('#mDon') });
     // Lưu kho: “+” (trang thật chặn link “javascripts:;”), “Đóng”
     $('#btnAddHoSoQuet').on('click', function(e){ e.preventDefault(); log('(trang: + thêm hồ sơ quét)'); hsqMoi(); });

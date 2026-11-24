@@ -6,7 +6,7 @@
 // (Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Đóng – chỉ khi bật “Tự động hết”). Bộ điền không bao giờ bấm Kết ISO / Chuyển tiếp /
 // Thực thi / Trả hồ sơ: Chuyển tiếp + Thực thi (chuyển hồ sơ cho đúng tài khoản) do bảng điền tự bấm, có kiểm tra riêng.
 (() => {
-  const VERSION = 36;
+  const VERSION = 37;
   // cửa sổ chủ sử dụng (cùng mẫu với bảng điền)
   const CHU_WIN = /^((thong tin|them|moi|cap nhat|sua|chi tiet) )*(ca nhan|chu su dung|nguoi su dung|chu so huu)\b/;
   const THUA_WIN = /^((them|moi|thong tin|chi tiet|cap nhat|sua) )*thua dat\b/;
@@ -1252,15 +1252,16 @@
         const said0 = dlgText(d);
         const raw = (said0 ? (modalTitle(d) ? modalTitle(d) + ': ' : '') + said0 : (d.textContent || '').replace(/\s+/g, ' ').trim()).slice(0, 200);
         if (!rule) {
-          // hộp bạn đã dạy (tab Trường: lấy hộp hỏi lúc đang hiện, tích nút trả lời) → bấm đúng nút đó. Hộp báo lỗi thì không
+          // hộp bạn đã dạy (tab Trường: lấy hộp hỏi lúc đang hiện, tích nút trả lời) → bấm đúng nút đó – cả hộp báo LỖI bạn đã dạy (bạn yêu cầu
+          // 24/11: “các lỗi tôi đã dạy thì hãy làm đúng quy trình”; trả kèm err để bảng điền biết bước đang làm chưa xong)
           const L = (msg.learned || []).find((x) => x && x.key === key);
-          if (L && L.btn && !DLG_ERR.test(text)) {
+          if (L && L.btn) {
             const list = tplButtons(d, []);
             let hit = L.btn.id ? list.filter((b) => b.el.id === L.btn.id && b.key === L.btn.key) : [];
             if (hit.length !== 1) hit = list.filter((b) => b.key === L.btn.key && b.nth === (L.btn.nth || 0));
             if (hit.length === 1 && !hit[0].el.disabled && isVisible(hit[0].el)) {
               hit[0].el.click();
-              return { ...base, ok: true, open: true, title, text: raw, btn: hit[0].text, learned: true, key };
+              return { ...base, ok: true, open: true, title, text: raw, btn: hit[0].text, learned: true, key, err: DLG_ERR.test(text) };
             }
           }
           return { ...base, ok: false, open: true, title, text: raw, key };

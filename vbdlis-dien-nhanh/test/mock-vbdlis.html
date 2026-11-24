@@ -817,6 +817,11 @@
   window.mockCapNhatHsq = function(ev){
     window.__mockCapNhat = (window.__mockCapNhat || 0) + 1;
     log('(' + (ev && ev.isTrusted === false ? 'tiện ích' : 'người dùng') + ' bấm Cập nhật hồ sơ quét)');
+    // window.__mockKySo = true: như trang thật 24/11 – hộp “Tập tin … chưa được ký số! Vui lòng ký số tập tin trước khi đính kèm!” (một nút ĐỒNG Ý), không lưu
+    if (window.__mockKySo) {
+      log('(trang báo: tập tin chưa được ký số – không lưu)');
+      return setTimeout(() => mockConfirm('THÔNG BÁO', 'Tập tin <b>' + window.__mockHsq.ma + '.DDK.pdf</b> chưa được ký số!<br>Vui lòng ký số tập tin trước khi đính kèm!', [{ text: 'ĐỒNG Ý', cls: 'btn-warning' }]), 400);
+    }
     const kinds = [...document.querySelectorAll('#tbDanhSachFile tbody tr')].filter((tr) => (tr.querySelector('.mockFileName') || {}).textContent).map((tr) => tr.children[2].textContent.trim());
     window.__mockHsq.recs.push(kinds);
     closeM();
@@ -1527,8 +1532,17 @@
   function thucHienKetISO(ev){
     log('(' + aiBam(ev) + ' bấm Thực hiện – Kết ISO)');
     bayKetISO(ev);
+    const xong = () => { closeM(); setTimeout(() => { ketISOXong(); openM('mQuyTrinh'); mockToast('Thành công', 'Kết ISO thành công'); }, 600); };
     mockConfirm('Xác nhận', 'Bạn có chắc chắn muốn kết ISO?', [
-      { text: 'Đồng ý', cls: 'btn-orange', fn: (e) => { bayKetISO(e); closeM(); setTimeout(() => { ketISOXong(); openM('mQuyTrinh'); mockToast('Thành công', 'Kết ISO thành công'); }, 600); } },
+      { text: 'Đồng ý', cls: 'btn-orange', fn: (e) => {
+        bayKetISO(e);
+        // window.__mockLk3 = true: như trang thật 24/11 – sau Đồng ý hiện CẢNH BÁO “hồ sơ chưa đáp ứng liên kết 3 khối …” (ĐỒNG Ý / KHÔNG)
+        if (window.__mockLk3) return setTimeout(() => mockConfirm('CẢNH BÁO', '<b>HỒ SƠ CHƯA ĐÁP ỨNG LIÊN KẾT 3 KHỐI LIÊN KẾT KHÔNG GIAN</b><br>Thửa đất <b>1(999)</b> không tồn tại dữ liệu không gian<br>Bạn có thật sự muốn <b>tiếp tục</b> thực hiện kết ISO hay không?', [
+          { text: 'ĐỒNG Ý', cls: 'btn-warning', fn: (e2) => { log('(' + aiBam(e2) + ' bấm ĐỒNG Ý – cảnh báo liên kết 3 khối)'); xong(); } },
+          { text: 'KHÔNG', cls: 'btn-default' }
+        ]), 400);
+        xong();
+      } },
       { text: 'Hủy', cls: 'btn-default' }
     ]);
   }

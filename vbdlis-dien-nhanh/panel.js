@@ -20,7 +20,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.21.9'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.21.11'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -310,7 +310,7 @@
     }
     if (Object.keys(s).length) S.stage[id] = s;
     else delete S.stage[id];
-    if (by !== 'tay' && /^(tn|don|quet|cv|ld|trk|tra|xong)$/.test(stage)) S.nsRun = 0; // 🤖 chạy liên tục: có TB làm được → đếm lại
+    if (by !== 'tay' && /^(ld|trk|tra|xong)$/.test(stage)) S.nsRun = 0; // 🤖 chạy liên tục: có TB đi được tới chuyển lãnh đạo / trả → đếm lại
     if (S.armed && S.armed.tb === id && by === 'tay') S.armed = null; // bạn tự đổi → bỏ chờ tự ghi nhận
     if (S.armedScan && S.armedScan.tb === id && by === 'tay') S.armedScan = null;
     // TB 🤖 làm dở (mở từ Danh sách hồ sơ thụ lý) đã chuyển lãnh đạo / đã trả hồ sơ / bạn đổi trạng thái → thôi nhớ
@@ -1193,6 +1193,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     while (Date.now() < until) {
       const rs = await act('answerDialog', { rules: AUTO() ? AUTO_DIALOGS : [], skip });
       const hit = rs.find((x) => x.ok);
+      if (hit && hit.learned && hit.err)
+        return { ok: false, q: true, name: 'câu hỏi của trang', why: `trang báo lỗi “${String(hit.title || '').slice(0, 60)}” – đã bấm “${hit.btn}” theo hộp bạn dạy` };
       if (hit) {
         answered.push(`Trang hỏi “${hit.title}” – tiện ích bấm “${hit.btn}”${hit.learned ? ' (hộp bạn đã dạy)' : ''}`);
         await sleep(900);
@@ -1231,13 +1233,23 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         break;
       }
       let open = null;
+      let errHit = null;
       for (let k = 0; k < 4; k++) {
         const dl = await act('answerDialog', { rules: AUTO() ? AUTO_DIALOGS : [], skip });
-        if (dl.some((x) => x.ok)) {
+        const hit = dl.find((x) => x.ok);
+        if (hit) {
+          if (hit.learned && hit.err) {
+            errHit = hit; // hộp LỖI bạn đã dạy: đã bấm theo mẫu – bước này chưa xong
+            break;
+          }
           await sleep(900);
           continue;
         }
         open = dl.find((x) => x.open && !x.own) || null;
+        break;
+      }
+      if (errHit) {
+        out.push({ ok: false, name, why: `trang báo lỗi “${String(errHit.title || '').slice(0, 60)}” – đã bấm “${errHit.btn}” theo hộp bạn dạy; các nút sau không bấm` });
         break;
       }
       if (open) {
@@ -2373,12 +2385,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // không thấy ô tìm của danh sách, không cài được phần đưa file vào trang, bấm chuyển trang mà trang không chuyển
   const NS_GLOBAL = /chua co du lieu tb|tai khoan dang dang nhap|chua dat tai khoan|chua co tai khoan|khong chay duoc lenh|tien ich vua duoc tai lai|mat ket noi|khong thay o tim|khong cai duoc|ma trang khong chuyen/;
   // dừng vì BẠN (bấm ■ Dừng / tắt 🤖, vừa bấm – gõ trên trang, bạn chọn người khác ở cửa sổ chọn người, Chạy thử…) → không tạm hoãn TB
-  const NS_USER = /^da dung theo yeu cau|ban vua bam|ban dang|ban da chon|ban tu bam|chay thu|trong cua so dang chon/;
+  const NS_USER = /^da dung theo yeu cau|ban vua bam|ban dang (thao tac|bam|go|tat|chon)|ban da chon|chay thu|trong cua so dang chon/;
   const NS_MAX = 5; // 5 TB liên tiếp bị tạm hoãn vì vướng (không TB nào làm được bước nào ở giữa) → có thể trang đổi / mạng lỗi: tắt 🤖, kêu
   // lý do tạm hoãn CHUNG: tên bước đang làm (không chép chữ lỗi / tên người – lý do được lưu cả trong file sao lưu)
   const nsReason = (c) => {
     let t = String((c && c.l && c.l.text) || '').replace(/\s+/g, ' ').trim();
-    t = t.replace(/^(Chủ \d+):.*$/, '$1').replace(/\d{9,}/g, '…');
+    // chỉ tên bước: bỏ phần sau “ – ” (tên tài khoản nhận…), tên file quét, tên chủ, dãy số dài
+    t = t.split(' – ')[0].replace(/^Tải lên .+$/, 'Tải lên file quét').replace(/^(Chủ \d+):.*$/, '$1').replace(/\d{9,}/g, '…');
     if (t.length > 80) t = t.slice(0, 80) + '…';
     return `🤖 vướng ở bước “${t || 'tự động'}” – xem dòng báo của lần chạy; sửa xong bỏ tạm hoãn để 🤖 làm lại`;
   };
@@ -2409,10 +2422,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     if (h.kind === 'don') return (S.lastMsg.don || 0) > h.at || (S.lastMsg.lt || 0) > h.at;
     return false;
   }
+  // hộp CẢNH BÁO “HỒ SƠ CHƯA ĐÁP ỨNG LIÊN KẾT 3 KHỐI LIÊN KẾT KHÔNG GIAN – Thửa đất … không tồn tại dữ liệu không gian. Bạn có thật sự muốn
+  // tiếp tục thực hiện kết ISO hay không?” (ĐỒNG Ý / KHÔNG) – bạn yêu cầu 24/11 (ảnh trang thật ở Kết ISO): “đồng ý và làm các bước bình thường”
+  const LK3_DIALOGS = [{ re: 'lien ket 3 khoi.*tiep tuc', btn: ['Đồng ý', 'Có', 'OK'] }];
   // hộp hỏi của trang tiện ích được tự trả lời khi bật Tự động hết (chữ đã bỏ dấu)
   const AUTO_DIALOGS = [
     { re: 'cap nhat (lai )?dia chi tai san', btn: 'Đồng ý' },
     { re: 'giay to tuy than da ton tai', btn: 'Đồng ý' },
+    ...LK3_DIALOGS,
   ];
   const DON_WIN_SRC = '^nhap don dang ky\\b';
   // hộp xác nhận ngay sau khi tiện ích bấm “Lưu hồ sơ” (VBDLIS thật, ảnh 22/11):
@@ -3291,10 +3308,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           ' (bấm “■ Dừng” để thôi)';
         cur.wait(waitMsg);
         // 🤖 chạy liên tục (24/11): lần chạy tự động không tự Lưu được (không phải vì trang đang hỏi) → không đứng chờ bạn: TB này tạm hoãn, làm TB khác
-        if (!autoSaved && fromAuto && AUTO() && !/^trang dang hoi/.test(norm(noAuto)) && !(await act('dialogState')).some((x) => x.open))
+        if (!autoSaved && fromAuto && AUTO() && !/^trang dang hoi/.test(norm(noAuto)) && !(await act('dialogState')).some((x) => x.open)) {
+          delete S.done[pendKey]; // 🤖 sẽ đóng cửa sổ này không lưu – lần sau mở lại mục này như mới
+          saveUi();
           throw new Error(
             `không tự Lưu được ${it.kind === 'chu' ? 'cửa sổ chủ' : 'cửa sổ thửa'} (${noAuto || (gapsHere ? 'dữ liệu TB còn thiếu' : bad.length ? 'có ô chưa điền được' : 'mẫu tab Trường bỏ tích ô bắt buộc')}) – 🤖 không đứng chờ bạn`
           );
+        }
         if (!autoSaved) needYou(`Bấm Lưu – ${it.label}`);
         // chờ cửa sổ lưu xong: trang có thể hỏi (vd. “Giấy tờ tùy thân đã tồn tại…”) → BẠN trả lời; xong thì về lại cửa sổ đơn
         const t0 = Date.now();
@@ -3340,6 +3360,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           } else if (autoSaved && !d && !stuck && Date.now() - t0 > 8000) {
             // đã tự bấm Lưu mà cửa sổ chủ vẫn mở (trang báo thiếu ô?) → không bấm lần 2, nhờ bạn xem
             stuck = true;
+            // 🤖 chạy liên tục (soát 24/11): không đứng chờ bạn 20 phút – TB này tạm hoãn, 🤖 đóng cửa sổ (không lưu), làm TB khác
+            if (fromAuto && AUTO()) {
+              delete S.done[pendKey];
+              saveUi();
+              throw new Error(`đã bấm “Lưu” nhưng cửa sổ ${it.kind === 'chu' ? 'chủ' : 'thửa'} chưa đóng (trang báo lỗi / thiếu ô?) – 🤖 không đứng chờ bạn`);
+            }
             if (tonTai) {
               // đã trả lời hộp “thửa đã tồn tại” mà cửa sổ thửa còn mở → nhờ bạn đóng, KHÔNG bảo bấm Lưu thửa đã tồn tại
               cur.wait(`trang báo “${tonTai.text}” – đã bấm “${tonTai.btn}”, cửa sổ thửa vẫn mở – bạn bấm Đóng / Hủy bỏ (không bấm Lưu)`);
@@ -3448,6 +3474,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           });
           show();
         }
+        if (why && fromAuto) throw new Error(`${why} – 🤖 không bấm “Lưu thông tin đăng ký”, không đứng chờ bạn`); // chạy liên tục (soát 24/11)
         if (why) {
           cur = step('Tự động hết: dừng trước “Lưu thông tin đăng ký”');
           cur.wait(`${why} – bạn kiểm tra rồi tự bấm “Lưu thông tin đăng ký”, “Hoàn tất”`);
@@ -3606,7 +3633,6 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const m = tbOfSo(so);
       let x = m.list.length === 1 ? m.list[0] : null;
       if (!x && !so && sure && tb) x = tb;
-      if (x) tbKnown = true;
       if (!x && !so) {
         log.push({ icon: '•', cls: 'muted', html: esc(`Để báo lỗi (gửi người hỗ trợ): ${listDiag()}`) });
         show();
@@ -3626,6 +3652,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const want = x.nguoiNop && x.nguoiNop.hoTen;
       if (nn && want && normVal(nn) !== normVal(want))
         throw ask(`hồ sơ đang mở có người nộp “${nn}”, khác TB ${x.tb} (“${want}”) – tiện ích không xử lý`, '');
+      tbKnown = true; // (soát 24/11) chỉ khi đã kiểm xong người nộp – lỗi trước đó không tạm hoãn nhầm TB đang chọn
       return { x, so: so || x.soBienNhan || '' };
     };
     // đã bấm nút chuyển / trả (k) trong 30 phút mà chưa xác nhận
@@ -3779,6 +3806,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (l.length === 1) {
           kqTb = l[0];
           stage3 = true;
+          tbKnown = true; // hồ sơ đọc được số biên nhận đúng 1 TB
           if (l[0] !== tb) setTb(l[0]);
           // Quy trình 5 tác vụ = lãnh đạo đã trả về → ghi mốc kq NGAY (trước đây chỉ ghi lúc chuyển bước Trả kết quả: dừng giữa chừng – chưa có file
           // quét, chờ bạn Kết ISO… – thì TB chưa có dấu, sau này bạn tự trả xong mà tìm không thấy hồ sơ thì không tích ✓ được)
@@ -3808,24 +3836,29 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         step('Đóng Quy trình – làm TB khác').ok(`hồ sơ chờ bạn ${why} – 🤖 đóng Quy trình (không lưu gì), 10 phút sau mới mở lại hồ sơ này`);
         tailOk = '';
         await sleep(900);
-        if (onListPage()) return;
+        if (onListPage()) return true;
         const nav = navXuLyCongViec() || listUrlLink();
-        if (!nav) return;
+        if (!nav) return true;
         cur = step('Về Danh sách hồ sơ thụ lý – TB khác');
         await goAndWait(nav, 'Xử lý công việc', () => onListPage() && !qtModal(), listUrlLink());
         cur.ok();
+        return true;
       };
+      await loadScanQ(); // hàng chờ file quét mới nhất (xét file CỦA hồ sơ này)
+      const scanOk = !!kqTb && hasScanFor(tbPairs(kqTb));
       const r23 = q.rows.filter((r) => ['pl', 'lk'].includes(qtKindOf(r)));
       if (r23.some((r) => !r.chk.checked)) {
         // TB tạm hoãn (vd. trang đã báo không cập nhật được dữ liệu pháp lý) → không làm tác vụ 2–3 – nút “Bỏ tạm hoãn”
         if (kqTb && (S.stage[String(kqTb.tb)] || {}).hoan)
           throw ask(`TB ${kqTb.tb} đang tạm hoãn – tiện ích không làm tác vụ 2–3`, actBtn('unHoan', kqTb.tb, `Bỏ tạm hoãn, chạy TB ${kqTb.tb}`));
+        // (soát 24/11) chỉ còn Lưu kho mà hàng chờ chưa có file quét CỦA hồ sơ này → 🤖 đóng Quy trình (không mở Lưu kho), làm TB khác
+        if (!r23.some((r) => qtKindOf(r) === 'pl' && !r.chk.checked) && !scanOk && (await qtWaitClose('thả file quét (DDK + TBXN) của hồ sơ này vào bảng điền'))) return;
         await runQuyTrinh('quytrinh', qtCtx);
         const q2 = await qtSettled(alive);
         if (!q2 || q2.v !== 'kq') return;
         // tác vụ 2–3 chưa xong (vd. hàng chờ chưa có file quét) → giữ lời nhắc của bước đó (🤖: chưa có file quét → đóng Quy trình, làm TB khác)
         if (q2.rows.some((r) => ['pl', 'lk'].includes(qtKindOf(r)) && !r.chk.checked)) {
-          if (q2.rows.some((r) => qtKindOf(r) === 'lk' && !r.chk.checked) && !q2.rows.some((r) => qtKindOf(r) === 'pl' && !r.chk.checked) && !S.scanQ.length)
+          if (q2.rows.some((r) => qtKindOf(r) === 'lk' && !r.chk.checked) && !q2.rows.some((r) => qtKindOf(r) === 'pl' && !r.chk.checked) && !scanOk)
             await qtWaitClose('thả file quét (DDK + TBXN) vào bảng điền');
           return;
         }
@@ -3843,7 +3876,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           step('Kết ISO').skip(`còn tác vụ chưa tích “Đã xử lý”: ${other.map((r) => r.name).join(', ')} – tiện ích chưa Kết ISO`);
           tailOk = '<div class="hint">Bạn xem các tác vụ chưa tích “Đã xử lý”. Chỉ còn thiếu <b>Kết ISO</b> là 🤖 tự Kết ISO, chuyển bước “Trả kết quả” rồi Trả hồ sơ.</div>';
           tailNeed = '-';
-          if (other.every((r) => qtKindOf(r) === 'lk') && !S.scanQ.length) await qtWaitClose('thả file quét (DDK + TBXN) vào bảng điền');
+          if (other.every((r) => qtKindOf(r) === 'lk') && !scanOk) await qtWaitClose('thả file quét (DDK + TBXN) vào bảng điền');
           return;
         }
         step('Kết ISO').skip('chưa tích đủ “Đã xử lý” (Kết ISO bạn tự làm) – tích đủ 5 tác vụ là tiện ích tự chuyển bước Trả kết quả');
@@ -3917,6 +3950,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       let good = null;
       let closedAt = 0;
       let confirmed = 0;
+      let lk3 = 0; // đã bấm Đồng ý hộp cảnh báo “liên kết 3 khối” (24/11)
       for (;;) {
         stopIf();
         const ts = toastsSince(t0);
@@ -3928,10 +3962,22 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const dd = await dlgNow(ISO_DONE_DIALOGS, true);
         if (dd && dd.answered) good = good || { raw: dd.title || 'Kết ISO thành công' };
         else if (dd) {
+          // cảnh báo “hồ sơ chưa đáp ứng liên kết 3 khối liên kết không gian … tiếp tục thực hiện kết ISO?” → Đồng ý, làm tiếp (1 lần) – trước hộp
+          // xác nhận (hộp này cũng có chữ “bạn có thật sự muốn … thực hiện kết ISO”)
+          if (!lk3) {
+            const a = await dlgNow(LK3_DIALOGS, true);
+            if (a && a.answered) {
+              lk3 = 1;
+              continue;
+            }
+          }
           const canAsk = !confirmed && Date.now() - t0 < 15000 * slowK();
           const d = await dlgNow(canAsk ? ISO_DIALOGS : [], !canAsk);
           if (d && d.answered) confirmed++;
           else if (d) {
+            // hộp bạn đã dạy ở tab Trường → bấm theo mẫu (hộp LỖI đã dạy: bước này chưa xong – TB tạm hoãn)
+            const tl = canAsk ? null : await dlgNow([]);
+            if (tl && tl.answered) continue;
             needYou('Trang hỏi – bạn xem', 'bad');
             throw ask(`trang hỏi / báo “${(d.text || d.title || '').slice(0, 150)}” – tiện ích dừng`, redoBtn());
           }
@@ -4891,6 +4937,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       let good = null;
       let closedAt = 0;
       let confirmed = 0; // hộp “Bạn có chắc chắn muốn trả hồ sơ này?” – chỉ trả lời 1 lần
+      let traLk3 = 0; // đã bấm Đồng ý hộp cảnh báo “liên kết 3 khối” (24/11)
       let lastBusy = 0; // lúc gần nhất trang còn “Đang xử lý…”
       for (;;) {
         stopIf();
@@ -4906,10 +4953,21 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const dd = await dlgNow(TRA_DONE_DIALOGS, true);
         if (dd && dd.answered) good = good || { raw: dd.title || 'Trả hồ sơ thành công' };
         else if (dd) {
+          // cảnh báo “chưa đáp ứng liên kết 3 khối … tiếp tục thực hiện …?” → Đồng ý, làm tiếp (1 lần, bạn yêu cầu 24/11)
+          if (!traLk3) {
+            const a = await dlgNow(LK3_DIALOGS, true);
+            if (a && a.answered) {
+              traLk3 = 1;
+              continue;
+            }
+          }
           const canAsk = !confirmed && Date.now() - t0 < 15000 * slowK();
           const d = await dlgNow(canAsk ? TRA_DIALOGS : [], !canAsk);
           if (d && d.answered) confirmed++;
           else if (d) {
+            // hộp bạn đã dạy ở tab Trường → bấm theo mẫu (hộp LỖI đã dạy: bước này chưa xong – TB tạm hoãn)
+            const tl = canAsk ? null : await dlgNow([]);
+            if (tl && tl.answered) continue;
             needYou('Trang hỏi – bạn xem', 'bad');
             if (ERR_TOAST.test(norm(`${d.title || ''} ${d.text || ''}`)))
               await setMark(tb.tb, 'fwd', { ...((S.stage[String(tb.tb)] || {}).fwd || { k: 'tra', at: t0 }), bad: 'err' });
@@ -5018,15 +5076,31 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     // về Tiếp nhận hồ sơ trống) – 🤖 làm TB khác
     const cvGoBack = async () => {
       const lv = S.cvLeave || {};
-      S.cvLeave = null;
       title = `🤖 Chạy liên tục – rời TB ${lv.tb || ''} (đã tạm hoãn), làm TB khác`;
       cur = step('Đóng cửa sổ của TB vừa tạm hoãn (không lưu)');
+      // (soát 24/11) hồ sơ đang mở phải là của TB vừa tạm hoãn (đọc được số) – không thì không đóng gì
+      try {
+        const own = await openDossierTbs();
+        if (own.length === 1 && String(own[0].tb) !== String(lv.tb)) {
+          S.cvLeave = null;
+          cur.skip(`hồ sơ đang mở là của TB ${own[0].tb}, không phải TB ${lv.tb} – không đóng gì`);
+          tailNeed = '-';
+          return;
+        }
+      } catch (e) {}
       const shut = [];
       for (let i = 0; i < 10; i++) {
         stopIf();
         if (pageDialog() || (await act('dialogState')).some((x) => x.open)) {
+          // hộp đã biết / bạn đã dạy → bấm theo mẫu rồi đóng tiếp; hộp chưa dạy → chờ bạn (bạn trả lời xong 🤖 đóng tiếp)
+          const a = (await act('answerDialog', { rules: AUTO_DIALOGS })).find((x) => x.ok);
+          if (a) {
+            await sleep(900);
+            continue;
+          }
+          S.cvLeave = { ...lv, at: Date.now() - 20000, now: 1 };
           needYou('Trang đang hỏi – bạn xem', 'bad');
-          throw ask('trang đang hiện hộp hỏi / thông báo – tiện ích không tự đóng tiếp; bạn trả lời hộp đó (hoặc dạy hộp này ở tab Trường), 🤖 làm tiếp', '');
+          throw ask('trang đang hiện hộp hỏi / thông báo chưa dạy – tiện ích chưa đóng tiếp; bạn trả lời hộp đó (hoặc dạy hộp này ở tab Trường), 🤖 đóng tiếp', '');
         }
         let tp = await topNow();
         if (!tp && shut.length) {
@@ -5036,21 +5110,43 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         }
         if (!tp) break;
         const key = modalKey(tp);
-        if (!CV_LEAVE_WIN.some((re) => re.test(key))) throw ask(`đang mở ${tp.name} – tiện ích không tự đóng cửa sổ này; bạn đóng rồi 🤖 làm tiếp`, '');
+        if (!CV_LEAVE_WIN.some((re) => re.test(key))) {
+          S.cvLeave = null;
+          throw ask(`đang mở ${tp.name} – tiện ích không tự đóng cửa sổ này; bạn đóng rồi 🤖 làm tiếp`, '');
+        }
+        if (Date.now() - USER.at < 2000) {
+          // bạn vừa bấm / gõ trên trang → không đóng (bạn đang làm)
+          S.cvLeave = null;
+          cur.skip('bạn đang thao tác trên trang – tiện ích không đóng cửa sổ');
+          tailNeed = '-';
+          return;
+        }
         const r = (await act('closeTop', { win: '^' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') })).find((y) => y.ok);
-        if (!r) throw ask(`không đóng được ${tp.name} – bạn đóng giúp rồi 🤖 làm tiếp`, '');
+        if (!r) {
+          S.cvLeave = null;
+          throw ask(`không đóng được ${tp.name} – bạn đóng giúp rồi 🤖 làm tiếp`, '');
+        }
         shut.push(tp.name);
         await sleep(1200);
       }
       cur.ok(shut.length ? `đã đóng ${shut.join(', ')}` : 'không còn cửa sổ mở');
       tailNeed = '-';
+      S.cvLeave = null;
       if (onListPage()) return; // ở danh sách → 🤖 tìm tiếp TB khác
       const recv = !!btnLuuHoSo() && !btnXuLyHoSo() && S.opts.tuSangTB !== false && !!nextTodo(true);
-      const nav = recv ? navTiepNhan() : navXuLyCongViec() || listUrlLink();
-      if (!nav) throw new Error(`không thấy mục “${recv ? 'Tiếp nhận hồ sơ' : 'Xử lý công việc'}” ở thanh bên trái – bạn mở trang đó, 🤖 làm tiếp`);
-      cur = step(recv ? 'Về màn hình Tiếp nhận hồ sơ (trống) – TB sau' : 'Về Danh sách hồ sơ thụ lý – TB khác');
-      if (recv) await goAndWait(nav, 'Tiếp nhận hồ sơ', null);
-      else await goAndWait(nav, 'Xử lý công việc', () => onListPage() && !qtModal(), listUrlLink());
+      // màn hình Tiếp nhận: thanh trái có thể không có đường link thật → về danh sách (từ đó 🤖 sang Tiếp nhận); không có gì thì tải lại trang
+      const nav = recv ? navTiepNhan() || navXuLyCongViec() || listUrlLink() : navXuLyCongViec() || listUrlLink();
+      if (!nav) {
+        if (btnLuuHoSo() && !btnXuLyHoSo()) {
+          cur = step('Tải lại màn hình Tiếp nhận hồ sơ (trống) – TB sau');
+          cur.ok();
+          setTimeout(() => location.reload(), 1200);
+          return;
+        }
+        throw new Error('không thấy mục “Xử lý công việc” ở thanh bên trái – bạn mở Danh sách hồ sơ thụ lý, 🤖 làm tiếp');
+      }
+      cur = step('Về Danh sách hồ sơ thụ lý / Tiếp nhận – TB khác');
+      await goAndWait(nav, 'Xử lý công việc', () => onListPage() && !qtModal(), listUrlLink());
       cur.ok();
       tailNeed = '-';
     };
@@ -6142,10 +6238,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             ' (bấm “■ Dừng” để thôi)'
         );
         // 🤖 chạy liên tục (24/11): lần chạy tự động không tự Lưu được thửa (không phải vì trang đang hỏi) → không đứng chờ bạn: TB này tạm hoãn
-        if (!autoSavedT && fromAuto && AUTO() && !/^trang dang hoi/.test(norm(noAutoT)) && !(await act('dialogState')).some((x) => x.open))
+        if (!autoSavedT && fromAuto && AUTO() && !/^trang dang hoi/.test(norm(noAutoT)) && !(await act('dialogState')).some((x) => x.open)) {
+          delete S.done[pendKey]; // 🤖 sẽ đóng cửa sổ này không lưu – lần sau mở lại thửa này như mới
+          saveUi();
           throw new Error(
             `không tự Lưu được cửa sổ thửa ${t.soThua}/${t.soTo} (${noAutoT || (bad.length ? 'có ô chưa điền được' : skipT.length ? 'mẫu tab Trường bỏ tích ô bắt buộc' : 'chưa đủ điều kiện')}) – 🤖 không đứng chờ bạn`
           );
+        }
         if (!autoSavedT) needYou(`Bấm Lưu – thửa ${t.soThua}/${t.soTo}`);
         const t0 = Date.now();
         let stuckT = false;
@@ -6176,6 +6275,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           if (autoSavedT && !stuckT && !tonAskT && Date.now() - t0 > 8000) {
             // đã tự bấm Lưu mà cửa sổ thửa vẫn mở (trang báo lỗi / thiếu ô?) → không bấm lần 2, nhờ bạn xem
             stuckT = true;
+            // 🤖 chạy liên tục (soát 24/11): không đứng chờ bạn 20 phút – TB này tạm hoãn, 🤖 đóng cửa sổ (không lưu), làm TB khác
+            if (fromAuto && AUTO()) {
+              delete S.done[pendKey];
+              saveUi();
+              throw new Error(`đã bấm “Lưu” nhưng cửa sổ thửa ${t.soThua}/${t.soTo} chưa đóng (trang báo lỗi / thiếu ô?) – 🤖 không đứng chờ bạn`);
+            }
             if (tonTaiT) {
               // đã trả lời hộp “thửa đã tồn tại” mà cửa sổ thửa còn mở → nhờ bạn đóng, KHÔNG bảo bấm Lưu thửa đã tồn tại
               cur.wait(`trang báo “${tonTaiT.text}” – đã bấm “${tonTaiT.btn}”, cửa sổ thửa vẫn mở – bạn bấm Hủy bỏ / Đóng (không bấm Lưu)`);
@@ -6464,7 +6569,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         // 🤖 chạy liên tục (bạn yêu cầu 24/11): lần chạy do 🤖 tự bắt đầu vướng ở MỘT TB đã biết chắc – không phải popup / hộp hỏi chưa dạy đang
         // hiện, không phải lỗi chung, không phải do bạn → ⏸ tạm hoãn TB đó (lý do chung), không kêu; 20 giây sau 🤖 đóng cửa sổ của TB đó, làm TB khác
         let ns = false;
-        if (fromAuto && AUTO() && !isLd() && !tplSig && tb && (tbKnown || stage3) && !S.stopReq) {
+        if (fromAuto && AUTO() && !isLd() && !tplSig && tb && tbKnown && !S.stopReq && !(e && e.actHtml)) {
           const mn = norm(m);
           ns = !NS_USER.test(mn) && !NS_GLOBAL.test(mn) && !pageDialog();
           if (ns)
@@ -6477,8 +6582,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (cur && (cur.l.icon === '⏳' || cur.l.icon === '⏸')) cur.bad(m);
         else log.push({ icon: '✗', cls: 'bad', html: esc(m) });
         if (ns) {
-          markStage(tb.tb, 'hoan', 'auto', { lyDo: nsReason(cur) });
-          S.nsRun = (S.nsRun || 0) + 1;
+          // TB đã tạm hoãn từ trước (vd. lỗi pháp lý / chưa ký số đã ghi lý do riêng) → giữ lý do đó, không đếm thêm
+          if (!(S.stage[String(tb.tb)] || {}).hoan) {
+            markStage(tb.tb, 'hoan', 'auto', { lyDo: nsReason(cur) });
+            S.nsRun = (S.nsRun || 0) + 1;
+          }
           if (fromAuto) S.autoFail.add(fromAuto);
           safeRemove('tbGoList');
           if (S.nsRun >= NS_MAX) {
@@ -7107,6 +7215,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       S.autoSig = '';
       S.autoFail.clear();
       dropHold();
+      S.cvLeave = null;
       S.sweepSeen = {};
       saveSweepSeen();
       roundReset();
@@ -7130,6 +7239,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       return;
     }
     S.opts = { ...S.opts, tuDong: false };
+    S.cvLeave = null;
     if (S.running) S.stopReq = true; // đang chạy → dừng luôn
     setStatus('🤖 Tự động hết: TẮT – tiện ích không tự bấm Lưu hồ sơ / Lưu thông tin đăng ký / Hoàn tất / Chuyển tiếp / Trả hồ sơ nữa.');
     safeSet({ tbOpts: S.opts });
@@ -8550,6 +8660,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   //  - tên file đúng đủ bộ thửa → lấy file đó (các file khác tên mà cùng bộ = bản trùng);
   //  - tên dài bị chia (quy định 25.10): vài file cùng loại, không trùng thửa nhau, gộp lại vừa đủ bộ → lấy 1 file, các phần kia là bản trùng;
   //  - chỉ khớp một phần (vd. thửa có ở cả TB khác) → KHÔNG lấy
+  const hasScanFor = (pairs) => {
+    const p = scanPick(pairs);
+    return !!(p.don && p.tbxn) && !p.conflict.length;
+  };
   function scanPick(pairs, q = S.scanQ) {
     const want = uniq(pairs);
     const out = { don: null, tbxn: null, extra: [], partial: [], conflict: [] };
@@ -8779,18 +8893,29 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     try {
       const btn = rowNow().upBtn;
       if (btn && shownEl(btn)) clickPage(btn); // nút “Tải lên” của dòng (không phải nút lưu)
-      let took = await waitUntil(() => !stash.isConnected || rowNow().uploaded(), 5000, alive);
+      const kyErr = () => {
+        const kd = kySoDlg();
+        if (!kd) return;
+        const e = new Error('trang báo tập tin chưa được ký số');
+        e.kySoDlg = kd;
+        throw e;
+      };
+      let took = await waitUntil(() => !stash.isConnected || rowNow().uploaded() || !!kySoDlg(), 5000, alive);
+      kyErr();
       if (!took) {
         ringed = rowNow().upBtn;
         ringScan(ringed, true);
         c.wait('trang chưa nhận file: bạn bấm “Tải lên” ở dòng tô vàng – file tự vào, không phải chọn (hộp chọn file vẫn mở ra thì chọn đúng file này) · “■ Dừng” để thôi');
         needYou('Bấm “Tải lên”');
-        took = await waitUntil(() => !stash.isConnected || rowNow().uploaded(), WAIT_MAX_MS, alive);
+        took = await waitUntil(() => !stash.isConnected || rowNow().uploaded() || !!kySoDlg(), WAIT_MAX_MS, alive);
         stopNeed();
+        kyErr();
         if (!took) throw new Error('chờ bấm “Tải lên” quá 20 phút – đã dừng');
       }
       c.wait('trang đang tải lên…');
-      if (!(await waitUntil(() => rowNow().uploaded(), 120000, alive)))
+      const up = await waitUntil(() => rowNow().uploaded() || !!kySoDlg(), 120000, alive);
+      kyErr();
+      if (!up)
         throw new Error('2 phút chưa thấy tải xong – xem lại dòng này trên trang (Xem tập tin), rồi bấm “▶ Chạy cả TB” lại');
     } finally {
       stash.remove(); // file tạm không giữ lại
@@ -8868,6 +8993,24 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     if (ctx.known && ctx.known() && tbx && cur0 && tbx !== cur0)
       throw new Error(`Mã đơn của Lưu kho là của TB ${tbx.tb}, khác hồ sơ đang mở (TB ${cur0.tb}) – tiện ích không lưu kho cho hồ sơ này`);
     if (tbx && cur0 !== tbx) ctx.setTb(tbx);
+    // TB chắc chắn của hồ sơ (đơn khớp đúng TB, hoặc TB lần chạy đã biết chắc mà Mã đơn không chỉ TB khác) – chỉ TB này mới được tạm hoãn
+    const hx = tbx || (ctx.known && ctx.known() && cur0 && !tbs.length ? cur0 : null);
+    // hộp “chưa được ký số” (24/11): hộp chỉ báo + biết chắc TB → Đồng ý, Thoát, ⏸ tạm hoãn (kySoHoan); không thì dừng chờ bạn (không chép chữ hộp)
+    const kySoBox = async (d) => {
+      if (hx && plSole(d)) {
+        // file chưa ký số không dùng được nữa → bỏ khỏi hàng chờ (bạn thả lại file đã ký số)
+        try {
+          const ids = [pick.don, pick.tbxn, ...pick.extra].filter(Boolean).map((x) => x.id);
+          if (ids.length) await unqueueScan(ids);
+        } catch (e) {}
+        await kySoHoan(d, ctx, hx, c);
+      }
+      needYou('Trang báo – bạn xem', 'bad');
+      throw ask(
+        `trang báo tập tin chưa được ký số – ${hx ? 'hộp có câu hỏi / nhiều nút' : 'tiện ích chưa biết chắc hồ sơ này là TB nào'}: tiện ích không tự bấm, không tạm hoãn – bạn tự xử lý`,
+        ''
+      );
+    };
     ctx.setTitle(`Lưu kho hồ sơ quét${tbx ? ` – TB ${tbx.tb}` : ''}${ma ? ` – ${ma}` : ''}`);
     c.ok(
       `${ma || pairs.join(', ')}` +
@@ -8968,7 +9111,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       c.ok(`Loại giấy tờ, Mô tả, Tên giấy tờ = “${SCAN_KIND[kind]}”`);
     }
     // 6. tải lên từng file – dòng đã có tập tin thì bỏ qua; file nào đính kèm xong thì xóa file đó (và bản trùng của nó) khỏi hàng chờ
+    //    (🤖 tự bấm Cập nhật: xóa khi trang LƯU XONG – dừng giữa chừng / 🤖 đóng cửa sổ thì file vẫn còn để làm lại)
     let hooked = false;
+    const upIds = [];
     for (const kind of ['don', 'tbxn']) {
       stopIf();
       const item = pick[kind];
@@ -8990,9 +9135,19 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
       const file = await scanFileOf(item);
       if (!file) throw new Error(`không đọc được nội dung file ${item.name} trong hàng chờ – thả lại file đó rồi bấm lại`);
-      await uploadScanRow(row, file, c, stopIf);
-      await unqueueScan([item.id, ...extraIds]);
-      c.ok(`→ dòng “${SCAN_KIND[kind]}” – đã tải lên, đã xóa khỏi hàng chờ`);
+      try {
+        await uploadScanRow(row, file, c, stopIf);
+      } catch (e) {
+        if (e && e.kySoDlg) await kySoBox(e.kySoDlg);
+        throw e;
+      }
+      if (optOn('tuQT')) {
+        upIds.push(item.id, ...extraIds);
+        c.ok(`→ dòng “${SCAN_KIND[kind]}” – đã tải lên (xóa khỏi hàng chờ khi trang lưu xong)`);
+      } else {
+        await unqueueScan([item.id, ...extraIds]);
+        c.ok(`→ dòng “${SCAN_KIND[kind]}” – đã tải lên, đã xóa khỏi hàng chờ`);
+      }
     }
     // 7. “Cập nhật”
     c = step('Nút “Cập nhật”');
@@ -9017,6 +9172,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         stopIf();
         const d = pageDialog();
         if (d) {
+          if (kySoDlg()) await kySoBox(d); // tập tin chưa được ký số (24/11)
+          const tl = AUTO() ? (await act('answerDialog', { rules: [] })).find((x) => x.ok) : null; // hộp bạn đã dạy
+          if (tl) {
+            if (tl.learned && tl.err) throw taughtErr(tl);
+            await sleep(900);
+            continue;
+          }
           needYou('Trang đang hỏi – bạn xem', 'bad');
           throw ask(`sau khi bấm “Cập nhật”, trang báo: “${d.text.slice(0, 200)}” – tiện ích dừng, bạn tự xử lý`, '');
         }
@@ -9030,6 +9192,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (Date.now() - t0 > 90000) throw new Error('90 giây chưa thấy hồ sơ quét được lưu (cửa sổ Lưu kho chưa mở lại có đủ 2 tập tin) – xem lại trang');
         await sleep(500);
       }
+      if (upIds.length) await unqueueScan(upIds); // trang đã lưu hồ sơ quét → bỏ file đã đính kèm khỏi hàng chờ
       if (tbx) markStage(tbx.tb, 'quet', 'auto');
       const xong = !!tbx && stageOf(tbx) === 'xong';
       c.ok(
@@ -9226,6 +9389,68 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     e.hoanSkip = true;
     throw e;
   }
+  // hộp “Tập tin … chưa được ký số! Vui lòng ký số tập tin trước khi đính kèm!” ở cửa sổ Hồ sơ quét (bạn yêu cầu 24/11, ảnh trang thật):
+  // bấm Đồng ý → Thoát cửa sổ Hồ sơ quét (không lưu) → ⏸ tạm hoãn TB, lý do là lỗi (chữ chung: loại tập tin DDK / TBXN – không chép tên tập tin)
+  // → 🤖 đóng nốt cửa sổ (Lưu kho, Quy trình), về danh sách làm TB khác. Hộp có câu hỏi / nhiều nút, hoặc chưa biết chắc TB → dừng chờ bạn
+  const KY_SO = /chua duoc ky so|ky so tap tin/;
+  const kySoDlg = () => {
+    const d = pageDialog();
+    return d && KY_SO.test(norm(`${d.title || ''} ${d.text || ''}`)) ? d : null;
+  };
+  async function kySoHoan(d, ctx, x, c) {
+    const t = norm(`${d.title || ''} ${d.text || ''}`);
+    const which = /\.ddk\b/.test(t) ? 'DDK (đơn đăng ký)' : /tbxn/.test(t) ? 'TBXN' : '';
+    const lyDo1 = `Lỗi Lưu kho hồ sơ quét: tập tin ${which ? which + ' ' : ''}chưa được ký số – ký số tập tin, thả lại file rồi bỏ tạm hoãn để 🤖 làm lại`;
+    const id = String(x.tb);
+    const old = ((S.stage[id] || {}).hoan || {}).lyDo || '';
+    // ghi tạm hoãn TRƯỚC mọi cú bấm (■ Dừng / trang tải lại giữa chừng vẫn còn dấu)
+    markStage(id, 'hoan', 'auto', { lyDo: old && !old.includes('chưa được ký số') ? `${old} · ${lyDo1}` : lyDo1 });
+    try {
+      await stageChain;
+    } catch (e) {}
+    c.wait(`trang báo tập tin ${which ? which + ' ' : ''}chưa được ký số – đã tạm hoãn TB ${x.tb}; tiện ích bấm “Đồng ý”, “Thoát”`);
+    const alive = () => {
+      ctx.stopIf();
+      return true;
+    };
+    let clicked = false;
+    let gone = false;
+    let out = false;
+    try {
+      const ok = d.buttons.find((b) => b.isConnected && /^(dong y|ok|dong)$/.test(norm(b.value || b.textContent || '')));
+      if (ok) {
+        ok.click();
+        clicked = true;
+      }
+      gone = await waitUntil(() => !pageDialog(), 5000, alive);
+      if (gone) {
+        const top = (await act('modalState')).find((m) => m.open);
+        const k = top ? modalKey(top) : '';
+        if (top && /^(thong tin )?ho so quet\b/.test(k) && (await act('closeTop', { win: '^' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') })).some((y) => y.ok))
+          out = await waitUntil(() => scanScreen() !== 'hsq' && scanScreen() !== 'tthsq', 6000, alive);
+        if (!out && scanScreen() === 'hsq') {
+          // dự phòng: cửa sổ Hồ sơ quét không được nhận là cửa sổ trên cùng (vd. không có ô nhập) → bấm thẳng nút “Thoát” (đúng MỘT nút) của cửa sổ đó
+          const own = visIn('#btnCapNhatHoSoQuet') || visIn('#tbDanhSachFile') || visIn('#btnAddFileHoSoQuet');
+          const win = own && own.closest('.modal, [role="dialog"]');
+          const bt = win ? [...win.querySelectorAll('button, a, .btn')].filter((b) => shownEl(b) && /^(thoat|dong)$/.test(btnText(b))) : [];
+          if (bt.length === 1) {
+            clickPage(bt[0]);
+            out = await waitUntil(() => scanScreen() !== 'hsq' && scanScreen() !== 'tthsq', 6000, alive);
+          }
+        }
+      }
+    } catch (e) {
+      if (S.stopReq) throw e; // ■ Dừng – TB đã ghi tạm hoãn
+    }
+    const did = [clicked && gone ? 'đã bấm “Đồng ý”' : '', out ? 'đã bấm “Thoát” cửa sổ Hồ sơ quét' : ''].filter(Boolean).join(', ');
+    const head = `trang báo tập tin ${which ? which + ' ' : ''}chưa được ký số → ⏸ đã tạm hoãn TB ${x.tb}${did ? ', ' + did : ''}`;
+    if (!gone || !out) throw ask(`${head} – ${!gone ? 'hộp báo chưa đóng' : 'cửa sổ Hồ sơ quét chưa đóng'}: bạn đóng giúp`, '');
+    if (AUTO()) S.cvLeave = { tb: id, at: Date.now(), now: 1 }; // 🤖: đóng nốt Lưu kho / Quy trình (không chờ 20 giây), về danh sách làm TB khác
+    setEvt(`⏸ TB ${esc(x.tb)} – ${esc(whoOf(x))}: tập tin ${esc(which)} chưa được ký số → ${esc(did)}, đã <b>tạm hoãn</b> (lý do: lỗi)${AUTO() ? ' – 🤖 đóng nốt cửa sổ, làm TB khác' : ''}.`, true);
+    const e = new Error(`${head}${AUTO() ? ' – 🤖 đóng nốt cửa sổ, làm TB khác' : ' – chọn TB khác rồi bấm ▶'}`);
+    e.hoanSkip = true;
+    throw e;
+  }
   // Tác vụ “Cập nhật dữ liệu pháp lý” (như bạn hướng dẫn 22/11): Xử lý tác vụ → tab thứ 3 “Thông tin sau biến động” (Thông tin giấy SBD)
   // → bấm dòng “Đơn đăng ký” (chuyển xanh) → Thực hiện → hộp hỏi xác nhận: Đồng ý (bạn cho phép) → chờ “Cập nhật dữ liệu pháp lý thành công”
   // → tích “Đã xử lý”. Hộp hỏi lạ / báo lỗi → dừng chờ bạn.
@@ -9342,6 +9567,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           yes.click();
           answered = true;
         } else if (!answered || bad) {
+          const tl = AUTO() ? (await act('answerDialog', { rules: [] })).find((x) => x.ok) : null; // hộp bạn đã dạy ở tab Trường
+          if (tl) {
+            if (tl.learned && tl.err) throw taughtErr(tl);
+            await sleep(900);
+            continue;
+          }
           needYou('Trang đang hỏi – bạn xem', 'bad');
           throw ask(`sau khi bấm “Thực hiện”, trang báo: “${d.text.slice(0, 200)}” – tiện ích dừng, bạn tự xử lý rồi bấm “▶ Chạy cả TB” lại`, '');
         }
@@ -9389,9 +9620,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       ctx.setTail('<div class="hint">Xong tác vụ 2–3. Bạn làm <b>Kết ISO</b> và tích “Đã xử lý”; tích đủ 5 tác vụ là 🤖 Tự động hết tự Chuyển tiếp bước “Trả kết quả” rồi Trả hồ sơ.</div>', '-');
       return;
     }
-    if (!(await loadScanQ()).length) {
+    const qq = await loadScanQ();
+    const ktb = ctx.known && ctx.known() ? ctx.curTb() : null;
+    // hàng chờ trống, hoặc có file của hồ sơ KHÁC mà chưa có file của hồ sơ này (soát 24/11) → không mở Lưu kho
+    if (!qq.length || (ktb && !hasScanFor(tbPairs(ktb)))) {
       c = step('Tác vụ “Lưu kho hồ sơ quét”');
-      c.skip('hàng chờ chưa có file quét – thả file DDK + TBXN vào bảng điền rồi bấm “▶ Chạy cả TB” lại');
+      c.skip(`hàng chờ chưa có file quét${qq.length ? ' của hồ sơ này' : ''} – thả file DDK + TBXN vào bảng điền rồi bấm “▶ Chạy cả TB” lại`);
       ctx.setTail('<div class="hint">Tác vụ Lưu kho hồ sơ quét chưa làm: thả file DDK + TBXN của hồ sơ vào bảng điền rồi bấm “▶ Chạy cả TB” lại.</div>', '-');
       return;
     }
@@ -11532,9 +11766,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     });
     return [head, ...rows].map((r) => r.map((c) => String(c ?? '').replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\r\n');
   }
-  function downloadTsv() {
-    // UTF-16 (có BOM) + dấu Tab: Excel mở thẳng, đúng tiếng Việt, tách đúng cột với mọi cài đặt vùng
-    const text = progressTsv();
+  // UTF-16 (có BOM) + dấu Tab: Excel mở thẳng, đúng tiếng Việt, tách đúng cột với mọi cài đặt vùng
+  function utf16Tsv(text) {
     const buf = new Uint8Array(2 + text.length * 2);
     buf[0] = 0xff;
     buf[1] = 0xfe;
@@ -11543,7 +11776,64 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       buf[2 + 2 * i] = c & 255;
       buf[3 + 2 * i] = c >> 8;
     }
-    return saveFile(`tien-do-vbdlis-${stamp()}.csv`, new Blob([buf], { type: 'text/csv' }));
+    return new Blob([buf], { type: 'text/csv' });
+  }
+  function downloadTsv() {
+    return saveFile(`tien-do-vbdlis-${stamp()}.csv`, utf16Tsv(progressTsv()));
+  }
+  // ---------- TB LỖI (bạn yêu cầu 24/11: “khi chạy xong và soát lỗi 1 lượt xong thì xuất ra file excel các TB lỗi và tình trạng lỗi”) ----------
+  // lỗi của một TB: ⏸ tạm hoãn (lý do), 🤖 dừng ở TB đó, đã bấm mà chưa xác nhận (Lưu hồ sơ / Hoàn tất / chuyển tiếp có lỗi), lệch ô,
+  // số biên nhận đã dùng, kiểm lại TB ✓ còn hồ sơ, kiểm lại 3 lần chưa chắc
+  function errInfo(x) {
+    const s = S.stage[String(x.tb)] || {};
+    const h = S.autoHold.get(String(x.tb));
+    const errs = [
+      s.hoan && `tạm hoãn: ${s.hoan.lyDo || 'không ghi lý do'}`,
+      h && h.kind === 'err' && '🤖 dừng ở TB này (lần chạy trước lỗi) – chờ bạn bấm ▶',
+      s.tnClick && !s.tn && 'đã bấm Lưu hồ sơ, chưa thấy “Lưu hồ sơ thành công” – kiểm tra trên VBDLIS',
+      s.htClick && !s.don && 'đã bấm Hoàn tất, chưa thấy “Lưu đơn đăng ký thành công” – kiểm tra đơn',
+      s.fwd && !s[s.fwd.k] && s.fwd.bad && `đã bấm ${FWD_LONG[s.fwd.k] || 'chuyển tiếp'} nhưng trang báo lỗi / chưa rõ – xem lại trên VBDLIS`,
+      s.lech ? `lệch ${s.lech} ô so với dữ liệu` : '',
+      s.daDung && !s.ld && !s.xong && 'số biên nhận đã được dùng cho hồ sơ khác',
+      s.sot && (s.sot.dup || s.sot.khac || s.sot.lai) && 'kiểm lại TB ✓: còn hồ sơ trong Danh sách hồ sơ thụ lý – bạn xem',
+      s.xong && s.chkN >= 3 && s.chk >= s.xong && 'kiểm lại 3 lần chưa chắc (danh sách chưa rõ)',
+    ].filter(Boolean);
+    return { s, errs };
+  }
+  function errRows() {
+    return S.data.map((x) => ({ x, ...errInfo(x) })).filter((r) => r.errs.length);
+  }
+  function errTsv(rows) {
+    const head = ['TB', 'Số biên nhận', 'Người nộp', 'Trạng thái', 'Lỗi / tình trạng', 'Tạm hoãn lúc'];
+    const body = rows.map((r) => [r.x.tb, r.x.soBienNhan || '', whoOf(r.x), STAGE_TEXT[showStage(r.x)], r.errs.join('; '), r.s.hoan ? fmtIso(r.s.hoan.at) : '']);
+    return [head, ...body].map((rr) => rr.map((c) => String(c ?? '').replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\r\n');
+  }
+  function downloadErrTsv(rows) {
+    return saveFile(`tb-loi-vbdlis-${stamp()}.csv`, utf16Tsv(errTsv(rows || errRows())));
+  }
+  // 🤖 tự xuất khi hết một lượt (tìm TB ◐ + kiểm TB ✓): chỉ khi danh sách TB lỗi khác lần xuất trước và cách lần trước ít nhất 10 phút (không tải
+  // file liên tục khi 🤖 chạy vòng)
+  const ERR_KEY = 'vbdlis-dien-nhanh-errexport';
+  function autoErrExport() {
+    const rows = errRows();
+    if (!rows.length) return '';
+    const sig = rows.map((r) => `${r.x.tb}:${r.errs.join('|')}`).join('#');
+    let last = null;
+    try {
+      last = JSON.parse(sessionStorage.getItem(ERR_KEY) || 'null');
+    } catch (e) {}
+    if (last && (last.sig === sig || Date.now() - (last.at || 0) < 10 * 60 * 1000)) return '';
+    let name = '';
+    try {
+      name = downloadErrTsv(rows);
+    } catch (e) {
+      return '';
+    }
+    try {
+      sessionStorage.setItem(ERR_KEY, JSON.stringify({ sig, at: Date.now() }));
+    } catch (e) {}
+    setEvt(`📄 Hết một lượt chạy + soát: đã xuất file Excel <b>${esc(name)}</b> – ${rows.length} TB lỗi và tình trạng lỗi (thư mục Tải xuống).`);
+    return name;
   }
   function selectTb(id) {
     if (S.running || !S.data.some((x) => String(x.tb) === String(id))) return false;
@@ -11636,7 +11926,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             )
             .join('') || '<tr><td colspan="9" class="muted">Không có TB nào.</td></tr>'
         }</table></div>
-        <div class="row"><button class="btn" id="pgCopy" title="Sao chép cả bảng – dán vào Excel là đúng cột">⧉ Sao chép bảng</button><button class="btn" id="pgCsv" title="Tải file mở bằng Excel">⬇ Tải file Excel</button></div>
+        <div class="row"><button class="btn" id="pgCopy" title="Sao chép cả bảng – dán vào Excel là đúng cột">⧉ Sao chép bảng</button><button class="btn" id="pgCsv" title="Tải file mở bằng Excel">⬇ Tải file Excel</button><button class="btn" id="pgErr" title="Chỉ các TB lỗi (tạm hoãn, 🤖 dừng, đã bấm mà chưa xác nhận, lệch ô…) và tình trạng lỗi – 🤖 cũng tự xuất khi hết một lượt chạy + soát">⬇ TB lỗi (Excel)</button></div>
         <div class="row"><button class="btn" id="pgBak" title="Lưu tiến độ ra file: số TB, giờ, trạng thái, thửa đã nhập / bỏ qua và lý do tạm hoãn bạn gõ (không có tên, số giấy tờ trong dữ liệu); kèm các mẫu tab Trường (tích, thứ tự nút, giá trị mẫu bạn đặt – đã lọc tên người trong dữ liệu TB, tên tài khoản, dãy số dài)">⬇ Sao lưu tiến độ</button><button class="btn" id="pgRes" title="Nạp file sao lưu tiến độ (.json – gộp với tiến độ hiện có), hoặc file Excel tiện ích xuất ra (⬇ Tải file Excel, sửa cột Trạng thái – .csv / .xlsx): xem trước rồi đổi theo Excel">⬆ Nạp tiến độ…</button><input type="file" id="pgFile" accept=".json,.csv,.txt,.tsv,.xlsx,application/json,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none"><span class="muted" style="font-size:11px">${bakAt ? `Sao lưu gần nhất: ${esc(fmtTime(bakAt))}` : 'Chưa sao lưu lần nào'}</span></div>
         <div class="hint">Bấm một dòng để chọn TB đó. <b>Đổi hàng loạt</b>: tích ô đầu dòng (Shift + bấm = chọn liền một đoạn; ô trên cùng = mọi TB đang hiện theo bộ lọc; hoặc gõ số TB / khoảng rồi bấm “Chọn”), chọn trạng thái rồi bấm <b>Đổi</b>. Tiện ích tự ghi giờ từng bước (tiếp nhận, nhập đơn, lưu kho…); trạng thái: ○ Chưa xong tới khi Thực thi chuyển lãnh đạo → ◐ Đã nhập nhưng chưa xong → ✓ Xong khi Trả hồ sơ xong (chưa trả xong vẫn là ◐); sai thì đổi ô Trạng thái của TB đó. Gỡ / cài lại tiện ích hay đổi máy thì tiến độ mất – nên <b>Sao lưu tiến độ</b> cuối mỗi ngày. <b>Nạp tiến độ</b> nhận file sao lưu (.json) hoặc file Excel tiện ích xuất ra (sửa cột Trạng thái, lưu .csv / .xlsx) – xem trước rồi mới đổi.</div>
         <div id="pgMsg" class="hint"></div>`;
@@ -11936,6 +12226,15 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           return msg('Không tải được file: ' + friendly(err), true);
         }
       }
+      if (b && b.id === 'pgErr') {
+        const er = errRows();
+        if (!er.length) return msg('Không có TB lỗi nào.', false);
+        try {
+          return msg(`Đã tải “${downloadErrTsv(er)}” – ${er.length} TB lỗi – vào thư mục Tải xuống.`);
+        } catch (err) {
+          return msg('Không tải được file: ' + friendly(err), true);
+        }
+      }
       if (b && b.id === 'pgBak') {
         try {
           const name = backupStage();
@@ -12088,9 +12387,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     // về danh sách / Tiếp nhận làm TB khác. Đang ở danh sách, không còn cửa sổ → làm tiếp như thường
     {
       const lv = S.cvLeave && Date.now() - S.cvLeave.at < 15 * 60 * 1000 ? S.cvLeave : null;
-      if (!lv) S.cvLeave = null;
+      // (soát 24/11) bạn đã bỏ tạm hoãn TB đó, hoặc đã bấm / gõ trên trang sau lúc tạm hoãn (bạn đang tự xử lý) → thôi rời
+      if (!lv || !(S.stage[String(lv.tb)] || {}).hoan || USER.at > lv.at + 1500) S.cvLeave = null;
       else if (!top && onListPage()) S.cvLeave = null;
-      else return Date.now() - lv.at < 20000 || Date.now() - USER.at < 20000 ? '' : `cvback:${lv.tb}:${lv.at}`;
+      else
+        return (!lv.now && Date.now() - lv.at < 20000) || Date.now() - USER.at < 20000 || Date.now() - (S.panelAt || 0) < 20000
+          ? ''
+          : `cvback:${lv.tb}:${lv.at}`;
     }
     const k = top ? modalKey(top) : '';
     if (top && DON_MODAL.test(k)) {
@@ -12154,7 +12457,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const nd = kindRow('nhap');
         if (nd && !nd.chk.checked) return '';
         const need2 = !kindRow('pl').chk.checked;
-        const need3 = !kindRow('lk').chk.checked && S.scanQ.length > 0;
+        const need3 = !kindRow('lk').chk.checked && hasScanFor(tbPairs(x)); // có file quét CỦA hồ sơ này (soát 24/11)
         const all = rows.every((r) => r.chk.checked); // bạn đã Kết ISO, tích đủ → chuyển bước Trả kết quả
         // bạn bật “Tự Kết ISO”: chỉ còn thiếu Kết ISO → 🤖 tự Kết ISO rồi chuyển bước Trả kết quả
         const left = rows.filter((r) => !r.chk.checked);
@@ -12227,6 +12530,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         S.holdNote = 'chkTab';
         setStatus(`🤖 Còn ${ckN} TB ✓ Xong chưa kiểm lại – thanh lọc của Danh sách hồ sơ thụ lý đang ở mục khác “Tất cả”: bấm “Tất cả” để 🤖 kiểm.`, true);
       }
+      // hết một lượt chạy + soát (bạn yêu cầu 24/11) → xuất file Excel các TB lỗi và tình trạng lỗi (khi danh sách lỗi đổi, cách lần trước ≥ 10 phút)
+      if (!ckN || listTabState() === 'other') autoErrExport();
       roundReset(true); // xong một lượt – lượt sau bắt đầu lại (vẫn nhớ các TB lượt vừa xong đã tích ✓)
       // lượt tìm xong (mọi TB đã tìm 1 lần, chưa thấy) / không còn TB phải tìm → còn TB chưa tiếp nhận thì sang màn hình Tiếp nhận hồ sơ
       // làm TB đó (bạn: “tiếp tục làm TB khác”); hết TB chưa tiếp nhận thì 🤖 quay lại Danh sách hồ sơ thụ lý tìm tiếp

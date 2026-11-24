@@ -1447,7 +1447,7 @@
   // bước “3. Lãnh đạo UBND xã”. Chọn dòng → Xử lý hồ sơ → Quy trình CHỈ có “Ký duyệt hồ sơ” (KyDuyetHoSo) → tích → Chuyển tiếp → “4. Chuyên viên
   // hoàn tất hồ sơ (Tiếp theo)” → tài khoản đúng dung.kd (mồi nhử đứng trước) → Thực thi → hồ sơ rời danh sách lãnh đạo, danh sách tải lại.
   //   mockLanhDao(n, { coTrang }) bật (n hồ sơ bước 3 + 1 hồ sơ đã sang bước 4 + hồ sơ mồi nhử “không thuộc bạn”); coTrang = số dòng mỗi trang
-  //   mockLDThem(sbn): chuyên viên vừa chuyển thêm hồ sơ – chỉ hiện khi danh sách tải lại (🔍 / Xử lý công việc)
+  //   mockLDThem(sbn): chuyên viên vừa chuyển thêm hồ sơ – chỉ hiện khi danh sách tải lại (🔍 / Xử lý công việc / tải lại trang F5)
   //   __mockLD.loi = sbn: Thực thi hồ sơ đó báo lỗi đỏ (không chuyển); __mockLD.khongToast: chuyển xong không có câu báo;
   //   __mockLD.giu: hồ sơ đã chuyển vẫn còn trong danh sách (ghi bước 4); mockLDTat() tắt
   const LD_BUOC3 = '3. Lãnh đạo UBND xã';
@@ -1702,6 +1702,16 @@
     if (ldS && typeof ldS === 'object') window.__mockLD = Object.assign({}, window.__mockLD, ldS);
     const lg = ssDoc('__mockLog');
     if (typeof lg === 'string') { document.getElementById('log').textContent = lg; log('(— trang tải lại —)'); }
+    // vai trò lãnh đạo: trang tải lại (F5) = danh sách lấy lại từ máy chủ – hiện hồ sơ chuyên viên vừa chuyển thêm, về trang 1 (như trang thật);
+    // __mockLD.f5 đếm số lần tải lại trang
+    try {
+      const L = window.__mockLD;
+      if (L.on && (performance.getEntriesByType('navigation')[0] || {}).type === 'reload') {
+        L.f5 = (L.f5 || 0) + 1;
+        log('(trang tải lại (F5) lần ' + L.f5 + ' – danh sách lãnh đạo lấy lại từ máy chủ)');
+        ldHienMoi();
+      }
+    } catch (e) {}
     const h = ssDoc('__mockHoSo');
     if (h && typeof h === 'object') {
       Object.assign(window.__mockHoSo, h);

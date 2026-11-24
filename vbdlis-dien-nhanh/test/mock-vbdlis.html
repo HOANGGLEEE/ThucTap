@@ -74,7 +74,9 @@
   #mockDsThuLy .mockDsXuLy > a:first-child::before{content:'⚙ ';color:#26b99a}
   #mockDsThuLy .mockCaret::after{content:' ▾'}
   #mockDsThuLy .mockDsTabs{margin-bottom:6px}
-  #mockDsThuLy .mockDsTabs a{margin-right:12px;color:#337ab7;text-decoration:none;cursor:pointer}
+  #mockDsThuLy .mockDsTabs a{margin-right:12px;color:#337ab7;text-decoration:none;cursor:pointer;padding-bottom:2px}
+  /* mục đang chọn: gạch chân (như trang thật – ảnh 23/11), KHÔNG có lớp active – window.mockDsTab(i) đổi mục */
+  #mockDsThuLy .mockDsTabs a[data-chon]{border-bottom:2px solid #337ab7}
   #mockDsThuLy td{text-align:left;vertical-align:top;line-height:1.7}
   #mockDsRows tr{cursor:pointer}
   #mockDsRows tr.selected{background:#1b7fbd;color:#fff}
@@ -138,7 +140,7 @@
         <a href="javascript:;" class="btn btn-default mockCaret" onclick="bamNutPhu(event, 'In biên nhận')">In biên nhận</a>
         <span class="btn-group"><a href="javascript:;" class="btn btn-default" onclick="bamNutPhu(event, 'Tải biên nhận')">Tải biên nhận</a><a href="javascript:;" class="btn btn-default dropdown-toggle" onclick="bamNutPhu(event, 'nút ▾ cạnh Tải biên nhận')">▾</a></span>
       </div>
-      <div class="mockDsTabs"><a onclick="bamNutPhu(event, 'tab Tất cả')">Tất cả</a><a onclick="bamNutPhu(event, 'tab Quá hạn xử lý')">Quá hạn xử lý (16)</a><a onclick="bamNutPhu(event, 'tab Quá hạn trả hồ sơ')">Quá hạn trả hồ sơ (0)</a><a onclick="bamNutPhu(event, 'tab Sắp hết hạn xử lý')">Sắp hết hạn xử lý (0)</a><a onclick="bamNutPhu(event, 'tab Đang chờ bổ sung')">Đang chờ bổ sung (24)</a><a onclick="bamNutPhu(event, 'tab Đang chuyển thuế')">Đang chuyển thuế (4)</a></div>
+      <div class="mockDsTabs"><a data-chon="1" onclick="bamNutPhu(event, 'tab Tất cả')">Tất cả</a><a onclick="bamNutPhu(event, 'tab Quá hạn xử lý')">Quá hạn xử lý (16)</a><a onclick="bamNutPhu(event, 'tab Quá hạn trả hồ sơ')">Quá hạn trả hồ sơ (0)</a><a onclick="bamNutPhu(event, 'tab Sắp hết hạn xử lý')">Sắp hết hạn xử lý (0)</a><a onclick="bamNutPhu(event, 'tab Đang chờ bổ sung')">Đang chờ bổ sung (24)</a><a onclick="bamNutPhu(event, 'tab Đang chuyển thuế')">Đang chuyển thuế (4)</a></div>
       <table id="tblDsThuLy"><thead><tr><th>#</th><th>Thông tin hồ sơ</th><th>Thông tin biên nhận</th><th>Thông tin luân chuyển</th><th>Thông tin người nộp</th></tr></thead><tbody id="mockDsRows"></tbody></table>
       <div id="mockPager" class="dataTables_paginate" style="display:none;margin-top:6px"></div>
       <div style="margin-top:8px;color:#555">Hiển thị từ 1 đến 2 trong tổng số 2 hồ sơ tiếp nhận</div>
@@ -515,20 +517,28 @@
   const ghiLog = () => { clearTimeout(hgLog); hgLog = 0; const t = document.getElementById('log').textContent; ssGhi('__mockLog', t.length > 300000 ? t.slice(-300000) : t); };
   const log = (t) => { const l = document.getElementById('log'); l.textContent += t + '\n'; l.scrollTop = 1e9; if (!hgLog) hgLog = setTimeout(ghiLog, 300); };
   function openThemThua(){
+    window.__mockTonTaiLuc = '';
     ['ttSoThua','ttSoTo','ttSoThuaCu','ttSoToCu','ttDienTich'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('ttDiaChi').value = 'Phường Việt Yên, Thành phố Bắc Ninh';
     document.getElementById('ttErr').textContent = '';
     openM('mThemThua');
   }
-  // thửa ĐÃ TỒN TẠI (bạn yêu cầu 23/11): window.__mockTonTai = { thua, to, kieu, tuDong } – Lưu đúng thửa đó → hộp báo, KHÔNG lưu.
-  // kieu 'bo-qua': “… đã tồn tại …?” Bỏ qua thửa này / Vẫn lưu (BẪY); 'thong-bao': “… đã tồn tại” Đóng; 'hoi': Đồng ý (BẪY) / Không – không có nút bỏ qua.
-  // tuDong: bấm nút bỏ qua thì trang tự đóng cửa sổ thửa (mặc định: cửa sổ thửa còn mở)
+  // thửa ĐÃ TỒN TẠI (bạn yêu cầu 23/11): window.__mockTonTai = { thua, to, kieu, tuDong, x, luc } – Lưu đúng thửa đó → hộp báo, KHÔNG lưu.
+  // kieu 'bo-qua': “… đã tồn tại …?” Bỏ qua thửa này / Vẫn lưu (BẪY); 'thong-bao': “… đã tồn tại” Đóng; 'hoi': Đồng ý (BẪY) / Không – không có nút bỏ qua;
+  // 'dong-y' (GIỐNG TRANG THẬT, ảnh 23/11): “THÔNG BÁO – Thửa đất đã tồn tại”, MỘT nút “ĐỒNG Ý” (bấm → hộp đóng, cửa sổ thửa còn mở);
+  // 'dong-y-2nut': như 'dong-y' nhưng thêm nút “Hủy” (không có chữ hỏi) – tiện ích KHÔNG được bấm ĐỒNG Ý (BẪY).
+  // tuDong: bấm nút bỏ qua / ĐỒNG Ý thì trang tự đóng cửa sổ thửa (mặc định: cửa sổ thửa còn mở); x: hộp có thêm nút × ở tiêu đề;
+  // luc: 'nhap' – trang báo ngay khi điền xong Số thửa + Số tờ (như trang kiểm tra lúc rời ô), không chờ bấm Lưu
   function hopTonTai(thua, to, dongCuaSo){
     const T = window.__mockTonTai;
     if (!T || String(T.thua) !== String(thua) || String(T.to) !== String(to)) return false;
     window.__mockTonTaiDem = (window.__mockTonTaiDem || 0) + 1;
     const bo = (e) => { log('(' + aiBam(e) + ' bấm “Bỏ qua thửa này” – thửa ' + thua + '/' + to + ')'); if (T.tuDong) dongCuaSo(); };
-    if (T.kieu === 'thong-bao') mockConfirm('Thông báo', 'Thửa đất số ' + thua + ' tờ bản đồ số ' + to + ' đã tồn tại trong hệ thống', [{ text: 'Đóng', cls: 'btn-default' }]);
+    if (T.kieu === 'dong-y') mockConfirm('THÔNG BÁO', 'Thửa đất đã tồn tại', [
+      { text: 'ĐỒNG Ý', cls: 'btn-orange', fn: (e) => { log('(' + aiBam(e) + ' bấm “ĐỒNG Ý” – thửa ' + thua + '/' + to + ' đã tồn tại)'); if (T.tuDong) dongCuaSo(); } }], { x: T.x });
+    else if (T.kieu === 'dong-y-2nut') mockConfirm('THÔNG BÁO', 'Thửa đất đã tồn tại', [
+      { text: 'ĐỒNG Ý', cls: 'btn-orange', fn: () => log('!!! BẤM ĐỒNG Ý Ở HỘP 2 NÚT (THỬA ĐÃ TỒN TẠI) !!!') }, { text: 'Hủy', cls: 'btn-default' }], { x: T.x });
+    else if (T.kieu === 'thong-bao') mockConfirm('Thông báo', 'Thửa đất số ' + thua + ' tờ bản đồ số ' + to + ' đã tồn tại trong hệ thống', [{ text: 'Đóng', cls: 'btn-default' }]);
     else if (T.kieu === 'hoi') mockConfirm('Xác nhận', 'Thửa đất số ' + thua + ' tờ bản đồ số ' + to + ' đã tồn tại. Bạn có muốn cập nhật thông tin thửa đất?', [
       { text: 'Đồng ý', cls: 'btn-orange', fn: () => log('!!! BẤM ĐỒNG Ý CẬP NHẬT THỬA ĐÃ TỒN TẠI !!!') }, { text: 'Không', cls: 'btn-default' }]);
     else mockConfirm('Thông báo', 'Thửa đất số ' + thua + ' tờ bản đồ số ' + to + ' đã tồn tại trong hệ thống. Bạn có muốn tiếp tục?', [
@@ -536,6 +546,19 @@
     log('(trang báo: thửa ' + thua + '/' + to + ' đã tồn tại – ' + (T.kieu || 'bo-qua') + ', không lưu)');
     return true;
   }
+  // luc 'nhap': trang kiểm tra thửa ngay khi điền Số thửa / Số tờ (rời ô) – mỗi lần mở cửa sổ thửa báo một lần
+  function tonTaiLucNhap(e){
+    const T = window.__mockTonTai;
+    const id = (e.target && e.target.id) || '';
+    if (!T || T.luc !== 'nhap' || !/^(ttSoThua|ttSoTo|tSoThua|tSoTo)$/.test(id)) return;
+    const p = id.startsWith('tt') ? 'tt' : 't';
+    const v = (x) => document.getElementById(p + x).value.trim();
+    if (window.__mockTonTaiLuc === p || String(T.thua) !== v('SoThua') || String(T.to) !== v('SoTo')) return;
+    window.__mockTonTaiLuc = p;
+    log('(trang kiểm tra thửa lúc rời ô Số thửa / Số tờ)');
+    hopTonTai(v('SoThua'), v('SoTo'), p === 'tt' ? () => closeM() : () => dongThuaDon());
+  }
+  ['change', 'blur', 'focusout'].forEach((t) => document.addEventListener(t, tonTaiLucNhap, true));
   function luuThua(){
     const v = id => document.getElementById(id).value.trim();
     if (hopTonTai(v('ttSoThua'), v('ttSoTo'), () => closeM())) return;
@@ -578,6 +601,7 @@
     if (window.__fromDon) { window.__fromDon = false; moLaiDon(); } else closeM();
   }
   function resetThua(){
+    window.__mockTonTaiLuc = '';
     ['tSoThua','tSoTo','tDienTichPL','tSoThuaCu','tSoToCu','tDiaChi','tDienTich3','tThoiHan'].forEach(id => document.getElementById(id).value = '');
     ['#tDienTich','#tDienTich2'].forEach(s => { const a = AutoNumeric.getAutoNumericElement(s); if (a) a.clear(); });
     $('#tMDSD').val('').trigger('change'); $('#tNguonGoc').val('');
@@ -810,12 +834,19 @@
     setTimeout(() => w.remove(), 6000);
   }
   // hộp hỏi kiểu jconfirm (tiêu đề, nội dung, nút); b.fn(e) nhận sự kiện bấm (e.isTrusted: người dùng hay tiện ích)
-  function mockConfirm(title, content, buttons){
+  function mockConfirm(title, content, buttons, opts){
     const o = document.createElement('div');
     o.className = 'jconfirm mockjc';
     o.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.2)';
     o.innerHTML = `<div class="jconfirm-box" role="dialog" style="width:420px;margin:180px auto;background:#fff;padding:12px;border-radius:4px"><div class="jconfirm-title-c"><span class="jconfirm-title">${title}</span></div><div class="jconfirm-content">${content}</div><div class="jconfirm-buttons"></div></div>`;
     const bx = o.querySelector('.jconfirm-buttons');
+    if (opts && opts.x) {
+      const x = document.createElement('button');
+      x.className = 'close'; x.setAttribute('aria-label', 'Close'); x.textContent = '×';
+      x.style.cssText = 'float:right;border:0;background:none;font-size:18px;cursor:pointer';
+      x.onclick = (e) => { o.remove(); log('(' + (e.isTrusted ? 'người dùng' : 'tiện ích') + ' bấm × – ' + title + ')'); };
+      o.querySelector('.jconfirm-title-c').prepend(x);
+    }
     buttons.forEach((b) => { const el = document.createElement('button'); el.className = 'btn ' + (b.cls || ''); el.textContent = b.text; el.onclick = (e) => { o.remove(); log('(' + (e.isTrusted ? 'người dùng' : 'tiện ích') + ' bấm “' + b.text + '” – ' + title + ')'); b.fn && b.fn(e); }; bx.appendChild(el); });
     document.body.appendChild(o);
   }
@@ -1278,7 +1309,8 @@
     return 'ok';
   };
   // ô tìm “Số biên nhận” (giống trang thật, ảnh 15–16): trống = mọi hồ sơ của bạn; có chữ (bấm 🔍 / Enter) = hồ sơ có số biên nhận chứa chữ đó.
-  // Hồ sơ đang ở bước lãnh đạo (stage 'ld') KHÔNG có trong danh sách của bạn (lãnh đạo chưa trả về). Tải lại trang → ô tìm trống.
+  // Hồ sơ đang ở bước lãnh đạo (stage 'ld') KHÔNG có trong danh sách của bạn (lãnh đạo chưa trả về). Hồ sơ đã trả (stage 'done') cũng KHÔNG còn
+  // (trang thật 24/11: tìm số vừa trả → “Không tìm thấy hồ sơ nào”; window.__mockDoneConLai = true → còn dòng như bản cũ). Tải lại trang → ô tìm trống.
   window.__mockDsQ = '';
   function dsHang(){
     const H = window.__mockHoSo;
@@ -1288,7 +1320,7 @@
     if (L.on) rows = L.ds.filter((d) => !d.moi && !d.daDi).map((d) => ['ld:' + d.sbn, d]).concat([['khac', hsKhac()]]);
     else {
       rows = [['khac', hsKhac()]];
-      if (H.sbn && H.stage && H.stage !== 'ld') rows.push(['hs', hsDangLam()]);
+      if (H.sbn && H.stage && H.stage !== 'ld' && (H.stage !== 'done' || window.__mockDoneConLai)) rows.push(['hs', hsDangLam()]);
     }
     return q ? rows.filter(([, d]) => String(d.sbn).replace(/\s+/g, ' ').toLowerCase().includes(q)) : rows;
   }
@@ -1312,7 +1344,7 @@
     }
     document.getElementById('mockDsRows').innerHTML = rows.length
       ? rows.map(([k, d]) => dongDs(k, d)).join('')
-      : '<tr><td colspan="5" style="text-align:center;color:#888">Không có dữ liệu</td></tr>';
+      : '<tr><td colspan="5" style="text-align:center;color:#888">Không tìm thấy hồ sơ nào</td></tr>';
     if (H.chon && !rows.some(([k]) => k === H.chon)) { H.chon = ''; luuHoSoTT(); }
     veChonDs();
   }
@@ -1328,6 +1360,12 @@
   };
   document.getElementById('txtTimHoSo').addEventListener('keydown', (e) => { if (e.key === 'Enter') window.dsTimKiem(e); });
   // thanh trái “Xử lý công việc” (ảnh 17) → Danh sách hồ sơ thụ lý (ô tìm trống, chưa chọn dòng)
+  // thanh lọc Tất cả / Quá hạn xử lý / …: đổi mục đang chọn (gạch chân) – chỉ đổi hình, danh sách không lọc
+  window.mockDsTab = function(i){
+    const as = [...document.querySelectorAll('#mockDsThuLy .mockDsTabs a')];
+    as.forEach((a, j) => (j === i ? a.setAttribute('data-chon', '1') : a.removeAttribute('data-chon')));
+    log('(giả lập: thanh lọc đang chọn “' + (as[i] ? as[i].textContent : '?') + '”)');
+  };
   window.mockXuLyCongViec = function(ev){
     log('(' + aiBam(ev) + ' bấm Xử lý công việc – Danh sách hồ sơ thụ lý)');
     const H = window.__mockHoSo;
@@ -1525,7 +1563,8 @@
     if (m && m.classList && m.classList.contains('modal') && m.classList.contains('show')) { dongModal(m.id); log('(bấm ra nền – đóng cửa sổ ' + m.id + ')'); }
   });
   // window.__mockTraKieu: 'ghi-chu' – Ghi chú trống → trang báo lỗi ngay trong cửa sổ (chữ đỏ), không hỏi;
-  // 'hop-loi' – Đồng ý → cửa sổ đóng, hộp “Có lỗi xảy ra…” (OK), không có câu báo nổi; 'hop-ok' – Đồng ý → hộp “Trả hồ sơ thành công” (Đóng)
+  // 'hop-loi' – Đồng ý → cửa sổ đóng, hộp “Có lỗi xảy ra…” (OK), không có câu báo nổi; 'hop-ok' – Đồng ý → hộp “Trả hồ sơ thành công” (Đóng);
+  // 'hop-la' – Đồng ý → cửa sổ đóng, hộp lạ “Hồ sơ chưa được ký số…” (Đóng – không phải chữ báo lỗi quen, không phải thành công), hồ sơ CHƯA trả
   function thucHienTraHoSo(ev){
     window.__mockThucHienTra = (window.__mockThucHienTra || 0) + 1;
     log('(' + aiBam(ev) + ' bấm Thực hiện – Trả hồ sơ)');
@@ -1541,6 +1580,13 @@
   }
   function xongTraHoSo(e){
     const H = window.__mockHoSo, ai = aiBam(e);
+    if (window.__mockTraKieu === 'hop-la') {
+      return setTimeout(() => {
+        dongModal('mTraHoSo');
+        mockConfirm('Thông báo', 'Hồ sơ chưa được ký số, đề nghị kiểm tra lại', [{ text: 'Đóng', cls: 'btn-default' }]);
+        log('(trang báo bằng hộp lạ: Hồ sơ chưa được ký số – hồ sơ CHƯA trả)');
+      }, 400);
+    }
     if (window.__mockTraKieu === 'hop-loi') {
       return setTimeout(() => {
         dongModal('mTraHoSo');
@@ -1548,7 +1594,18 @@
         log('(trang báo bằng hộp: Có lỗi xảy ra – hồ sơ CHƯA trả)');
       }, 400);
     }
+    // window.__mockTraCham = số mili giây: như trang thật (ảnh 23/11) – cửa sổ Trả hồ sơ vẫn mở, lớp phủ “Đang xử lý...” giữa trang lúc trang xử lý
+    const cham = Math.max(0, +window.__mockTraCham || 0);
+    if (cham) {
+      const ov = document.createElement('div');
+      ov.id = 'mockDangXuLy';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center';
+      ov.innerHTML = '<div style="color:#fff;font-size:22px;font-weight:bold;text-align:center"><div style="font-size:40px">⟳</div><span>Đang xử lý...</span></div>';
+      document.body.appendChild(ov);
+      log('(trang: Đang xử lý... ' + Math.round(cham / 1000) + ' giây – cửa sổ Trả hồ sơ vẫn mở)');
+    }
     setTimeout(() => {
+      document.getElementById('mockDangXuLy')?.remove();
       dongModal('mTraHoSo');
       if (H.stage !== 'tra') {
         log('!!! TRẢ HỒ SƠ KHI HỒ SƠ KHÔNG Ở BƯỚC TRẢ KẾT QUẢ (bước ' + (H.stage || 'trống') + ') !!!');
@@ -1564,7 +1621,7 @@
       log('(trang báo: Trả hồ sơ thành công – hồ sơ ' + H.sbn + ' đã trả kết quả; Danh sách hồ sơ thụ lý tải lại, dòng hồ sơ bỏ chọn)');
       if (window.__mockReload) return taiLaiTrang();
       veView();
-    }, 400);
+    }, 400 + cham);
   }
 
   // ----- cờ giả lập (giữ qua tải lại trang): choTuBam = cho tiện ích bấm Lưu hồ sơ / Lưu thông tin đăng ký / Hoàn tất,
@@ -1685,6 +1742,9 @@
     fakeMask(document.getElementById('ttDienTich'), fmtArea);
     fakeMask(document.getElementById('tDienTich3'), fmtArea);
     ['tSoThua', 'tSoTo', 'cnNamSinh'].forEach(id => fakeMask(document.getElementById(id), fmtNum));
+    // luc 'nhap' (hộp “đã tồn tại” lúc điền): Số thửa / Số tờ của đơn có mặt nạ → tiện ích điền qua page-setter rồi $(el).trigger('change'),
+    // chỉ trình nghe jQuery nhận được (trình nghe gốc không chạy) → nghe cả qua jQuery (cờ __mockTonTaiLuc chặn báo 2 lần)
+    $(document).on('change', '#tSoThua, #tSoTo, #ttSoThua, #ttSoTo', tonTaiLucNhap);
     // Nhập đơn đăng ký: danh sách thả xuống kiểu Bootstrap
     $(document).on('click', '[data-toggle="dropdown"]', function(e){ e.preventDefault(); const g = $(this).parent(); const was = g.hasClass('open'); $('.dropdown.open').removeClass('open'); if (!was) g.addClass('open'); return false; });
     $(document).on('click', function(){ $('.dropdown.open').removeClass('open'); });

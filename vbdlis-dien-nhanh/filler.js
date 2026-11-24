@@ -6,7 +6,7 @@
 // (Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Đóng – chỉ khi bật “Tự động hết”). Bộ điền không bao giờ bấm Kết ISO / Chuyển tiếp /
 // Thực thi / Trả hồ sơ: Chuyển tiếp + Thực thi (chuyển hồ sơ cho đúng tài khoản) do bảng điền tự bấm, có kiểm tra riêng.
 (() => {
-  const VERSION = 33;
+  const VERSION = 35;
   // cửa sổ chủ sử dụng (cùng mẫu với bảng điền)
   const CHU_WIN = /^((thong tin|them|moi|cap nhat|sua|chi tiet) )*(ca nhan|chu su dung|nguoi su dung|chu so huu)\b/;
   const THUA_WIN = /^((them|moi|thong tin|chi tiet|cap nhat|sua) )*thua dat\b/;
@@ -1276,6 +1276,20 @@
         } else b = buttonsByText(labels, d, []).filter((x) => !NEVER_BTN.test(normBtn(x.value || x.textContent)));
         if (b.length !== 1)
           return { ...base, ok: false, open: true, title, text: `${raw} (không thấy, hoặc thấy nhiều nút “${rule.btnRe ? rule.btnRe : labels.join(' / ')}”)` };
+        // rule.sole: chỉ bấm khi hộp là hộp CHỈ BÁO – cả hộp có đúng MỘT nút có chữ (nút × / nút chỉ có biểu tượng không tính).
+        // Vd. trang thật (ảnh 23/11) “THÔNG BÁO – Thửa đất đã tồn tại” chỉ có nút “ĐỒNG Ý”. Hộp có thêm nút (Hủy / Không / Bỏ qua…) là hộp hỏi → không bấm
+        if (rule.sole) {
+          // và chính hộp sắp bấm: là hộp DUY NHẤT đang mở trong khung này, không phải câu hỏi (chữ gốc có “?”, hoặc “có muốn”,
+          // “thật sự muốn”, “hay không”, “xác nhận”…) – không để hộp hỏi chồng lên / thay chỗ hộp báo nhận cú bấm Đồng ý
+          if (top.length !== 1) return { ...base, ok: false, open: true, title, text: `${raw} (đang có ${top.length} hộp – không bấm)` };
+          if (/\?/.test(d.textContent || '') || /co muon|co chac|ban muon|that su muon|hay khong|xac nhan/.test(text))
+            return { ...base, ok: false, open: true, title, text: `${raw} (hộp hỏi – không bấm)` };
+          const cs = [...d.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"], .btn')].filter(
+            (el) => isVisible(el) && normBtn(el.value || el.textContent)
+          );
+          const n = cs.filter((el) => !cs.some((o) => o !== el && el.contains(o))).length;
+          if (n !== 1) return { ...base, ok: false, open: true, title, text: `${raw} (hộp có ${n} nút – không phải hộp chỉ báo một nút)` };
+        }
         const said = (b[0].value || b[0].textContent || '').replace(/\s+/g, ' ').trim();
         b[0].click();
         return { ...base, ok: true, open: true, title, btn: said };

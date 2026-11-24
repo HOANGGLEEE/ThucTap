@@ -863,8 +863,17 @@
     // cây của tab SBD tải chậm
     setTimeout(() => { t.innerHTML = `<li class="jstree-node jstree-leaf" aria-selected="false"><i class="jstree-icon"></i><a class="jstree-anchor" href="#" id="j11_1_anchor"><b>Đơn đăng ký</b>|| <b>0 - Phường Việt Yên</b> - Mã đơn: ${window.__mockHsq.ma} - Số thứ tự hồ sơ: -/- - Ngày tiếp nhận: 22/11/2026 - Ngày đăng ký: -/-</a></li>`; }, 1200);
   };
-  function dongCNDLPL(){ closeM(); setTimeout(() => openM('mQuyTrinh'), 200); }
+  // window.__mockQtCham = số ms: trang mở lại Quy trình chậm sau khi đóng cửa sổ tác vụ (mặc định 200)
+  function dongCNDLPL(){ closeM(); setTimeout(() => openM('mQuyTrinh'), window.__mockQtCham || 200); }
   function xongCNDLPL(){
+    // window.__mockPlLoi = true: như trang thật 24/11 – hộp đỏ “KHÔNG THỂ CẬP NHẬT DỮ LIỆU PHÁP LÝ”, một nút ĐỒNG Ý, cửa sổ Cập nhật vẫn mở (chữ GIẢ)
+    if (window.__mockPlLoi) {
+      log('(trang báo: không thể cập nhật dữ liệu pháp lý)');
+      // window.__mockPlHoi = true: biến thể HỎI (2 nút Đồng ý / Hủy) – tiện ích không được tự bấm
+      const hoi = !!window.__mockPlHoi;
+      const btns = hoi ? [{ text: 'ĐỒNG Ý', cls: 'btn-danger' }, { text: 'HỦY', cls: 'btn-default' }] : [{ text: 'ĐỒNG Ý', cls: 'btn-danger' }];
+      return setTimeout(() => mockConfirm('KHÔNG THỂ CẬP NHẬT DỮ LIỆU PHÁP LÝ', '<b>THÔNG TIN ĐĂNG KÝ CHƯA ĐÁP ỨNG NHÓM 1</b><br>1. Đăng ký của Bà NGƯỜI GIẢ LẬP, CMND: 000000000; Thửa đất số 1(999): <b>không có mã định danh cá nhân</b>' + (hoi ? '<br>Bạn có muốn tiếp tục cập nhật các đăng ký còn lại?' : ''), btns), 600);
+    }
     closeM();
     setTimeout(() => {
       const k = document.querySelector('#bindQuyTrinhXuLy input[data-actioncode="CapNhatDuLieuPhapLy"]');

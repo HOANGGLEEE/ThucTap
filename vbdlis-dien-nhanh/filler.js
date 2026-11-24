@@ -6,7 +6,7 @@
 // (Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Đóng – chỉ khi bật “Tự động hết”). Bộ điền không bao giờ bấm Kết ISO / Chuyển tiếp /
 // Thực thi / Trả hồ sơ: Chuyển tiếp + Thực thi (chuyển hồ sơ cho đúng tài khoản) do bảng điền tự bấm, có kiểm tra riêng.
 (() => {
-  const VERSION = 35;
+  const VERSION = 36;
   // cửa sổ chủ sử dụng (cùng mẫu với bảng điền)
   const CHU_WIN = /^((thong tin|them|moi|cap nhat|sua|chi tiet) )*(ca nhan|chu su dung|nguoi su dung|chu so huu)\b/;
   const THUA_WIN = /^((them|moi|thong tin|chi tiet|cap nhat|sua) )*thua dat\b/;
@@ -1177,6 +1177,8 @@
           );
         if (!bs.length) return { ...base, ok: false, why: 'không thấy nút Hủy bỏ / Đóng / ×' };
         const said = (bs[0].value || bs[0].textContent || '').replace(/\s+/g, ' ').trim() || '×';
+        // nút Đóng là link <a href=""> / href="#" mà trang quên chặn → không cho trang tải lại (như clickBtn); link javascript: thì để trang tự chạy
+        if (!/^javascript:/i.test((bs[0].getAttribute('href') || '').trim())) noNav(bs[0]);
         bs[0].click();
         return { ...base, ok: true, btn: said };
       }

@@ -3,35 +3,9 @@
 // Tiện ích chỉ chạm vào trang khi bạn bấm biểu tượng / các nút trong bảng điền, hoặc khi bạn bật “🤖 Tự động hết”
 // (khi đó trang tải lại thì bảng tự mở lại để làm tiếp).
 
-const DATA_FILE = 'data/du-lieu.json';
 importScripts('page-setter.js'); // định nghĩa vbdlisPageSetter, vbdlisFireSelect2 (chạy trong trang)
 
-// Đọc file dữ liệu TB trong thư mục data của tiện ích (đọc thẳng từ đĩa – sửa file là lần mở bảng sau thấy ngay)
-async function loadDataText() {
-  // Chưa có file (máy mới tải tiện ích từ git – dữ liệu không đưa lên git) → coi như dữ liệu trống
-  let res;
-  try {
-    res = await fetch(chrome.runtime.getURL(DATA_FILE));
-  } catch (e) {
-    return '[]';
-  }
-  if (!res.ok) return '[]';
-  return (await res.text()).replace(/^﻿/, '').trim() || '[]'; // bỏ BOM (file lưu từ Notepad / Excel)
-}
-async function loadSample() {
-  return JSON.parse(await loadDataText());
-}
-
-chrome.runtime.onInstalled.addListener(async () => {
-  const { tbData } = await chrome.storage.local.get('tbData');
-  if (tbData === undefined) { // chỉ khi chưa có dữ liệu bao giờ (bạn đã xóa hết thì để trống)
-    try {
-      await chrome.storage.local.set({ tbData: await loadSample() });
-    } catch (e) {
-      console.warn('Không nạp được dữ liệu mẫu', e);
-    }
-  }
-});
+// Dữ liệu TB chỉ nạp bằng file CSV trong bảng điền (Dữ liệu → Mở file CSV…) – tiện ích không tự đọc thư mục data nữa (1.21.20)
 
 chrome.action.onClicked.addListener(async (tab) => {
   try {
@@ -64,9 +38,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   if (reopening.has(tabId)) return;
   reopening.add(tabId);
   try {
-    const { tbOpts, tbShownTabs, tbAutoTab, tbGoList } = await chrome.storage.local.get(['tbOpts', 'tbShownTabs', 'tbAutoTab', 'tbGoList']);
-    // bạn vừa bấm ▶ cho TB “Đã tiếp nhận” ở tab này (tiện ích bấm “Xử lý công việc”) → mở lại bảng để tìm tiếp, kể cả khi 🤖 tắt
-    const goList = !!tbGoList && tbGoList.tabId === tabId && Date.now() - (tbGoList.at || 0) < 2 * 60 * 1000;
+    const { tbOpts, tbShownTabs, tbAutoTab, tbGoList, tbGoRecv } = await chrome.storage.local.get(['tbOpts', 'tbShownTabs', 'tbAutoTab', 'tbGoList', 'tbGoRecv']);
+    // bạn vừa bấm ▶ cho TB “Đã tiếp nhận” ở tab này (tiện ích bấm “Xử lý công việc”) → mở lại bảng để tìm tiếp, kể cả khi 🤖 tắt;
+    // (25/11) bấm ▶ ở danh sách cho TB chưa tiếp nhận (tiện ích bấm Tiếp nhận hồ sơ) → mở lại bảng để tiếp nhận TB đó
+    const fresh = (g) => !!g && g.tabId === tabId && Date.now() - (g.at || 0) < 2 * 60 * 1000;
+    const goList = fresh(tbGoList) || fresh(tbGoRecv);
     if (!((tbOpts && tbOpts.tuDong === true && tbAutoTab === tabId) || goList) || (tbShownTabs || {})[tabId] === false) return;
     // bảng đang có trên trang → không đụng (chạy lại panel.js sẽ ẩn / hiện bảng)
     const [r] = await chrome.scripting.executeScript({ target: { tabId }, func: () => !!document.getElementById('vbdlis-dien-nhanh-host') });
@@ -239,11 +215,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       if (msg.type === 'vbdlis-config') {
         sendResponse({ ok: true, config: await loadConfig() });
-        return;
-      }
-      if (msg.type === 'vbdlis-sample') {
-        // gửi nguyên chữ của file: bảng điền tự đọc JSON (tự sửa lỗi nhỏ, báo rõ dòng sai)
-        sendResponse({ ok: true, text: await loadDataText() });
         return;
       }
       if (msg.type === 'vbdlis-fill' || msg.type === 'vbdlis-scan' || msg.type === 'vbdlis-act') {

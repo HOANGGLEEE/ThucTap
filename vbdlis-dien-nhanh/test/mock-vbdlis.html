@@ -57,6 +57,7 @@
   #mockSidebar{position:fixed;left:0;top:140px;width:74px;background:#2a3f54;padding:6px 0;z-index:5;border-radius:0 6px 6px 0}
   #mockSidebar a{display:block;color:#fff;font-size:11px;text-align:center;padding:6px 4px;text-decoration:none}
   #mockSidebar a.cur{background:#1abb9c}
+  #mockTNSub{background:#1f2f40}#mockTNSub a{font-size:10px}
   body[data-mock-view="dsthuly"] #mockDsThuLy{display:block}
   body[data-mock-view="dsthuly"] > fieldset, body[data-mock-view="dsthuly"] .ttHoSo{display:none}
   #mockDsThuLy header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #ddd;font-size:15px;color:#444}
@@ -127,7 +128,7 @@
 <!-- ============ DANH SÁCH HỒ SƠ THỤ LÝ (giống ảnh 7, 8 – 22/11): chỉ hiện ở view 'dsthuly' (form tiếp nhận ẩn) ============ -->
 <!-- nút “Xử lý hồ sơ” KHÔNG có id (tiện ích phải tìm theo chữ) + nút ▾ riêng; các nút khác chỉ ghi nhật ký. Bảng: dòng hồ sơ KHÁC (mồi nhử) + dòng hồ sơ đang làm.
      Bấm vào dòng (chỗ nào cũng được, trừ link ✎ số biên nhận) = chọn dòng (lớp selected, nền xanh) + khung phải “Thông tin hồ sơ”; link ✎ số biên nhận = BẪY -->
-<nav id="mockSidebar"><a href="javascript:;" onclick="bamNutPhu(event, 'Tiếp nhận hồ sơ ▾')">Tiếp nhận hồ sơ ▾</a><a href="javascript:;" id="mockNavXLCV" onclick="mockXuLyCongViec(event)"><i class="fa fa-cog"></i> Xử lý công việc</a><a href="javascript:;" onclick="bamNutPhu(event, 'Quản lý sổ ▾')">Quản lý sổ ▾</a></nav>
+<nav id="mockSidebar"><div class="mockTree"><a href="javascript:;" id="mockNavTN" onclick="mockMoMenuTN(event)">Tiếp nhận hồ sơ ▾</a><div id="mockTNSub" style="display:none"><a href="?view=tiepnhan" onclick="log('(' + aiBam(event) + ' bấm menu con Tiếp nhận hồ sơ)')">Tiếp nhận hồ sơ</a><a href="javascript:;" onclick="bamNutPhu(event, 'Tra cứu hồ sơ')">Tra cứu hồ sơ</a></div></div><a href="javascript:;" id="mockNavXLCV" onclick="mockXuLyCongViec(event)"><i class="fa fa-cog"></i> Xử lý công việc</a><a href="javascript:;" onclick="bamNutPhu(event, 'Quản lý sổ ▾')">Quản lý sổ ▾</a></nav>
 <div id="mockDsThuLy">
   <header class="main-header"><span class="mockDsTieuDe">Danh sách hồ sơ thụ lý</span><span class="user-info"><span class="mockAvatar">B</span> <span id="mockTaiKhoan"></span></span></header>
   <div class="mockDsKhung">
@@ -1017,6 +1018,8 @@
   // nút thử tay: nhảy thẳng tới hồ sơ đã lưu (bước 'tn'), số biên nhận lấy ở ô Số biên nhận
   window.mockHoSoDaLuu = function(sbn){ closeM(); sangHoSo(sbn || document.getElementById('txtSoBienNhan').value.trim() || SBN_MAC_DINH, false); };
   function veXuLyHoSo(ev){ log('(' + aiBam(ev) + ' bấm Về trang xử lý hồ sơ – giả lập: ở lại trang)'); }
+  // thanh trái giống trang thật: “Tiếp nhận hồ sơ ▾” chỉ mở / đóng menu con (mục con “Tiếp nhận hồ sơ” mới là đường link)
+  function mockMoMenuTN(ev){ const sub = document.getElementById('mockTNSub'); const mo = sub.style.display === 'none'; sub.style.display = mo ? 'block' : 'none'; log('(' + aiBam(ev) + ' bấm Tiếp nhận hồ sơ ▾ – ' + (mo ? 'mở' : 'đóng') + ' menu con)'); }
   function bamNutPhu(ev, ten){ log('(' + aiBam(ev) + ' bấm ' + ten + ' – giả lập: không làm gì)'); }
   // Về trang tiếp nhận hồ sơ: trang tiếp nhận mới, form trống (__mockReload: tải lại cả trang)
   function veTiepNhan(ev){
@@ -1925,6 +1928,20 @@
     };
     window.__mem = mem;
     window.addEventListener('pagehide', ghiMem); // kể cả khi thử nghiệm sửa thẳng window.__mem
+    // (1.21.20) tiện ích thôi tự đọc data/du-lieu.json – trang THỬ tự đưa file đó vào kho giả lần đầu (chỉ để có dữ liệu thử)
+    if (mem.tbData === undefined) {
+      fetch('../data/du-lieu.json?t=' + Date.now(), { cache: 'no-store' })
+        .then((r) => (r.ok ? r.text() : '[]'))
+        .then((t) => {
+          if (mem.tbData !== undefined) return;
+          let a = [];
+          try { a = JSON.parse(String(t).replace(/^﻿/, '') || '[]'); } catch (e) {}
+          if (!Array.isArray(a) || !a.length) return;
+          a.forEach((x) => { x.tb = String(x.tb); });
+          c.storage.local.set({ tbData: a });
+        })
+        .catch(() => {});
+    }
   })();
 </script>
 <script>

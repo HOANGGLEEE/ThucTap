@@ -20,7 +20,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.21.24'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.21.25'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -6523,15 +6523,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       // màn hình Tiếp nhận (chưa lưu) đang có dữ liệu của TB khác → tải lại trang (F5) cho trống rồi điền TB này như thường.
       // Tối đa 2 lần / 2 phút cho một TB (trang tải lại vẫn còn dữ liệu đó) – quá thì dừng báo như trước
       const recvF5 = (why) => {
-        let r = null;
-        try {
-          r = JSON.parse(sessionStorage.getItem('vbdlis-dien-nhanh-recvf5') || 'null');
-        } catch (e) {}
-        const n = r && r.tb === String(tb.tb) && Date.now() - (r.at || 0) < 2 * 60 * 1000 ? r.n || 0 : 0;
-        if (n >= 2) return false;
-        try {
-          sessionStorage.setItem('vbdlis-dien-nhanh-recvf5', JSON.stringify({ tb: String(tb.tb), n: n + 1, at: Date.now() }));
-        } catch (e) {}
+        if (!recvF5Ok(tb.tb)) return false;
         cur.ok(`${why} – tải lại trang (F5) cho trống rồi điền TB ${tb.tb}`);
         // 🤖 tắt → bảng điền mở lại sau khi tải trang và điền tiếp TB này; 🤖 bật → 🤖 tự làm màn hình Tiếp nhận trống
         if (!AUTO()) safeSet({ tbGoRecv: { tb: String(tb.tb), at: Date.now(), tabId: S.tabId == null ? null : S.tabId } });
@@ -12051,6 +12043,19 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     safeSet({ tbRecvUrl: u });
   }
   // TB chưa tiếp nhận tiếp theo cho 🤖: TB đang chọn (con trỏ tiếp nhận) nếu còn “Chưa làm”, chưa bấm Lưu hồ sơ; không thì TB chưa làm phía sau
+  // (25/11) trang Tiếp nhận có dữ liệu của TB khác → F5: tối đa 2 lần / 2 phút cho một TB (tải lại vẫn còn dữ liệu đó → thôi, báo)
+  function recvF5Ok(id) {
+    let r = null;
+    try {
+      r = JSON.parse(sessionStorage.getItem('vbdlis-dien-nhanh-recvf5') || 'null');
+    } catch (e) {}
+    const n = r && r.tb === String(id) && Date.now() - (r.at || 0) < 2 * 60 * 1000 ? r.n || 0 : 0;
+    if (n >= 2) return false;
+    try {
+      sessionStorage.setItem('vbdlis-dien-nhanh-recvf5', JSON.stringify({ tb: String(id), n: n + 1, at: Date.now() }));
+    } catch (e) {}
+    return true;
+  }
   function recvNext() {
     const ok = (x) => !!x && stageOf(x) === 'chua' && !(S.stage[String(x.tb)] || {}).tnClick && !S.autoHold.has(String(x.tb));
     const c = recvTB(); // (25/11) con trỏ tiếp nhận – không phải TB đang hiện (TB ở trên chạy theo 🤖)
@@ -14371,8 +14376,20 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         rr = JSON.parse(sessionStorage.getItem('vbdlis-dien-nhanh-recvrun') || 'null');
       } catch (e) {}
       const sr = tr ? S.stage[String(tr.tb)] || {} : {};
-      if (!tr || !rr || rr.tb !== String(tr.tb) || Date.now() - (rr.at || 0) > 30 * 60 * 1000 || sr.tnClick || sr.tn || sr.hoan || S.autoHold.has(String(tr.tb))) return '';
-      if (sbn && String(sbn).trim() && soKey(sbn) !== soKey(tr.soBienNhan || '')) return '';
+      if (!tr || sr.tnClick || sr.tn || sr.hoan || S.autoHold.has(String(tr.tb))) return '';
+      // dữ liệu trên trang là của TB đang tiếp nhận (đúng Số biên nhận, mọi thửa thuộc TB đó)?
+      const sameTb =
+        !(sbn && String(sbn).trim() && soKey(sbn) !== soKey(tr.soBienNhan || '')) && rows.every((r) => (tr.thua || []).some((t) => sameThua(r, t)));
+      if (!sameTb) {
+        // (25/11 – bạn: “nếu mà trang tiếp nhận hồ sơ đã điền mà khác tb mình đang nhập thì hãy f5 lại trang và điền như bình thường”)
+        // bạn không thao tác 20 giây → tải lại trang (F5) cho trống, 🤖 điền TB đang nhập như thường
+        if (stageOf(tr) !== 'chua' || !userQuiet(20000) || !recvF5Ok(tr.tb)) return '';
+        setStatus(`🤖 Trang Tiếp nhận đang có dữ liệu không phải TB ${tr.tb} – tải lại trang (F5) rồi điền TB ${tr.tb}.`);
+        log0(`🤖 trang Tiếp nhận có dữ liệu của TB khác – F5 rồi điền TB ${tr.tb}`);
+        setTimeout(() => location.reload(), 300);
+        return '';
+      }
+      if (!rr || rr.tb !== String(tr.tb) || Date.now() - (rr.at || 0) > 30 * 60 * 1000) return ''; // đúng TB mà không phải 🤖 đang làm dở (có thể bạn đang gõ)
       return userQuiet(20000) ? `tn:${tr.tb}:r` : '';
     }
     if (sbn === null) return '';

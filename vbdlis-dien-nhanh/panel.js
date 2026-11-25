@@ -20,7 +20,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.21.17'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.21.18'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -2097,7 +2097,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // ---------- điền ----------
   // Diện tích: PDF ghi "56,5" → nhập "56.5". Không đoán khi không chắc (vd "1.225": nghìn hay thập phân?)
   function normArea(s) {
-    const raw = String(s ?? '').trim();
+    // ô ="56.5" (file CSV tiện ích / kỹ năng ghi để Excel không đổi số) → bỏ vỏ, kể cả khi đi đường khác bước đọc CSV
+    const raw = String(s ?? '').trim().replace(/^="([\s\S]*)"$/, '$1').trim();
     const t = raw.replace(/\s+/g, '').replace(/(m²|m2)$/i, '');
     if (!t) return { err: 'chưa có diện tích' };
     if (/^\d{1,3}\.\d{3}$/.test(t) || /^\d{1,3}(\.\d{3})+$/.test(t)) return { err: `diện tích “${raw}” – không rõ dấu chấm là hàng nghìn hay thập phân, sửa lại (vd 1225 hoặc 1.2)` };
@@ -7349,28 +7350,312 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       text:
         `Đã nạp ${items.length} TB (${items.map((x) => x.tb).join(', ')}). Tổng cộng ${S.data.length} TB.` +
         (fixed ? ` Đã đổi ${fixed} diện tích từ dấu phẩy sang dấu chấm (56,5 → 56.5).` : '') +
-        (items.autofix && items.autofix.length ? ` Đã tự sửa JSON: ${items.autofix.join('; ')}.` : '') +
-        (items.bad.length ? ` ⚠ Diện tích cần sửa: ${items.bad.join('; ')}` : ''),
+        (items.autofix && items.autofix.length ? ` Đã tự sửa: ${items.autofix.join('; ')}.` : '') +
+        (items.bad.length ? ` ⚠ Cần sửa: ${items.bad.join('; ')}` : ''),
       bad: items.bad.length > 0,
     };
   }
-  // đọc các file .json (chọn bằng nút “Mở file…” hoặc kéo thả) → gộp vào
+  // ---------- dữ liệu TB bằng Excel (bạn yêu cầu 25/11: “nạp exel thay json … để dễ tiền kiểm soát”) ----------
+  // Mỗi dòng một người nộp / một chủ / một thửa; cột “Dòng” ghi Người nộp, Chủ 1, Chủ 2…, Thửa 1… Các ô của cả TB (Số biên nhận,
+  // Địa chỉ tài sản, Giấy tờ, Ghi chú…) ghi ở dòng Người nộp (dòng nào ghi cũng được – lấy ô có chữ đầu tiên).
+  // Nạp: file luôn đúng (bạn chọn “Excel luôn đúng”; file là CSV sửa bằng Excel) – TB có trong file được dựng lại đúng theo file (chủ, thửa thêm / bớt theo file); TB không có
+  // trong file giữ nguyên. Cột “Cần xem” tiện ích ghi khi xuất (soát trước khi nạp), lúc nạp bỏ qua cột này.
+  const XL_COLS = [
+    ['tb', 'TB'], ['dong', 'Dòng'], ['hoTen', 'Họ tên'], ['namSinh', 'Năm sinh'], ['gioiTinh', 'Giới tính'], ['loaiGiayTo', 'Loại giấy tờ'],
+    ['soGiayTo', 'Số giấy tờ'], ['noiCap', 'Nơi cấp'], ['soTo', 'Số tờ'], ['soThua', 'Số thửa'], ['dienTich', 'Diện tích'],
+    ['dienTichPL', 'Diện tích PL'], ['mdsd', 'MĐSD'], ['nguonGoc', 'Nguồn gốc'], ['thoiHan', 'Thời hạn'], ['diaChi', 'Địa chỉ'],
+    ['soBienNhan', 'Số biên nhận'], ['diaChiTaiSan', 'Địa chỉ tài sản'], ['giayTo', 'Giấy tờ'], ['ghiChu', 'Ghi chú'],
+    ['phuongXa', 'Phường/Xã'], ['quyTrinh', 'Quy trình'], ['dieuKienCapGiay', 'Điều kiện cấp giấy'], ['dangKyLanDau', 'Đăng ký lần đầu'],
+    ['loaiDoiTuong', 'Loại đối tượng'], ['danToc', 'Dân tộc'], ['quocTich', 'Quốc tịch'], ['canXem', 'Cần xem'],
+  ];
+  const XL_OPT = ['dienTichPL', 'phuongXa', 'quyTrinh', 'dieuKienCapGiay', 'dangKyLanDau', 'loaiDoiTuong', 'danToc', 'quocTich']; // chỉ xuất khi có TB dùng
+  const XL_TB = ['soBienNhan', 'diaChiTaiSan', 'giayTo', 'ghiChu', 'phuongXa', 'quyTrinh', 'dieuKienCapGiay', 'dangKyLanDau']; // ô của cả TB
+  const XL_CHU = ['hoTen', 'namSinh', 'gioiTinh', 'loaiGiayTo', 'soGiayTo', 'noiCap', 'diaChi', 'loaiDoiTuong', 'danToc', 'quocTich'];
+  const XL_THUA = ['soThua', 'soTo', 'dienTich', 'dienTichPL', 'mdsd', 'diaChi', 'thoiHan', 'nguonGoc']; // thứ tự ô như dữ liệu JSON
+  const XL_NOP = ['hoTen', 'soGiayTo', 'diaChi'];
+  const XL_KNOWN = new Set(['tb', 'nguoiNop', 'chu', 'thua', ...XL_TB]);
+  // so nội dung hai TB: không kể thứ tự ô, ô trống / mảng rỗng (Excel không giữ ô trống)
+  const xlCanon = (o) =>
+    JSON.stringify(o, (k, v) => {
+      if (v === '' || v == null || (Array.isArray(v) && !v.length)) return undefined;
+      if (v && typeof v === 'object' && !Array.isArray(v)) return Object.fromEntries(Object.keys(v).sort().map((kk) => [kk, v[kk]]));
+      return typeof v === 'number' ? String(v) : v;
+    });
+  // tên cột → khóa (bỏ dấu, bỏ ký hiệu; nhận thêm vài tên quen gọi)
+  const XL_ALIAS = {
+    'so tb': 'tb', 'tb so': 'tb', 'so thong bao': 'tb', 'loai dong': 'dong', 'ho va ten': 'hoTen', 'ten': 'hoTen', 'so cccd': 'soGiayTo',
+    'cccd': 'soGiayTo', 'so dinh danh': 'soGiayTo', 'to': 'soTo', 'to ban do': 'soTo', 'so to ban do': 'soTo', 'thua': 'soThua',
+    'thua so': 'soThua', 'dien tich m2': 'dienTich', 'muc dich': 'mdsd', 'muc dich su dung': 'mdsd', 'loai dat': 'mdsd',
+    'mdsd cap giay': 'mdsd', 'so bn': 'soBienNhan', 'dia chi thua': 'diaChi', 'thoi han sd': 'thoiHan', 'nguon goc dat': 'nguonGoc',
+  };
+  const xlNorm = (s) => norm(s).replace(/[^a-z0-9]+/g, ' ').trim();
+  const xlKeyOf = (h) => {
+    const n = xlNorm(h);
+    if (!n) return '';
+    const c = XL_COLS.find(([, lab]) => xlNorm(lab) === n);
+    return c ? c[0] : XL_ALIAS[n] || '';
+  };
+  const xlText = (v) => String(v ?? '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+  const xlNum = (v) => xlText(v).replace(/^(\d+)\.0+$/, '$1'); // ô số của Excel: 1890.0 → 1890
+  // số CCCD từ Excel: bỏ dấu cách / chấm; Excel bỏ mất số 0 đầu (ô dạng số) → thêm lại; số mũ (2.4E+11) thì không cứu được
+  function xlId(v, loai, who, notes, bad) {
+    const t = xlText(v);
+    if (!t) return '';
+    if (/^\d+(\.\d+)?e\+?\d+$/i.test(t)) {
+      bad.push(`${who}: số giấy tờ “${t}” bị Excel đổi thành số mũ – định dạng cột Số giấy tờ là Văn bản (Text) rồi gõ lại`);
+      return t;
+    }
+    let d = /^\d+\.0+$/.test(t) ? t.replace(/\.0+$/, '') : t.replace(/[\s.\-]/g, '');
+    if (!/^\d+$/.test(d)) return t;
+    if (d.length === 11 && (!loai || /can cuoc/.test(norm(loai)))) {
+      notes.push(`${who}: số giấy tờ thiếu số 0 đầu (Excel bỏ mất) – đã thêm`);
+      d = '0' + d;
+    }
+    return d;
+  }
+  // số CCCD 12 số: chữ số thứ 4 = thế kỷ + giới tính (0 nam / 1 nữ 19xx, 2 nam / 3 nữ 20xx), số 5–6 = năm sinh → lệch dữ liệu thì nhắc
+  function cccdLech(p) {
+    const d = digitsOf(p.soGiayTo);
+    if (d.length !== 12 || d === '033205007296') return []; // số CCCD thay cho chủ chỉ có CMND (quy ước 25/11)
+    const g = +d[3];
+    if (g > 3) return [];
+    const year = (g < 2 ? '19' : '20') + d.slice(4, 6);
+    const nam = g % 2 === 0;
+    const out = [];
+    const ns = String(p.namSinh || (/(\d{4})$/.exec(String(p.ngaySinh || '')) || [])[1] || '');
+    if (/^\d{4}$/.test(ns) && ns !== year) out.push(`số CCCD ứng năm sinh ${year}, dữ liệu ghi ${ns}`);
+    const gt = norm(p.gioiTinh || '');
+    if (/^(nam|nu)$/.test(gt) && (gt === 'nam') !== nam) out.push(`số CCCD ứng giới tính ${nam ? 'Nam' : 'Nữ'}, dữ liệu ghi ${p.gioiTinh}`);
+    return out;
+  }
+  // các hàng của trang tính → danh sách TB (như dữ liệu JSON) kèm báo cáo; hàng lỗi thì bỏ hàng đó
+  function tbsFromSheet(rows) {
+    rows = (rows || []).map((r) => (r || []).map(csvUnwrap));
+    let hi = -1;
+    let map = null;
+    for (let i = 0; i < Math.min(rows.length, 15); i++) {
+      const keys = (rows[i] || []).map(xlKeyOf);
+      if (keys.includes('tb') && keys.includes('dong')) {
+        hi = i;
+        map = keys;
+        break;
+      }
+    }
+    if (hi < 0) {
+      const head = rows.slice(0, 10).map((r) => (r || []).map(xlNorm).join('|')).join('\n');
+      if (/trang thai/.test(head)) throw new Error('đây là file tiến độ – nạp ở ☰ Tiến độ → “⬆ Nạp tiến độ…”');
+      throw new Error('không thấy hàng tiêu đề có cột “TB” và cột “Dòng” – dùng file mẫu (nút “⬇ Xuất CSV”)');
+    }
+    const by = new Map();
+    const errs = [];
+    const notes = [];
+    const bad = [];
+    for (let i = hi + 1; i < rows.length; i++) {
+      const r = rows[i] || [];
+      const v = {};
+      map.forEach((k, j) => {
+        if (k && k !== 'canXem' && !v[k]) v[k] = xlText(r[j]);
+      });
+      if (!Object.values(v).some(Boolean)) continue; // hàng trống
+      const where = `hàng ${i + 1}`;
+      const tb = xlNum(v.tb).replace(/^tb\s*/i, '');
+      if (!tb) {
+        errs.push(`${where}: thiếu số TB – bỏ hàng`);
+        continue;
+      }
+      const d = xlNorm(v.dong);
+      const kind = /^nguoi nop/.test(d) ? 'nop' : /^chu\b/.test(d) ? 'chu' : /^thua\b/.test(d) ? 'thua' : /^(tb|ho so|chung)?$/.test(d) ? 'tb' : '';
+      if (!kind) {
+        errs.push(`${where} (TB ${tb}): cột Dòng ghi “${v.dong}” – không hiểu (ghi Người nộp / Chủ / Thửa), bỏ hàng`);
+        continue;
+      }
+      let o = by.get(tb);
+      if (!o) by.set(tb, (o = { tb, chu: [], thua: [], tbv: {}, nop: null }));
+      XL_TB.forEach((k) => {
+        if (!v[k]) return;
+        if (!o.tbv[k]) o.tbv[k] = v[k];
+        else if (o.tbv[k] !== v[k]) notes.push(`TB ${tb}: ô “${XL_COLS.find((c) => c[0] === k)[1]}” ghi khác nhau ở nhiều hàng – lấy hàng đầu`);
+      });
+      const pick = (keys) => Object.fromEntries(keys.filter((k) => v[k]).map((k) => [k, v[k]]));
+      if (kind === 'nop') o.nop = pick(XL_NOP);
+      else if (kind === 'chu') o.chu.push(pick(XL_CHU));
+      else if (kind === 'thua') o.thua.push(pick(XL_THUA));
+    }
+    const items = [];
+    let fixed = 0;
+    for (const o of by.values()) {
+      const x = { tb: o.tb };
+      XL_TB.forEach((k) => {
+        if (!o.tbv[k]) return;
+        x[k] = k === 'giayTo' ? o.tbv[k].split(/\s*[;\n]\s*/).filter(Boolean) : o.tbv[k];
+      });
+      x.chu = o.chu.map((p, i) => {
+        const who = `TB ${o.tb} chủ ${i + 1}`;
+        const q = { ...p };
+        if (q.soGiayTo) q.soGiayTo = xlId(q.soGiayTo, q.loaiGiayTo, who, notes, bad);
+        if (q.namSinh) {
+          const ns = xlNum(q.namSinh);
+          const m = /(\d{4})$/.exec(ns);
+          q.namSinh = m ? m[1] : ns;
+          if (!m) bad.push(`${who}: năm sinh “${ns}” không phải 4 chữ số`);
+        }
+        if (q.gioiTinh) {
+          const g = norm(q.gioiTinh);
+          q.gioiTinh = g === 'nam' ? 'Nam' : /^nu$/.test(g) ? 'Nữ' : q.gioiTinh;
+        }
+        return q;
+      });
+      x.thua = o.thua.map((t, i) => {
+        const q = { ...t };
+        if (q.soTo) q.soTo = xlNum(q.soTo);
+        if (q.soThua) q.soThua = xlNum(q.soThua);
+        for (const key of ['dienTich', 'dienTichPL']) {
+          if (!q[key]) continue;
+          const a = normArea(q[key]);
+          if (a.v && a.v !== q[key]) {
+            q[key] = a.v;
+            fixed++;
+          } else if (a.err) bad.push(`TB ${o.tb} thửa ${i + 1} (${q.soThua || '?'}/${q.soTo || '?'}): ${a.err}`);
+        }
+        return q;
+      });
+      if (o.nop) {
+        const n = { ...o.nop };
+        if (n.soGiayTo) n.soGiayTo = xlId(n.soGiayTo, '', `TB ${o.tb} người nộp`, notes, bad);
+        x.nguoiNop = n;
+      } else if (x.chu[0]) {
+        x.nguoiNop = { hoTen: x.chu[0].hoTen, soGiayTo: x.chu[0].soGiayTo, diaChi: x.chu[0].diaChi };
+        notes.push(`TB ${o.tb}: không có hàng Người nộp – lấy chủ thứ nhất`);
+      }
+      items.push(x);
+    }
+    items.fixed = fixed;
+    items.bad = bad;
+    items.autofix = notes;
+    items.errs = errs;
+    items.xl = true;
+    return items;
+  }
+  // các chỗ nên xem trước khi nạp (cột “Cần xem” của file xuất ra) – chỉ nhắc, không chặn
+  function xlChecks(x) {
+    const r = { tb: [], nop: [], chu: [], thua: [] };
+    if (!String(x.soBienNhan || '').trim()) r.tb.push('thiếu Số biên nhận');
+    else {
+      const kp = uniq(khPairs(x.soBienNhan) || []);
+      const tp = uniq((x.thua || []).filter((t) => t && t.soTo && t.soThua).map(thuaKey));
+      if (kp.length && tp.length && !sameSet(kp, tp)) r.tb.push('Số biên nhận không khớp danh sách thửa');
+    }
+    if (!(x.thua || []).length) r.tb.push('chưa có thửa nào');
+    if (!(x.chu || []).length) r.tb.push('chưa có chủ nào');
+    const dup = dupMap().get(String(x.tb));
+    if (dup && dup.length) r.tb.push('trùng thửa với ' + uniq(dup.map((d) => 'TB ' + d.tb)).join(', '));
+    const n = x.nguoiNop || {};
+    if (!String(n.hoTen || '').trim()) r.nop.push('thiếu họ tên người nộp');
+    if (!String(n.diaChi || '').trim()) r.nop.push('thiếu địa chỉ người nộp');
+    if (!digitsOf(n.soGiayTo)) r.nop.push('thiếu số giấy tờ người nộp');
+    r.chu = (x.chu || []).map((p) => {
+      const a = [];
+      const g = chuGaps(p);
+      if (g.length) a.push('thiếu ' + g.join(', '));
+      const d = digitsOf(p.soGiayTo);
+      if (d && d.length !== 12 && d.length !== 9) a.push(`số giấy tờ có ${d.length} chữ số`);
+      return a.concat(cccdLech(p));
+    });
+    r.thua = (x.thua || []).map((t) => {
+      const a = thuaErrors(t, x, '').map((s) => s.replace(/^:\s*/, '').trim());
+      const md = String(t.mdsd || '').trim();
+      if (!md) a.push('thiếu mục đích sử dụng');
+      else if (thuaMdsd(t) !== md) a.push(`MĐSD ${md} sẽ nhập ${thuaMdsd(t)}`);
+      if (isDatO(t)) {
+        if (thuaNguonGoc(t) !== String(t.nguonGoc || '').trim()) a.push('đất ở: Nguồn gốc sẽ nhập “có thu tiền sử dụng đất”');
+        if (thuaThoiHan(t) !== String(t.thoiHan || '').trim()) a.push('đất ở: Thời hạn sẽ nhập “Lâu dài”');
+      }
+      return a;
+    });
+    return r;
+  }
+  // bảng xuất ra: tiêu đề + mỗi TB một hàng Người nộp, các hàng Chủ, các hàng Thửa
+  function dataSheetRows(list) {
+    const has = (k) =>
+      list.some((x) => (x[k] != null && x[k] !== '') || (x.chu || []).some((p) => p && p[k]) || (x.thua || []).some((t) => t && t[k]));
+    const cols = XL_COLS.filter(([k]) => !XL_OPT.includes(k) || has(k));
+    const rows = [cols.map((c) => c[1])];
+    let warn = 0;
+    for (const x of list) {
+      const ck = xlChecks(x);
+      const tbv = {};
+      XL_TB.forEach((k) => (tbv[k] = k === 'giayTo' ? (x.giayTo || []).join('; ') : x[k]));
+      const line = (dong, o, cx) => {
+        if (cx.length) warn++;
+        rows.push(cols.map(([k]) => (k === 'tb' ? x.tb : k === 'dong' ? dong : k === 'canXem' ? cx.join('; ') : o[k] ?? '')));
+      };
+      const n = x.nguoiNop || {};
+      line('Người nộp', { ...tbv, hoTen: n.hoTen, soGiayTo: n.soGiayTo, diaChi: n.diaChi }, [...ck.tb, ...ck.nop]);
+      (x.chu || []).forEach((p, i) =>
+        line(`Chủ ${i + 1}`, { ...p, namSinh: p.namSinh || (/(\d{4})$/.exec(String(p.ngaySinh || '')) || [])[1] || '' }, ck.chu[i] || [])
+      );
+      (x.thua || []).forEach((t, i) => line(`Thửa ${i + 1}`, t, ck.thua[i] || []));
+    }
+    return { rows, cols, warn };
+  }
+  // ---------- ghi file CSV dữ liệu TB (người dùng 25/11: “csv cơ”, “không dùng xlsx”) ----------
+  // ô số Excel hay đổi (số 0 đầu như số CCCD, có . , / - như 56.5, từ 12 chữ số) và chữ mở đầu = + - @ → ghi ="…"
+  // (Excel hiện đúng chữ, lưu lại thì thành chữ thường); ô có dấu " → bọc ngoặc kép kiểu CSV
+  function csvCell(v) {
+    const t = String(v ?? '').replace(/[\t\r\n]+/g, ' ');
+    const num = /^\d[\d.,\/\-]*$/.test(t) && (/^0\d/.test(t) || /[.,\/\-]/.test(t) || t.length >= 12);
+    const formula = /^[=+\-@]/.test(t);
+    if ((num || formula) && t.length <= 250) return `="${t.replace(/"/g, '""')}"`;
+    if (formula) return ' ' + t; // dài quá cho ="…" → dấu cách đầu để Excel không coi là công thức
+    return t.includes('"') ? `"${t.replace(/"/g, '""')}"` : t;
+  }
+  // ô ="…" (file tiện ích / kỹ năng Claude ghi) → bỏ vỏ khi nạp
+  const csvUnwrap = (v) => {
+    const m = /^\s*="([\s\S]*)"\s*$/.exec(String(v ?? ''));
+    return m ? m[1].replace(/""/g, '"') : v;
+  };
+  // ⬇ Xuất CSV: dữ liệu mọi TB đang có – UTF-16 + dấu Tab (Excel mở thẳng, đúng tiếng Việt, đúng cột); soát / sửa rồi nạp lại (file luôn đúng)
+  function exportDataCsv() {
+    const { rows, warn } = dataSheetRows(S.data);
+    const name = saveFile(`du-lieu-tb-${stamp()}.csv`, utf16Tsv(rows.map((r) => r.map(csvCell).join('\t')).join('\r\n')));
+    return { name, n: S.data.length, warn };
+  }
+  // đọc các file dữ liệu (chọn bằng nút “Mở file…” hoặc kéo thả): CSV (.csv / .tsv / .txt – sửa bằng Excel) hoặc .json → gộp vào.
+  // File CSV luôn đúng: TB có trong file thay hẳn TB cùng số (giữ các ô file không có cột, vd. ô riêng của dữ liệu cũ).
+  // Không dùng .xlsx (người dùng 25/11) → nhắc lưu lại dạng CSV
+  const isSheetFile = (f) => /\.(csv|tsv|txt)$/i.test(f.name) || (!/\.json$/i.test(f.name) && /text\/csv|tab-separated/.test(f.type || ''));
+  const isXlsxFile = (f) => /\.xls[xmb]?$/i.test(f.name);
+  const XLSX_NO = 'không dùng file .xlsx – trong Excel bấm “Lưu thành” (Save As), chọn kiểu “CSV UTF-8” hoặc “Unicode Text” rồi nạp file đó';
+  async function csvRows(f) {
+    const buf = await f.arrayBuffer();
+    const u8 = new Uint8Array(buf);
+    if ((u8[0] === 0x50 && u8[1] === 0x4b) || (u8[0] === 0xd0 && u8[1] === 0xcf)) throw new Error(XLSX_NO); // file Excel đổi đuôi thành .csv
+    return parseDelimited(decodeText(buf));
+  }
   async function importFiles(files) {
-    const list = [...(files || [])].filter((f) => /\.json$/i.test(f.name) || /json/.test(f.type));
-    if (!list.length) return { text: 'Không có file .json nào (chỉ nhận file dữ liệu TB dạng .json).', bad: true };
+    const list = [...(files || [])].filter((f) => /\.json$/i.test(f.name) || /json/.test(f.type) || isSheetFile(f) || isXlsxFile(f));
+    if (!list.length) return { text: 'Không có file dữ liệu nào (nhận file .csv hoặc .json).', bad: true };
     const all = [];
     const errs = [];
+    const rowErrs = [];
+    const fromXl = new Set();
     for (const f of list) {
       try {
-        const items = parseData(await f.text());
+        const sheet = isSheetFile(f);
+        if (!sheet && isXlsxFile(f)) throw new Error(XLSX_NO);
+        const items = sheet ? tbsFromSheet(await csvRows(f)) : parseData(await f.text());
+        if (sheet && !items.length) throw new Error('không có hàng dữ liệu TB nào');
         items.forEach((x) => {
           const k = all.findIndex((y) => y.tb === x.tb);
           if (k >= 0) all[k] = x;
           else all.push(x);
+          if (sheet) fromXl.add(x.tb);
+          else fromXl.delete(x.tb);
         });
         all.fixed = (all.fixed || 0) + items.fixed;
         all.bad = (all.bad || []).concat(items.bad);
         all.autofix = (all.autofix || []).concat(items.autofix.map((x) => `${f.name}: ${x}`));
+        (items.errs || []).forEach((x) => rowErrs.push(`${f.name} ${x}`));
       } catch (e) {
         errs.push(`${f.name}: ${e.message}`);
       }
@@ -7379,8 +7664,41 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     all.fixed = all.fixed || 0;
     all.bad = all.bad || [];
     all.autofix = all.autofix || [];
+    // TB từ Excel: giữ các ô Excel không có cột; TB đã tiếp nhận mà Excel đổi số biên nhận / thửa → nhắc (vẫn theo Excel)
+    const latest = (await store.get('tbData')).tbData || S.data;
+    const warn = [];
+    all.forEach((x, k) => {
+      if (!fromXl.has(x.tb)) return;
+      const old = latest.find((y) => String(y.tb) === String(x.tb));
+      if (!old) return;
+      const keep = {};
+      Object.keys(old).forEach((key) => {
+        if (!XL_KNOWN.has(key) && !(key in x)) keep[key] = old[key];
+      });
+      all[k] = { ...x, ...keep };
+      // nội dung y hệt bản đang có (vd. nạp lại file vừa xuất, không sửa gì) → giữ nguyên bản cũ: không mất dấu ✓ từng mục
+      if (xlCanon(all[k]) === xlCanon(old)) {
+        all[k] = old;
+        return;
+      }
+      // file chỉ có vài hàng của TB (vd. chỉ hàng Người nộp) → TB mất hết chủ / thửa: vẫn theo Excel nhưng nhắc rõ
+      const gone = [!(x.chu || []).length && (old.chu || []).length && 'chủ', !(x.thua || []).length && (old.thua || []).length && 'thửa'].filter(Boolean);
+      if (gone.length) warn.push(`TB ${x.tb}: file CSV không có hàng ${gone.join(' / ')} nào – TB này giờ không còn ${gone.join(' / ')} (thiếu hàng thì nạp lại đủ hàng của TB)`);
+      const s0 = S.stage[String(x.tb)] || {};
+      if ((s0.tn || s0.tnClick || s0.don || s0.ld) && (String(old.soBienNhan || '') !== String(x.soBienNhan || '') || !sameSet(tbPairs(old), tbPairs(x))))
+        warn.push(`TB ${x.tb} đã tiếp nhận trên VBDLIS mà Excel đổi số biên nhận / thửa – kiểm tra hồ sơ đó trên VBDLIS`);
+    });
     const r = await applyItems(all, false);
-    return { text: `${r.text} (từ ${list.length - errs.length} file)` + (errs.length ? ` ✗ Lỗi: ${errs.join('; ')}` : ''), bad: r.bad || errs.length > 0 };
+    const nXl = all.filter((x) => fromXl.has(x.tb)).length;
+    const cut = (a) => a.slice(0, 8).join('; ') + (a.length > 8 ? `; … (còn ${a.length - 8})` : '');
+    return {
+      text:
+        `${r.text} (từ ${list.length - errs.length} file${nXl ? `; ${nXl} TB theo file CSV – file luôn đúng` : ''})` +
+        (rowErrs.length ? ` ✗ Bỏ ${rowErrs.length} hàng lỗi: ${cut(rowErrs)}` : '') +
+        (warn.length ? ` ⚠ ${cut(warn)}` : '') +
+        (errs.length ? ` ✗ Lỗi: ${errs.join('; ')}` : ''),
+      bad: r.bad || errs.length > 0 || rowErrs.length > 0 || warn.length > 0,
+    };
   }
 
   // Thư mục data: mỗi lần mở bảng tự đọc data/du-lieu.json – TB mới được thêm, TB bạn chưa sửa được cập nhật,
@@ -7442,11 +7760,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     }
     const d = document.createElement('div');
     d.className = 'dlg';
-    d.innerHTML = `<div class="dh"><b>Dữ liệu TB (JSON)</b><span class="sp"></span><button class="btn x" id="dlgClose" title="Đóng hộp này (phím Esc)">✕ Đóng</button></div>
-      <div class="hint">Dán dữ liệu một TB hoặc danh sách TB rồi bấm “Gộp vào” (thay TB trùng số, giữ các TB khác). Có file .json thì <b>kéo thả file vào bảng này</b> hoặc bấm “Mở file…”. File <b>data/du-lieu.json</b> của tiện ích được tự đọc mỗi lần mở bảng.</div>
-      <input type="file" id="dlgFile" accept=".json,application/json" multiple style="display:none">
+    d.innerHTML = `<div class="dh"><b>Dữ liệu TB</b><span class="sp"></span><button class="btn x" id="dlgClose" title="Đóng hộp này (phím Esc)">✕ Đóng</button></div>
+      <div class="hint"><b>File CSV</b> (mở / sửa bằng Excel – mỗi dòng một người nộp / chủ / thửa; bấm “⬇ Xuất CSV” để có file đúng mẫu cột, kèm cột <b>Cần xem</b> để soát trước; sửa xong lưu vẫn kiểu CSV, không lưu .xlsx) hoặc file .json: bấm <b>“Mở file…”</b> hoặc <b>kéo thả file vào bảng này</b>. Nạp CSV thì <b>file luôn đúng</b>: TB có trong file lấy đúng theo file (chủ, thửa thêm / bớt theo file), TB không có trong file giữ nguyên. Hoặc dán JSON rồi bấm “Gộp vào”. File <b>data/du-lieu.json</b> của tiện ích được tự đọc mỗi lần mở bảng.</div>
+      <input type="file" id="dlgFile" accept=".csv,.tsv,.txt,.json,application/json,text/csv" multiple style="display:none">
       <textarea id="dlgTxt" spellcheck="false"></textarea>
-      <div class="row"><button class="btn pri" id="dlgMerge">Gộp vào</button><button class="btn" id="dlgReplace">Thay toàn bộ</button><button class="btn" id="dlgCopy">Sao chép hiện có</button><button class="btn" id="dlgOpen" title="Chọn file .json dữ liệu TB (chọn được nhiều file)">Mở file…</button><button class="btn" id="dlgSample" title="Đưa nội dung file data/du-lieu.json của tiện ích vào ô để Gộp vào / Thay toàn bộ">Lấy từ thư mục data</button><button class="btn" id="dlgRec" title="Xuất lại file của lần ghi thao tác gần nhất">Xuất bản ghi</button></div>
+      <div class="row"><button class="btn pri" id="dlgMerge">Gộp vào</button><button class="btn" id="dlgReplace">Thay toàn bộ</button><button class="btn" id="dlgCopy">Sao chép hiện có</button><button class="btn" id="dlgOpen" title="Chọn file dữ liệu TB: .csv (sửa bằng Excel) hoặc .json (chọn được nhiều file)">Mở file…</button><button class="btn" id="dlgXls" title="Tải file CSV dữ liệu mọi TB đang có (mở bằng Excel) – mỗi dòng một người nộp / chủ / thửa, cột Cần xem để soát trước; sửa xong lưu vẫn kiểu CSV rồi nạp lại bằng “Mở file…” (file luôn đúng)">⬇ Xuất CSV</button><button class="btn" id="dlgSample" title="Đưa nội dung file data/du-lieu.json của tiện ích vào ô để Gộp vào / Thay toàn bộ">Lấy từ thư mục data</button><button class="btn" id="dlgRec" title="Xuất lại file của lần ghi thao tác gần nhất">Xuất bản ghi</button></div>
       <div class="row"><span class="muted">Xóa:</span><button class="btn del" id="dlgDelOne" title="Xóa TB đang chọn ở ô trên cùng của bảng điền">TB đang chọn</button><button class="btn del" id="dlgDelAll" title="Xóa mọi TB trong tiện ích">Tất cả TB</button><button class="btn del" id="dlgDelRec" title="Xóa bản ghi thao tác đã ghi">Bản ghi thao tác</button></div>
       <div class="hint">Xóa chỉ xóa dữ liệu trong tiện ích (trên máy này), không đụng gì trên VBDLIS. Muốn có lại: dán JSON rồi “Gộp vào”, hoặc “Lấy từ thư mục data” rồi “Gộp vào”.</div>
       <div id="dlgMsg" class="hint"></div>`;
@@ -7516,6 +7834,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           msg(r.text, r.bad);
         } else if (id === 'dlgOpen') {
           d.querySelector('#dlgFile').click();
+        } else if (id === 'dlgXls') {
+          if (!S.data.length) return msg('Chưa có TB nào để xuất.', true);
+          const x = exportDataCsv();
+          msg(`Đã xuất “${x.name}” (${x.n} TB${x.warn ? `, ${x.warn} dòng có ghi chú ở cột Cần xem` : ''}) vào thư mục Tải xuống. Mở bằng Excel soát / sửa, lưu (Excel hỏi kiểu file thì giữ kiểu hiện tại, không lưu .xlsx), rồi bấm “Mở file…” chọn file đó để nạp lại (file luôn đúng).`);
         } else if (id === 'dlgRec') {
           const R = await recorder();
           if (!R) return msg('Không bật được bộ ghi thao tác trên trang này.', true);
@@ -8811,7 +9133,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const scans = all.filter(isScanFile);
       // file PDF / ảnh scan → vào hàng chờ file quét; file .json → nạp dữ liệu TB như trước
       if (scans.length) return await queueScanFiles(scans);
-      if (hasDir && !all.some((f) => /\.json$/i.test(f.name)))
+      if (hasDir && !all.some((f) => /\.(json|csv|tsv)$/i.test(f.name)))
         return setResult('<div class="bad">✗ Thư mục không có file quét nào (PDF tên “KH 2959.07777…DDK / TBXN”).</div>');
       const r = await importFiles(all);
       setResult(`<div class="${r.bad ? 'bad' : 'ok'}">${r.bad ? '✗' : '✓'} ${esc(r.text)}</div>`);

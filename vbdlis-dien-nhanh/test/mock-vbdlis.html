@@ -143,7 +143,8 @@
       <div class="mockDsTabs"><a data-chon="1" onclick="bamNutPhu(event, 'tab Tất cả')">Tất cả</a><a onclick="bamNutPhu(event, 'tab Quá hạn xử lý')">Quá hạn xử lý (16)</a><a onclick="bamNutPhu(event, 'tab Quá hạn trả hồ sơ')">Quá hạn trả hồ sơ (0)</a><a onclick="bamNutPhu(event, 'tab Sắp hết hạn xử lý')">Sắp hết hạn xử lý (0)</a><a onclick="bamNutPhu(event, 'tab Đang chờ bổ sung')">Đang chờ bổ sung (24)</a><a onclick="bamNutPhu(event, 'tab Đang chuyển thuế')">Đang chuyển thuế (4)</a></div>
       <table id="tblDsThuLy"><thead><tr><th>#</th><th>Thông tin hồ sơ</th><th>Thông tin biên nhận</th><th>Thông tin luân chuyển</th><th>Thông tin người nộp</th></tr></thead><tbody id="mockDsRows"></tbody></table>
       <div id="mockPager" class="dataTables_paginate" style="display:none;margin-top:6px"></div>
-      <div style="margin-top:8px;color:#555">Hiển thị từ 1 đến 2 trong tổng số 2 hồ sơ tiếp nhận</div>
+      <label id="mockLenBox" style="display:none;margin-top:6px">Hiển thị <select id="mockLen" onchange="mockCvLen(event)"></select> dòng</label>
+      <div id="mockDsInfo" style="margin-top:8px;color:#555">Hiển thị từ 1 đến 2 trong tổng số 2 hồ sơ tiếp nhận</div>
     </div>
     <div class="mockDsPhai"><div class="mockDsPhaiTieuDe">Thông tin hồ sơ</div><div id="mockTTHS"></div></div>
   </div>
@@ -1337,7 +1338,7 @@
     let rows;
     if (L.on) rows = L.ds.filter((d) => !d.moi && !d.daDi).map((d) => ['ld:' + d.sbn, d]).concat([['khac', hsKhac()]]);
     else {
-      rows = [['khac', hsKhac()]];
+      rows = [['khac', hsKhac()]].concat(((window.__mockCv || {}).them || []).map((d) => ['them:' + d.sbn, Object.assign({}, HS_KHAC, { buoc: '2. Chuyên viên', cb: '', vaoLuc: '' }, d)]));
       if (H.sbn && H.stage && H.stage !== 'ld' && (H.stage !== 'done' || window.__mockDoneConLai)) rows.push(['hs', hsDangLam()]);
     }
     return q ? rows.filter(([, d]) => String(d.sbn).replace(/\s+/g, ' ').toLowerCase().includes(q)) : rows;
@@ -1349,17 +1350,33 @@
     document.getElementById('mockTaiKhoan').textContent = (window.__mockDung || {})[L.on ? 'cv' : 'kq'] || '';
     let rows = dsHang();
     const pg = document.getElementById('mockPager');
-    if (L.on && L.coTrang && !String(window.__mockDsQ || '').trim()) {
-      const n = Math.max(1, Math.ceil(rows.length / L.coTrang));
-      if (L.trang >= n) L.trang = n - 1;
-      const t = L.trang;
-      rows = rows.slice(t * L.coTrang, (t + 1) * L.coTrang);
-      pg.style.display = '';
-      pg.innerHTML = `<a href="javascript:;" class="paginate_button previous${t <= 0 ? ' disabled' : ''}"${t <= 0 ? '' : ' onclick="mockLDTrang(event,-1)"'}>‹</a> <a class="paginate_button current">${t + 1}</a> <a href="javascript:;" class="paginate_button next${t >= n - 1 ? ' disabled' : ''}"${t >= n - 1 ? '' : ' onclick="mockLDTrang(event,1)"'}>›</a>`;
+    // phân trang: vai trò lãnh đạo (L.coTrang) / chuyên viên (window.__mockCv.coTrang – mockDsThem); dòng tổng số dưới bảng như trang thật
+    const C = window.__mockCv || {};
+    const P = L.on ? L : C;
+    const fnTrang = L.on ? 'mockLDTrang' : 'mockCvTrang';
+    const tong = rows.length;
+    let tu = tong ? 1 : 0;
+    let den = tong;
+    if (P.coTrang && !String(window.__mockDsQ || '').trim()) {
+      const n = Math.max(1, Math.ceil(rows.length / P.coTrang));
+      if (P.trang >= n) P.trang = n - 1;
+      const t = P.trang;
+      rows = rows.slice(t * P.coTrang, (t + 1) * P.coTrang);
+      tu = tong ? t * P.coTrang + 1 : 0;
+      den = t * P.coTrang + rows.length;
+      pg.style.display = !L.on && C.anTrang ? 'none' : '';
+      pg.innerHTML = `<a href="javascript:;" class="paginate_button previous${t <= 0 ? ' disabled' : ''}"${t <= 0 ? '' : ` onclick="${fnTrang}(event,-1)"`}>‹</a> <a class="paginate_button current">${t + 1}</a> <a href="javascript:;" class="paginate_button next${t >= n - 1 ? ' disabled' : ''}"${t >= n - 1 ? '' : ` onclick="${fnTrang}(event,1)"`}>›</a>`;
     } else {
       pg.style.display = 'none';
       pg.innerHTML = '';
     }
+    const info = document.getElementById('mockDsInfo');
+    info.textContent = `Hiển thị từ ${tu} đến ${den} trong tổng số ${tong} hồ sơ tiếp nhận`;
+    info.style.display = !L.on && C.khongTong ? 'none' : '';
+    const lb = document.getElementById('mockLenBox');
+    const lens = !L.on && C.coTrang && !C.khongChonDong ? [...new Set([C.coTrang0 || C.coTrang, 10, 25, 50])].sort((a, b) => a - b) : [];
+    lb.style.display = lens.length ? '' : 'none';
+    if (lens.length) document.getElementById('mockLen').innerHTML = lens.map((v) => `<option value="${v}"${v === C.coTrang ? ' selected' : ''}>${v}</option>`).join('');
     document.getElementById('mockDsRows').innerHTML = rows.length
       ? rows.map(([k, d]) => dongDs(k, d)).join('')
       : '<tr><td colspan="5" style="text-align:center;color:#888">Không tìm thấy hồ sơ nào</td></tr>';
@@ -1373,6 +1390,7 @@
     window.__mockDsQ = q;
     window.__mockTim = (window.__mockTim || 0) + 1;
     ldHienMoi();
+    if (window.__mockCv && !window.__mockCv.giuTrang) { window.__mockCv.trang = 0; luuCv(); }
     document.getElementById('mockDsRows').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">Đang tải…</td></tr>';
     setTimeout(veDsThuLy, 400);
   };
@@ -1410,7 +1428,7 @@
     H.chon = tr.getAttribute('data-mock-hs');
     luuHoSoTT();
     veChonDs();
-    log('(' + aiBam(e) + ' chọn dòng hồ sơ ' + (H.chon === 'hs' ? H.sbn : H.chon.startsWith('ld:') ? H.chon.slice(3) : hsKhac().sbn) + ')');
+    log('(' + aiBam(e) + ' chọn dòng hồ sơ ' + (H.chon === 'hs' ? H.sbn : H.chon.startsWith('ld:') ? H.chon.slice(3) : H.chon.startsWith('them:') ? H.chon.slice(5) : hsKhac().sbn) + ')');
   });
   // “Xử lý hồ sơ” của danh sách (không có id): chưa chọn dòng → báo lỗi; dòng hồ sơ khác → “Hồ sơ không thuộc bạn xử lý”; dòng hồ sơ đang làm → Quy trình theo bước
   function dsXuLyHoSo(ev){
@@ -1421,6 +1439,7 @@
       log('(trang báo: Hồ sơ không thuộc bạn xử lý)');
       return mockConfirm('Thông báo', 'Hồ sơ không thuộc bạn xử lý', [{ text: 'Đóng', cls: 'btn-default' }]);
     }
+    if (H.chon.startsWith('them:')) return log('(giả lập: hồ sơ thêm ' + H.chon.slice(5) + ' – chỉ để thử soát hàng loạt, không mở Quy trình)');
     if (H.chon.startsWith('ld:')) {
       // chế độ lãnh đạo: hồ sơ ở bước 3 → Quy trình “Ký duyệt hồ sơ”; đã chuyển → báo
       const d = ldItem(H.chon);
@@ -1452,6 +1471,36 @@
   //   __mockLD.giu: hồ sơ đã chuyển vẫn còn trong danh sách (ghi bước 4); mockLDTat() tắt
   const LD_BUOC3 = '3. Lãnh đạo UBND xã';
   window.__mockLD = { on: false, ds: [], ticks: {}, trang: 0, coTrang: 0, loi: '', khongToast: false, giu: false, qtSbn: '' };
+  // ===== SOÁT HÀNG LOẠT (tiện ích 1.21.17): Danh sách hồ sơ thụ lý của chuyên viên có thêm hồ sơ GIẢ + phân trang =====
+  //   mockDsThem([{ sbn, buoc }], { coTrang, giuTrang, anTrang, khongTong, khongChonDong }) – coTrang = số dòng mỗi trang; giuTrang: bấm 🔍 không về
+  //   trang 1; anTrang: không hiện thanh phân trang (tiện ích không nhận ra); khongTong: không có dòng tổng số; khongChonDong: không có ô chọn số dòng
+  window.__mockCv = { them: [], coTrang: 0, coTrang0: 0, trang: 0 };
+  function luuCv(){ ssGhi('__mockCv', window.__mockCv); }
+  window.mockDsThem = function(ds, o){
+    o = o || {};
+    window.__mockCv = { them: (ds || []).map((d) => (typeof d === 'string' ? { sbn: d } : d)), coTrang: o.coTrang || 0, coTrang0: o.coTrang || 0, trang: o.trang || 0,
+      giuTrang: !!o.giuTrang, anTrang: !!o.anTrang, khongTong: !!o.khongTong, khongChonDong: !!o.khongChonDong };
+    luuCv();
+    veDsThuLy();
+    log('(giả lập: danh sách chuyên viên thêm ' + window.__mockCv.them.length + ' hồ sơ' + (o.coTrang ? ', ' + o.coTrang + ' dòng mỗi trang' : '') + ')');
+  };
+  window.mockCvTrang = function(ev, buoc){
+    const C = window.__mockCv;
+    log('(' + aiBam(ev) + ' bấm trang ' + (buoc > 0 ? 'sau' : 'trước') + ')');
+    C.trang = Math.max(0, C.trang + buoc);
+    luuCv();
+    document.getElementById('mockDsRows').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">Đang tải…</td></tr>';
+    setTimeout(veDsThuLy, 400);
+  };
+  window.mockCvLen = function(ev){
+    const C = window.__mockCv;
+    C.coTrang = +ev.target.value || C.coTrang;
+    C.trang = 0;
+    luuCv();
+    log('(' + aiBam(ev) + ' chọn ' + C.coTrang + ' dòng mỗi trang)');
+    document.getElementById('mockDsRows').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">Đang tải…</td></tr>';
+    setTimeout(veDsThuLy, 400);
+  };
   function luuLD(){ ssGhi('__mockLD', window.__mockLD); }
   function ldMoi(sbn, i){
     return { sbn, ngayTN: '20/11/2026 0' + (8 + (i % 2)) + ':1' + (i % 10), buoc: LD_BUOC3, trangThai: 'Đang xử lý', cb: 'Lê Văn Ba', vaoLuc: '23/11/2026 1' + (i % 10) + ':05',
@@ -1700,6 +1749,8 @@
     }
     const ldS = ssDoc('__mockLD');
     if (ldS && typeof ldS === 'object') window.__mockLD = Object.assign({}, window.__mockLD, ldS);
+    const cvS = ssDoc('__mockCv');
+    if (cvS && typeof cvS === 'object') window.__mockCv = Object.assign({}, window.__mockCv, cvS);
     const lg = ssDoc('__mockLog');
     if (typeof lg === 'string') { document.getElementById('log').textContent = lg; log('(— trang tải lại —)'); }
     // vai trò lãnh đạo: trang tải lại (F5) = danh sách lấy lại từ máy chủ – hiện hồ sơ chuyên viên vừa chuyển thêm, về trang 1 (như trang thật);

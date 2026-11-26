@@ -883,17 +883,19 @@
     document.querySelectorAll('#chi_tiet_gcn_wapper .nav-tabs li').forEach((li, i) => li.classList.toggle('active', i === 0));
     document.querySelectorAll('#chi_tiet_gcn_wapper .tab-pane').forEach((p, i) => (p.style.display = i === 0 ? '' : 'none'));
     setTimeout(() => openM('mCNDLPL'), 300);
-    // cây của tab SBD tải chậm
+    // cây của tab SBD tải chậm; sessionStorage 'mockPlTrong' = '1': tab trống (không có dòng Đơn đăng ký – không có gì để cập nhật)
+    if (sessionStorage.getItem('mockPlTrong') === '1') return log('(tab Thông tin sau biến động trống – giả lập)');
     setTimeout(() => { t.innerHTML = `<li class="jstree-node jstree-leaf" aria-selected="false"><i class="jstree-icon"></i><a class="jstree-anchor" href="#" id="j11_1_anchor"><b>Đơn đăng ký</b>|| <b>0 - Phường Việt Yên</b> - Mã đơn: ${window.__mockHsq.ma} - Số thứ tự hồ sơ: -/- - Ngày tiếp nhận: 22/11/2026 - Ngày đăng ký: -/-</a></li>`; }, 1200);
   };
   // window.__mockQtCham = số ms: trang mở lại Quy trình chậm sau khi đóng cửa sổ tác vụ (mặc định 200)
   function dongCNDLPL(){ closeM(); setTimeout(() => openM('mQuyTrinh'), window.__mockQtCham || 200); }
   function xongCNDLPL(){
     // window.__mockPlLoi = true: như trang thật 24/11 – hộp đỏ “KHÔNG THỂ CẬP NHẬT DỮ LIỆU PHÁP LÝ”, một nút ĐỒNG Ý, cửa sổ Cập nhật vẫn mở (chữ GIẢ)
-    if (window.__mockPlLoi) {
+    // (giữ qua tải lại trang: sessionStorage 'mockPlLoi' / 'mockPlHoi' = '1')
+    if (window.__mockPlLoi || sessionStorage.getItem('mockPlLoi') === '1') {
       log('(trang báo: không thể cập nhật dữ liệu pháp lý)');
       // window.__mockPlHoi = true: biến thể HỎI (2 nút Đồng ý / Hủy) – tiện ích không được tự bấm
-      const hoi = !!window.__mockPlHoi;
+      const hoi = !!window.__mockPlHoi || sessionStorage.getItem('mockPlHoi') === '1';
       const btns = hoi ? [{ text: 'ĐỒNG Ý', cls: 'btn-danger' }, { text: 'HỦY', cls: 'btn-default' }] : [{ text: 'ĐỒNG Ý', cls: 'btn-danger' }];
       return setTimeout(() => mockConfirm('KHÔNG THỂ CẬP NHẬT DỮ LIỆU PHÁP LÝ', '<b>THÔNG TIN ĐĂNG KÝ CHƯA ĐÁP ỨNG NHÓM 1</b><br>1. Đăng ký của Bà NGƯỜI GIẢ LẬP, CMND: 000000000; Thửa đất số 1(999): <b>không có mã định danh cá nhân</b>' + (hoi ? '<br>Bạn có muốn tiếp tục cập nhật các đăng ký còn lại?' : ''), btns), 600);
     }
@@ -1927,10 +1929,6 @@
         // thông báo nổi (trang thử không có chrome.notifications): ghi lại để kiểm
         if (msg.type === 'vbdlis-notify' || msg.type === 'vbdlis-notify-clear') { (window.__mockNotes = window.__mockNotes || []).push({ type: msg.type, title: msg.title, text: msg.text, sticky: !!msg.sticky }); return { ok: true }; }
         if (msg.type === 'vbdlis-arm-file') return { ok: true, result: window.vbdlisArmFile() };
-        if (msg.type === 'vbdlis-sample') {
-          if (window.__sampleFail) return { ok: false, error: window.__sampleFail };
-          return { ok: true, text: window.__sampleText != null ? window.__sampleText : window.__sampleOverride ? JSON.stringify(window.__sampleOverride) : await (await fetch('../data/du-lieu.json?t=' + Date.now(), { cache: 'no-store' })).text() };
-        }
         if (msg.type === 'vbdlis-select2') {
           const m = await window.__vbdlis.run({ type: 'vbdlis-act', action: 'markSelect', label: msg.label });
           return { ok: true, frames: [m && m.ok ? window.vbdlisFireSelect2(m.id) : { ok: false }] };
@@ -1946,20 +1944,7 @@
     };
     window.__mem = mem;
     window.addEventListener('pagehide', ghiMem); // kể cả khi thử nghiệm sửa thẳng window.__mem
-    // (1.21.20) tiện ích thôi tự đọc data/du-lieu.json – trang THỬ tự đưa file đó vào kho giả lần đầu (chỉ để có dữ liệu thử)
-    if (mem.tbData === undefined) {
-      fetch('../data/du-lieu.json?t=' + Date.now(), { cache: 'no-store' })
-        .then((r) => (r.ok ? r.text() : '[]'))
-        .then((t) => {
-          if (mem.tbData !== undefined) return;
-          let a = [];
-          try { a = JSON.parse(String(t).replace(/^﻿/, '') || '[]'); } catch (e) {}
-          if (!Array.isArray(a) || !a.length) return;
-          a.forEach((x) => { x.tb = String(x.tb); });
-          c.storage.local.set({ tbData: a });
-        })
-        .catch(() => {});
-    }
+    // (26/11) thư mục data đã xóa – trang thử khởi đầu trống: nạp file CSV TB bịa ở hộp Dữ liệu để thử
   })();
 </script>
 <script>

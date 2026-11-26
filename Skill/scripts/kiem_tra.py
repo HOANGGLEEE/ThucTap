@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phiếu kiểm tra dữ liệu TB của tiện ích “VBDLIS Điền Nhanh” – CHỈ ĐỌC, không sửa dữ liệu.
 
-Chạy SAU khi đã làm JSON / gộp du-lieu.json, TRƯỚC khi nạp vào tiện ích (mở bảng điền Alt+Q):
+Chạy SAU khi đã làm JSON / gộp du-lieu.json, TRƯỚC khi nạp du-lieu.csv vào tiện ích:
 
   python kiem_tra.py "<thư mục data>" ["<thư mục nguồn chứa các thư mục TB xxxx>"]
 
@@ -47,6 +47,7 @@ PREFIX = 'KH 2959.07777.'
 OUT = 'du-lieu.json'
 PHIEU = 'phieu-kiem-tra.txt'
 LOI, CANH, GHI = 'LỖI', 'CẢNH BÁO', 'GHI CHÚ'
+LAST_PHIEU = None
 NAM_NAY = datetime.date.today().year
 
 RE_FILE = re.compile(r'^KH\s*2959\.07777\.(.+?)\.(TBXN|DDK)\.pdf$', re.I)
@@ -58,6 +59,7 @@ RE_TB_FILE = re.compile(r'^TB[_\- ]?(\d+(?:-\d+)?)\.json$', re.I)
 MA_TINH = set('001 002 004 006 008 010 011 012 014 015 017 019 020 022 024 025 026 027 030 031 033 034 035 036 '
               '037 038 040 042 044 045 046 048 049 051 052 054 056 058 060 062 064 066 067 068 070 072 074 075 '
               '077 079 080 082 083 084 086 087 089 091 092 093 094 095 096'.split())
+SO_THAY_CMND = '033205007296'  # số CCCD thay cho chủ hộ chỉ có CMND (người dùng chốt 25/11), xem gop_du_lieu.py
 LOAI_GT = ('Căn cước công dân', 'Căn cước', 'Chứng minh nhân dân')
 
 
@@ -351,6 +353,8 @@ def kiem_so_giay_to(tb, c, lab, P):
     if so != so_raw:
         P.loi(tb, f'{lab}: số giấy tờ có ký tự không phải chữ số')
     loai = s(c.get('loaiGiayTo'))
+    if so == SO_THAY_CMND:  # số CCCD thay cho chủ chỉ có CMND (người dùng chốt 25/11) – không kiểm quy tắc mã
+        return
     if len(so) == 12:
         if loai == 'Chứng minh nhân dân':
             P.canh(tb, f'{lab}: số 12 chữ số nhưng loại giấy tờ ghi CMND')
@@ -568,7 +572,7 @@ def kiem_cheo(eff, P):
             continue
         for c in ds_dict(x.get('chu')):
             so = chu_so(c.get('soGiayTo'))
-            if len(so) in (9, 12):
+            if len(so) in (9, 12) and so != SO_THAY_CMND:
                 by_id[so].append((tb, ten(c.get('hoTen')), s(c.get('namSinh'))))
     def gom(rows, idx, mine):
         """'GIÁ TRỊ (TB a, b); GIÁ TRỊ 2 (TB c)' cho các giá trị khác 'mine'."""
@@ -767,7 +771,9 @@ def run(data, nguon=None, ghi_file=True, in_ra=True):
     if nguon and not os.path.isdir(nguon):
         print(f'✗ không có thư mục nguồn: {nguon}')
         return 2
+    global LAST_PHIEU
     P = Phieu()
+    LAST_PHIEU = P  # gop_du_lieu.py lấy LỖI / CẢNH BÁO từng TB ghi vào cột “Cần xem” của du-lieu.csv
     eff, stat = doc_data(data, P)
     for tb in sorted(eff, key=tb_key):
         x = eff[tb]
@@ -818,7 +824,7 @@ def run(data, nguon=None, ghi_file=True, in_ra=True):
     if nl:
         L.append(f'→ Còn {nl} LỖI: sửa (đọc lại PDF nếu cần), chạy lại gop_du_lieu.py rồi kiểm tra lại. Phiếu: {out_txt}')
     else:
-        L.append(f'→ Không có LỖI. Xem các CẢNH BÁO rồi mở bảng điền (Alt+Q). Phiếu: {out_txt}')
+        L.append(f'→ Không có LỖI. Xem các CẢNH BÁO rồi nạp du-lieu.csv vào tiện ích (Dữ liệu → Mở file CSV…). Phiếu: {out_txt}')
     text = che('\n'.join(L))
     if in_ra:
         print(text)

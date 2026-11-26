@@ -1,6 +1,7 @@
 # Mẫu dữ liệu TB cho tiện ích “VBDLIS Điền Nhanh”
 
-Tiện ích đọc `…/vbdlis-dien-nhanh/data/du-lieu.json`: một **danh sách** các TB. Mỗi TB là một hồ sơ trên VBDLIS
+Tiện ích tự đọc `…/vbdlis-dien-nhanh/data/du-lieu.json`, nhưng skill ghi ra `C:\Users\Hoang\Downloads\data` (người dùng
+nạp bằng “Mở file…”). du-lieu.json là một **danh sách** các TB. Mỗi TB là một hồ sơ trên VBDLIS
 (bước Tiếp nhận hồ sơ + bước Nhập đơn đăng ký). File lẻ `TB_<số>.json` chứa **một** TB (cùng cấu trúc).
 
 ## Mẫu một TB (dữ liệu giả, chỉ để xem cấu trúc)
@@ -48,7 +49,7 @@ Tiện ích đọc `…/vbdlis-dien-nhanh/data/du-lieu.json`: một **danh sách
 | `chu[].hoTen` | **ảnh thẻ CCCD / Căn cước của chính người đó** trong DDK. Chỉ khi thẻ mờ không đọc được hoặc không có thẻ mới lấy TBXN (xem **Quy tắc tên** dưới bảng) | IN HOA, đủ dấu đúng như trên thẻ; khác TBXN thì ghi vào `ghiChu` |
 | `chu[].namSinh` | CCCD (ngày sinh) | 4 chữ số. Tiện ích chỉ điền **Năm sinh** |
 | `chu[].gioiTinh` | CCCD | `"Nam"` / `"Nữ"` |
-| `chu[].loaiGiayTo` | loại thẻ | `"Căn cước công dân"`; thẻ mới ghi “CĂN CƯỚC” (cấp từ 1/7/2024) → `"Căn cước"`; CMND 9 số → `"Chứng minh nhân dân"` |
+| `chu[].loaiGiayTo` | loại thẻ | `"Căn cước công dân"`; thẻ mới ghi “CĂN CƯỚC” (cấp từ 1/7/2024) → `"Căn cước"`; CMND 9 số → `"Chứng minh nhân dân"` (khi gộp: chủ hộ CMND → số thay `033205007296`, loại `"Căn cước công dân"`; chung chủ → bỏ chủ CMND – xem **Ai là chủ** mục 5) |
 | `chu[].soGiayTo` | mặt trước CCCD “Số/No.”, đối chiếu dòng MRZ mặt sau `IDVNM…` | 12 chữ số, không dấu cách |
 | `chu[].noiCap` | mặt sau thẻ | CCCD gắn chip cấp từ 2021 thường là “Cục Cảnh sát quản lý hành chính về trật tự xã hội” → ghi `Cục Cảnh sát Quản lý hành chính về TTXH`; không đọc được → để `""` (VBDLIS có sẵn giá trị mặc định này) |
 | `chu[].diaChi` | TBXN mục 1c | như `diaChiTaiSan` |
@@ -56,10 +57,10 @@ Tiện ích đọc `…/vbdlis-dien-nhanh/data/du-lieu.json`: một **danh sách
 | `chu[].tuyChon` | — | không dùng cho người có thẻ (người có thẻ luôn nhập đủ). Chỉ còn trong dữ liệu cũ; tiện ích vẫn thêm mọi chủ trong danh sách |
 | `thua[].soThua`, `.soTo` | danh sách thửa kèm TBXN | tờ theo **mã 2 cấp của TBXN** (đơn có thể ghi tờ cũ – không dùng tờ của đơn) |
 | `thua[].dienTich` | cột diện tích của TBXN | dấu **chấm** thập phân, không đơn vị: `56,5` → `"56.5"`, `1.712,6` → `"1712.6"` |
-| `thua[].mdsd` | cột mục đích của TBXN | mã: `LUC`, `BHK`, `NTS`, `ONT`, `CLN`… |
+| `thua[].mdsd` | cột mục đích của TBXN | mã: `LUC`, `LUK`, `BHK`, `NTS`, `CLN`… **Đất ở: `ONT`, `ONT+CLN`, `CLN+ONT` → ghi `ODT`** (phường là đô thị – người dùng chốt 23/11) |
 | `thua[].diaChi` | TBXN mục 1c (theo quy ước); nếu cột “Địa chỉ thửa đất” của danh sách ghi nơi khác hẳn thì ghi chú để người dùng quyết | |
-| `thua[].thoiHan` | cột thời hạn | đất nông nghiệp: `"50 năm"`; nếu TBXN ghi khác (vd. đất ở “Lâu dài”) thì theo TBXN |
-| `thua[].nguonGoc` | cột nguồn gốc | mặc định `Công nhận QSDĐ như giao đất không thu tiền sử dụng đất` |
+| `thua[].thoiHan` | cột thời hạn | đất nông nghiệp: `"50 năm"`; **đất ở (ODT): `"Lâu dài"`**; TBXN ghi rõ giá trị khác thì theo TBXN |
+| `thua[].nguonGoc` | cột nguồn gốc | mặc định `Công nhận QSDĐ như giao đất không thu tiền sử dụng đất`; **đất ở (ODT): `Công nhận QSDĐ như giao đất có thu tiền sử dụng đất`** |
 | `giayTo` | — | `["Đơn đăng ký", "Thông báo xác nhận kết quả đăng ký"]` |
 | `ghiChu` | — | những điều người dùng cần biết khi nhập: tên thẻ khác TBXN (ghi cả hai và nguồn đã nhập), tên sửa tay, tờ cũ/mới, số đọc không chắc, địa chỉ khác nhau… Hiện ở khung vàng của bảng điền. Viết kết quả đã kiểm, không để lời nhắc “kiểm tra lại” |
 
@@ -73,6 +74,9 @@ Không cần: `ngayCap`, `ngayHetHan`, `ngaySinh` (tiện ích không điền c�
 3. Thứ tự theo TBXN rồi đơn / Mẫu 15a; `chu[0]` = người có thẻ đứng đầu, `nguoiNop` = `chu[0]`. Người đứng tên TBXN
    không có thẻ → ghi chú `Người đứng tên TBXN … không có thẻ – nhập chủ theo thẻ: …`.
 4. Không có thẻ nào → nhập người đứng tên TBXN. Thẻ của người không có tên trong TBXN / đơn / Mẫu 15a → không tự thêm, báo người dùng.
+5. **CMND cũ (chốt 25/11)**: chung chủ mà có chủ chỉ có CMND → bỏ chủ CMND. Chỉ có chủ hộ có CMND → nhập chủ hộ với số
+   CCCD thay `033205007296`, loại `Căn cước công dân`, nơi cấp `Cục Cảnh sát Quản lý hành chính về TTXH`; năm sinh /
+   giới tính theo CMND. `gop_du_lieu.py` tự làm việc này (nhận chủ CMND qua loại `Chứng minh nhân dân` hoặc số 9 chữ số).
 
 ## Quy tắc tên (họ tên chủ) – người dùng đã chốt
 

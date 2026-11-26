@@ -127,8 +127,7 @@ def scan_folder(folder):
         # cùng 1 TBXN, tên file bị chia đôi vì quá dài → 1 TB
         halves.sort(key=lambda h: pair_key(h['pairs'][0]))
         pairs = [p for h in halves for p in h['pairs']]
-        note = (f'Thư mục có {len(halves)} cặp PDF cùng nội dung (tên file chia vì quá dài) – 1 TB {len(pairs)} thửa, '
-                f'Số biên nhận nối đủ {len(pairs)} tờ.thửa.')
+        note = ''  # người dùng 23/11: không ghi chú chuyện nhiều cặp PDF – người nhập không cần
         lines.append(f'  • {len(halves)} cặp PDF cùng nội dung → gộp 1 TB, {len(pairs)} thửa. NHỚ: thứ tự các nhóm thửa đang '
                      f'tạm theo tên file – đối chiếu STT trên danh sách thửa của TBXN, sai thì sắp lại cả “thua” lẫn Số biên nhận.')
         out.append((tb, pairs, note))

@@ -6,10 +6,21 @@ description: Tạo / cập nhật file dữ liệu TB (data/du-lieu.json và cá
 # Tạo dữ liệu TB cho tiện ích VBDLIS Điền Nhanh
 
 Người dùng là cán bộ nhập hồ sơ đăng ký đất đai (phường Việt Yên, TP Bắc Ninh) lên VBDLIS. Tiện ích Chrome
-“VBDLIS Điền Nhanh” (thư mục `vbdlis-dien-nhanh`) điền sẵn VBDLIS từ file **`vbdlis-dien-nhanh/data/du-lieu.json`**.
-Tiện ích **chỉ tự đọc đúng file du-lieu.json** (mỗi lần mở bảng điền bằng Alt+Q) – trình duyệt không cho tiện ích xem
-các file khác trong thư mục, nên file lẻ `TB_1896.json` để trong `data` sẽ không lên tiện ích nếu chưa gộp vào
-du-lieu.json. Nhiệm vụ của skill: làm ra dữ liệu **đúng** và **gộp vào du-lieu.json**.
+“VBDLIS Điền Nhanh” (thư mục `vbdlis-dien-nhanh`) điền sẵn VBDLIS từ dữ liệu TB người dùng **nạp bằng file CSV**
+(bản 1.21.20, 25/11: “bỏ nạp json đi” – tiện ích không nạp JSON, không tự đọc thư mục data nữa). Skill vẫn làm việc bằng
+JSON (`TB_<số>.json` → gộp `du-lieu.json`) – đó là file làm việc của Claude; thứ đưa người dùng nạp là **`du-lieu.csv`**
+gop_du_lieu.py ghi kèm. Nhiệm vụ của skill: làm ra dữ liệu **đúng**, **gộp vào du-lieu.json** và ghi **du-lieu.csv**.
+
+**Người dùng nạp bằng file CSV mở bằng Excel (chốt 25/11: “nạp exel thay json … để dễ tiền kiểm soát”, rồi “csv cơ”,
+“không dùng xlsx”)**: gop_du_lieu.py ghi kèm **`du-lieu.csv`** (cùng dữ liệu; UTF-16 + dấu Tab – Excel mở thẳng, đúng
+tiếng Việt; mỗi hàng một người nộp / chủ / thửa; cột **Cần xem** = cảnh báo + LỖI / CẢNH BÁO của phiếu kiểm tra; ô số dễ
+bị Excel đổi ghi dạng `="…"`). Người dùng mở bằng Excel soát / sửa, lưu (giữ kiểu CSV), rồi nạp vào tiện ích (Dữ liệu →
+“Mở file CSV…” hoặc kéo thả du-lieu.csv vào bảng điền → xem trước TB mới / TB đổi gì → tích chọn → “Nạp”; file luôn
+đúng – TB có trong file lấy đúng theo file; nạp lại không mất tiến độ). Lần gộp sau, chỗ người dùng sửa
+trong du-lieu.csv được lấy lại và ghi về `TB_<số>.json` (không bị bản cũ ghi đè). JSON vẫn là nơi skill làm việc.
+Không làm / không đọc file .xlsx. Người dùng có thể **gõ nhanh** TB mới trong du-lieu.csv (tiện ích 1.21.21): ô TB trống = TB
+hàng trên, Dòng gõ n / c / t hoặc để trống, TB “VD” là hàng mẫu (bỏ) – gop_du_lieu.py đọc được hết; ô để trống (nơi cấp, địa
+chỉ…) tiện ích tự điền lúc nạp. Có hàng bị bỏ (thiếu TB, Dòng lạ) thì gop không ghi đè du-lieu.csv – báo người dùng sửa hàng đó.
 
 Trả lời người dùng bằng tiếng Việt, ngắn gọn. Chính xác quan trọng hơn nhanh: dữ liệu sai sẽ được điền thẳng lên
 VBDLIS. **Không đoán**: chữ số mờ, tên khó đọc → để trống hoặc ghi rõ trong `ghiChu` và báo người dùng.
@@ -26,12 +37,25 @@ Cấu trúc JSON và nguồn của từng trường: đọc `references/mau-json
   “1891-1”, “1891-2” – người dùng đã báo đó là sai. Chỉ khi 2 cặp có nội dung TBXN khác nhau mới là 2 hồ sơ.
 - Các file JSON TB lẻ (do người dùng hoặc công cụ khác làm) để trong thư mục `data` → chỉ cần gộp (bước 4).
 
-Thư mục data thường ở `C:\Users\Hoang\Downloads\Extension\vbdlis-dien-nhanh\data` – kiểm tra lại, người dùng hay đổi chỗ.
+**Thư mục data ra (người dùng chốt 23/11)**: `C:\Users\Hoang\Downloads\data` – ở ngoài thư mục tiện ích. Không ghi vào
+`vbdlis-dien-nhanh\data` (chỉ chép đè vào đó khi người dùng bảo rõ). Người dùng hay tự chuyển / xoá thư mục này giữa các
+lần làm → chưa có thì tạo lại; có TB cũ của đợt trước thì hỏi giữ hay xoá trước khi gộp.
+
+**Chỉ giao CSV (người dùng chốt 25/11: “không cần json nữa”)**: làm việc (khung, TB_<số>.json, gộp, phiếu) trong một thư
+mục làm việc ở thư mục nháp; mỗi đợt giao cho người dùng **một thư mục** trong `Downloads\data` chỉ có **`du-lieu.csv`**
+(+ `phieu-kiem-tra.txt`), cả đợt một file tổng (không tách theo TDP). Không chép TB_*.json / du-lieu.json sang đó. Nạp:
+bảng điền → Dữ liệu → “Mở file…” → du-lieu.csv.
 
 ## Quy trình
 
 Các script nằm trong thư mục `scripts/` của skill này (dùng đường dẫn đầy đủ khi chạy). Cần Python có
-`pypdfium2`, `Pillow`.
+`pypdfium2`, `Pillow`. Chạy `python` **không có `-I`** (pypdfium2 nằm ở user site-packages; với `-I` khung_tb.py báo
+“? trang” và tách nhầm “TBXN KHÁC”). Đặt `PYTHONIOENCODING=utf-8` để in được tiếng Việt.
+
+**Đợt lớn (vài chục – hơn trăm TB)**: dựng khung xong thì chia TB cho ~10 subagent chạy song song. Viết một file brief
+trong thư mục nháp (quy tắc bước 2–3, đường dẫn script, thư mục nguồn, mẫu ghi chú) và giao mỗi agent một dải TB; mỗi agent
+chỉ sửa `TB_<số>.json` của dải mình trong thư mục khung nháp. Xong thì tự kiểm chéo (cùng số CCCD mà khác tên giữa các
+TB, chu[0] so với bảng Excel nếu có, thửa ODT đủ Lâu dài / có thu tiền), rồi mới chép sang data và gộp.
 
 ### 1. Dựng khung từ tên file
 
@@ -101,7 +125,30 @@ Không khớp với năm sinh / giới tính đọc trên thẻ → đã đọc 
     không có thẻ – khi đó ghi chú `Người đứng tên TBXN … không có thẻ – nhập chủ theo thẻ: …`); `nguoiNop` = `chu[0]`.
   - Không có thẻ nào → nhập người đứng tên TBXN (Quy tắc tên: “hồ sơ không có thẻ”).
   - Thẻ của người hoàn toàn không có tên trong TBXN / đơn / Mẫu 15a (vd. con nộp thay) → không tự thêm làm chủ; ghi chú và báo người dùng.
+  - **Chủ chỉ có CMND cũ (người dùng chốt 25/11)**:
+    - Chung chủ mà có người chỉ có CMND → **bỏ người có CMND**, chỉ nhập các chủ có CCCD / Căn cước.
+    - TB chỉ có chủ hộ có CMND (không ai có CCCD) → nhập chủ hộ với **số `033205007296`**, loại
+      `Căn cước công dân`, nơi cấp Cục Cảnh sát…; họ tên, năm sinh, giới tính vẫn theo CMND / TBXN (số mờ cũng được).
+    - Khi đọc hồ sơ cứ ghi chủ CMND như thường (loại `Chứng minh nhân dân`, số 9 chữ số hoặc để trống nếu mờ) –
+      gop_du_lieu.py tự áp dụng quy tắc này và ghi ghiChu; kiem_tra.py không kiểm quy tắc mã với số thay này.
 - Chủ **chỉ cần Năm sinh** (không cần Ngày sinh, Ngày cấp, Ngày hết hạn).
+- **Đất ở (người dùng chốt 23/11)**: mục đích `ONT`, `ONT+CLN` (hay `CLN+ONT`) → ghi **`ODT`** (phường = đô thị);
+  thửa đó thời hạn **`Lâu dài`**, nguồn gốc **`Công nhận QSDĐ như giao đất có thu tiền sử dụng đất`**. gop_du_lieu.py
+  tự đổi nếu lỡ ghi ONT / để mặc định nông nghiệp; tiện ích cũng tự đổi khi điền.
+- **Thư mục data (người dùng chốt 23/11)**: ghi mọi file ra `C:\Users\Hoang\Downloads\data` (ngoài thư mục
+  tiện ích), không ghi vào `vbdlis-dien-nhanh\data`. Báo người dùng nạp **du-lieu.csv** bằng bảng điền → Dữ liệu →
+  “Mở file CSV…” (xem trước rồi “Nạp”; file luôn đúng). Tiện ích không nạp JSON nữa.
+- **Không ghi chú chuyện “thư mục có N cặp PDF cùng nội dung”** (người dùng bảo xoá – người nhập không cần biết).
+- Các trường hợp hay gặp (đã chốt cách làm):
+  - TBXN ghi tên kèm biệt danh / số phân biệt, vd. `NGUYỄN VĂN A (PHÚC)`, `… - 2`, `NGUYỄN VĂN A (THẮM)` → nhập tên
+    theo thẻ, bỏ phần kèm; ghi chú một câu.
+  - Mặt sau thẻ là của người khác (MRZ ghi tên / số khác mặt trước) → chỉ lấy theo mặt trước khớp TBXN; ghi chú.
+  - Số CCCD hay năm sinh trên TBXN / đơn / Mẫu 15a lệch thẻ → nhập theo thẻ (đối chiếu MRZ và quy tắc mã), ghi chú cả hai.
+  - Hồ sơ không có thẻ → tên + số theo TBXN; nếu cùng người có thẻ ở TB khác trong đợt thì đối chiếu số, nơi cấp lấy theo
+    thẻ đó (không có thì để trống).
+  - Dấu tên trên thẻ mờ → nhập theo TBXN, ghi `Tên: thẻ CCCD mờ dấu – nhập theo TBXN (…)`.
+  - Đơn có chữ viết tay “đã chuyển nhượng…”, “còn thiếu thửa / diện tích”, thêm thửa TBXN không có, “nhà ông …” →
+    **chỉ nhập theo TBXN**, chép ý chữ tay vào ghi chú và đưa vào mục Cần anh/chị xem.
 - Thời hạn `50 năm` (đất nông nghiệp), nguồn gốc `Công nhận QSDĐ như giao đất không thu tiền sử dụng đất`, trừ khi
   TBXN ghi khác.
 - `ghiChu`: viết cho **người nhập** đọc ở khung vàng của bảng điền – mọi điều bất thường cần biết (tên sửa tay, tờ cũ/mới,
@@ -117,7 +164,11 @@ python scripts/gop_du_lieu.py "<thư mục data>" --kiem-tra    # xem báo cáo 
 python scripts/gop_du_lieu.py "<thư mục data>" --nguon "<thư mục chứa các TB xxxx>"   # ghi du-lieu.json (bản cũ → .bak)
 ```
 
-Ghi xong, script tự chạy **phiếu kiểm tra** (bước 5) và trả mã thoát 1 nếu phiếu còn LỖI. `--nguon` (không bắt buộc)
+Ghi xong, script tự chạy **phiếu kiểm tra** (bước 5), rồi ghi **`du-lieu.csv`** (cột Cần xem lấy từ cảnh báo + phiếu) và
+trả mã thoát 1 nếu phiếu còn LỖI. Trước khi gộp, script đọc `du-lieu.csv` đang có: TB nào người dùng đã sửa trong file
+(khác bản du-lieu.json lúc ghi file CSV) thì lấy theo file CSV và ghi lại vào `TB_<số>.json` (file lẻ sửa SAU file CSV
+thì file lẻ thắng). File đang mở trong Excel → script báo, chưa đọc / chưa ghi được: nhờ người dùng đóng file rồi chạy
+lại. Người dùng lỡ lưu thành .xlsx → script báo, nhờ lưu lại kiểu CSV. `--nguon` (không bắt buộc)
 để phiếu đối chiếu cả tên file PDF trong các thư mục `TB xxxx`.
 
 Script đọc **mọi** `*.json` trong data (trừ du-lieu.json) và gộp vào du-lieu.json đang có (TB trùng số: file sửa sau
@@ -154,23 +205,29 @@ lại / cần hỏi lại…”; khung chưa điền; liệt kê mọi `ghiChu`.
 
 ### 6. Báo người dùng
 
-- Kết quả chính trước: “Đã thêm TB 1896, 1897 vào du-lieu.json (tổng N TB)”.
+- Kết quả chính trước: “Đã thêm TB 1896, 1897 vào du-lieu.json và du-lieu.csv (tổng N TB)”.
 - Mỗi TB một dòng: chủ, số thửa, Số biên nhận (rút gọn nếu dài).
 - Mục **Cần anh/chị xem**: danh sách TB có LỖI / CẢNH BÁO trong phiếu kiểm tra (số TB + vấn đề ngắn), cộng những điều
   đọc không chắc: số / tên khó đọc, tên thẻ khác TBXN, thửa thiếu diện tích, tờ đơn khác tờ TBXN, tên sửa tay…
-- Nhắc: mở bảng điền (Alt+Q) là tiện ích tự đọc du-lieu.json – không cần dán JSON, không cần tải lại tiện ích.
-  TB đã sửa tay trong bảng điền được giữ nguyên; muốn lấy bản mới của file thì bảng điền → Dữ liệu → Lấy từ thư mục data → Gộp vào.
+- Nhắc cách nạp: data nằm ở `Downloads\data` (ngoài tiện ích) nên tiện ích **không tự đọc** → mở
+  `Downloads\data\du-lieu.csv` bằng Excel soát cột **Cần xem** (sửa nếu cần, lưu giữ kiểu CSV), rồi mở bảng điền (Alt+Q) →
+  Dữ liệu → **“Mở file CSV…”** (hoặc kéo thả) chọn `du-lieu.csv` → xem trước → **“Nạp”**. **File luôn đúng**: TB có trong file
+  được lấy đúng theo file; nạp lại không mất tiến độ. Không cần tải lại tiện ích. Tiện ích **không nạp JSON** nữa – đừng
+  bảo người dùng nạp du-lieu.json hay TB_*.json.
+- Mục Cần anh/chị xem nên chia nhóm: cần quyết (thẻ người lạ, chuyển nhượng, thửa ghi tay) / người đứng tên TBXN khác chủ
+  đã nhập / số CCCD lệch / tên thẻ khác TBXN / dấu mờ / không có thẻ / khác. Không chép số CCCD đầy đủ (chỉ 4–5 số cuối).
 
 ## Khi chỉ có JSON (không có PDF)
 
-Người dùng để sẵn các file `TB_xxxx.json` (hoặc dán JSON) và tiện ích báo “Failed to fetch” / không thấy dữ liệu:
-nguyên nhân là thiếu hoặc hỏng `data/du-lieu.json`. Chạy bước 4 để tạo lại, rồi báo các TB còn thiếu gì
-(diện tích, mục đích, số giấy tờ…) để người dùng bổ sung hoặc gửi PDF cho đọc lại.
+Người dùng để sẵn các file `TB_xxxx.json` (hoặc dán JSON) và tiện ích không thấy dữ liệu: tiện ích (từ 1.21.20) chỉ
+nạp file CSV. Chạy bước 4 (gop_du_lieu.py) để gộp và ghi `du-lieu.csv`, nhắc người dùng nạp file đó, rồi báo các TB
+còn thiếu gì (diện tích, mục đích, số giấy tờ…) để người dùng bổ sung hoặc gửi PDF cho đọc lại.
 
 ## Lưu ý
 
 - Không xóa / ghi đè file PDF hay file JSON gốc của người dùng; chỉ ghi `TB_<số>.json` mới (không ghi đè nếu đã có,
-  trừ khi người dùng bảo làm lại), `du-lieu.json` (có bản `.bak`) và `phieu-kiem-tra.txt`.
+  trừ khi người dùng bảo làm lại, hoặc người dùng đã sửa TB đó trong du-lieu.csv – gop ghi lại, bản cũ `.bak`),
+  `du-lieu.json` (có bản `.bak`), `du-lieu.csv` và `phieu-kiem-tra.txt`.
 - Dữ liệu có thể lệch giữa TBXN và đơn (tên sửa tay, người đã mất, tờ cũ). TBXN là căn cứ chính cho thửa (tờ, thửa,
   diện tích, mục đích…) và cho biết ai đứng tên; **họ tên, số giấy tờ, năm sinh của chủ theo thẻ CCCD** (Quy tắc tên,
   bước 3); đơn để đối chiếu.

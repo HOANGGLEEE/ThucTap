@@ -33,8 +33,8 @@ async function loadConfig() {
 // mở lại bảng để làm tiếp. Chỉ ở ĐÚNG tab bạn bật Tự động hết (tbAutoTab – tab khác mở VBDLIS không tự chạy),
 // khi Tự động hết còn bật và bạn không tự đóng bảng (×).
 const reopening = new Set(); // tab đang được mở lại bảng (tránh mở 2 bảng cùng lúc)
-chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
-  if (info.status !== 'complete' || !tab || !/^https:\/\/bgi\.mplis\.gov\.vn\//.test(tab.url || '')) return;
+// mở lại bảng điền trên tab VBDLIS sau khi trang chuyển / tải lại – khi 🤖 bật ở đúng tab đó (hoặc bạn vừa cho chạy tiếp)
+async function reopenPanel(tabId) {
   if (reopening.has(tabId)) return;
   reopening.add(tabId);
   try {
@@ -53,6 +53,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   } finally {
     reopening.delete(tabId);
   }
+}
+// trang tải xong hẳn (dự phòng – boot.js thường đã mở bảng sớm hơn)
+chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
+  if (info.status !== 'complete' || !tab || !/^https:\/\/bgi\.mplis\.gov\.vn\//.test(tab.url || '')) return;
+  reopenPanel(tabId);
 });
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   reopening.delete(tabId);
@@ -172,6 +177,29 @@ async function beepOffscreen(kind) {
   return { ok: false, error: err };
 }
 
+// xóa thông báo nổi (không lỗi dù Chrome trả về promise hay không)
+const nClear = (id) => {
+  try {
+    const p = chrome.notifications.clear(id);
+    if (p && p.catch) p.catch(() => {});
+  } catch (e) {}
+};
+// bấm vào thông báo nổi → đưa cửa sổ + tab VBDLIS đang chờ lên trước
+chrome.notifications.onClicked.addListener(async (id) => {
+  if (!String(id).startsWith('vbdlis-')) return;
+  try {
+    const m = (await chrome.storage.session.get(id))[id];
+    const tabId = m ? m.tabId : parseInt(String(id).slice(7), 10);
+    const tab = await chrome.tabs.get(tabId);
+    await chrome.windows.update(tab.windowId, { focused: true });
+    await chrome.tabs.update(tab.id, { active: true });
+  } catch (e) {}
+  nClear(id);
+});
+chrome.tabs.onRemoved.addListener((tabId) => {
+  nClear('vbdlis-' + tabId);
+});
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || typeof msg.type !== 'string' || !msg.type.startsWith('vbdlis-')) return;
   (async () => {
@@ -201,6 +229,40 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (msg.type === 'vbdlis-beep') {
         // trang VBDLIS vừa tải lại (bạn chưa bấm gì) → trang không phát được tiếng → tiện ích phát “ting” qua trang ẩn (offscreen.html)
         sendResponse(await beepOffscreen(msg.kind));
+        return;
+      }
+      if (msg.type === 'vbdlis-boot') {
+        // (26/11) boot.js: trang VBDLIS vừa dựng xong khung → mở lại bảng điền ngay (không chờ trang tải hết)
+        if (sender.tab && sender.tab.id != null && sender.frameId === 0) reopenPanel(sender.tab.id);
+        sendResponse({ ok: true });
+        return;
+      }
+      if (msg.type === 'vbdlis-notify') {
+        // (25/11 – bạn: “thêm thông báo nổi khi cần bạn xác nhận”) thông báo nổi của Windows; bấm vào → về đúng tab VBDLIS đang chờ
+        const tab = sender.tab;
+        if (!tab || tab.id == null) return sendResponse({ ok: false });
+        const id = 'vbdlis-' + tab.id;
+        nClear(id);
+        await chrome.notifications.create(id, {
+          type: 'basic',
+          iconUrl: chrome.runtime.getURL('icons/icon128.png'),
+          title: String(msg.title || 'VBDLIS Điền Nhanh – cần bạn').slice(0, 80),
+          message: String(msg.text || '').slice(0, 220),
+          contextMessage: 'Bấm vào đây để mở trang VBDLIS',
+          priority: 2,
+          requireInteraction: !!msg.sticky,
+        });
+        await chrome.storage.session.set({ [id]: { tabId: tab.id, windowId: tab.windowId } }).catch(() => {});
+        sendResponse({ ok: true });
+        return;
+      }
+      if (msg.type === 'vbdlis-notify-clear') {
+        const tabId = sender.tab && sender.tab.id;
+        if (tabId != null) {
+          nClear('vbdlis-' + tabId);
+          await chrome.storage.session.remove('vbdlis-' + tabId).catch(() => {});
+        }
+        sendResponse({ ok: true });
         return;
       }
       if (msg.type === 'vbdlis-badge') {

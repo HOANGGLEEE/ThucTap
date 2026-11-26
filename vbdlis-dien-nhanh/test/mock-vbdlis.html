@@ -356,6 +356,7 @@
       <table id="tbDanhSachFile"><thead><tr><th>Mô tả</th><th>Trích yếu</th><th>Loại hồ sơ quét</th><th>Giấy tờ nguồn gốc</th><th>Hồ sơ cũ</th><th>Tập tin đính kèm</th><th>Chức năng</th></tr></thead><tbody></tbody></table>
     </fieldset>
   </div>
+  <div class="g-recaptcha" id="mockRecap" style="display:none;margin:6px 12px;padding:6px;border:1px solid #ccc;width:260px"><label><input type="checkbox" id="mockRecapChk" onclick="mockRecapBam(event)"> Tôi không phải là người máy</label><textarea name="g-recaptcha-response" style="display:none"></textarea></div>
   <div class="modal-footer"><button type="submit" id="btnCapNhatHoSoQuet" onclick="mockCapNhatHsq(event)">Cập nhật</button> <a class="btn" onclick="closeM()">Thoát</a></div>
 </div></div>
 
@@ -816,9 +817,24 @@
     dongTTHSQ();
   }
   // NGƯỜI DÙNG bấm Cập nhật (giả lập): lưu hồ sơ quét → mở lại Lưu kho có hồ sơ quét mới + thông báo
+  // ô “Tôi không phải là người máy” giả (window.__mockCaptcha = true): chỉ NGƯỜI bấm thật mới có mã; tiện ích bấm → không tính
+  window.mockRecapBam = function(ev){
+    const ta = document.querySelector('#mockRecap textarea');
+    if (ev && ev.isTrusted) { ta.value = 'mock-token-' + Date.now() + '-xxxxxxxxxxxxxxxxxxxx'; log('(người dùng xác nhận không phải người máy)'); }
+    else { ev && ev.preventDefault(); log('!!! TIỆN ÍCH BẤM Ô “KHÔNG PHẢI NGƯỜI MÁY” – KHÔNG ĐƯỢC !!!'); }
+  };
   window.mockCapNhatHsq = function(ev){
     window.__mockCapNhat = (window.__mockCapNhat || 0) + 1;
     log('(' + (ev && ev.isTrusted === false ? 'tiện ích' : 'người dùng') + ' bấm Cập nhật hồ sơ quét)');
+    if (window.__mockCaptcha) {
+      const ta = document.querySelector('#mockRecap textarea');
+      document.getElementById('mockRecap').style.display = '';
+      if (!ta.value) {
+        log('(trang báo: Xác thực người dùng – chưa xác nhận không phải người máy)');
+        return setTimeout(() => mockConfirm('Xác thực người dùng', 'Vui lòng xác nhận bạn không phải là người máy!', [{ text: 'Đóng' }], { x: true }), 300);
+      }
+      ta.value = ''; document.getElementById('mockRecapChk').checked = false; // mã chỉ dùng một lần
+    }
     // window.__mockKySo = true: như trang thật 24/11 – hộp “Tập tin … chưa được ký số! Vui lòng ký số tập tin trước khi đính kèm!” (một nút ĐỒNG Ý), không lưu
     if (window.__mockKySo) {
       log('(trang báo: tập tin chưa được ký số – không lưu)');
@@ -1908,6 +1924,8 @@
       getURL: (p) => '../' + p,
       sendMessage: async (msg) => {
         if (msg.type === 'vbdlis-rec-inject') return { ok: true };
+        // thông báo nổi (trang thử không có chrome.notifications): ghi lại để kiểm
+        if (msg.type === 'vbdlis-notify' || msg.type === 'vbdlis-notify-clear') { (window.__mockNotes = window.__mockNotes || []).push({ type: msg.type, title: msg.title, text: msg.text, sticky: !!msg.sticky }); return { ok: true }; }
         if (msg.type === 'vbdlis-arm-file') return { ok: true, result: window.vbdlisArmFile() };
         if (msg.type === 'vbdlis-sample') {
           if (window.__sampleFail) return { ok: false, error: window.__sampleFail };

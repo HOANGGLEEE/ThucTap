@@ -20,7 +20,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.21.25'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.21.30'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -763,6 +763,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       <div class="card">
         <div class="ct">Khi 🤖 dừng chờ bạn</div>
         <label class="opt"><input type="checkbox" id="optAmBao"${S.opts.amBao !== false ? ' checked' : ''}> Kêu “ting” và nháy tên tab (để bạn làm việc khác trong lúc VBDLIS chạy chậm)</label>
+        <label class="opt"><input type="checkbox" id="optThongBao"${S.opts.thongBao !== false ? ' checked' : ''}> Thông báo nổi ở góc màn hình (khi bạn đang ở tab / cửa sổ khác; cần xác nhận “không phải người máy” thì luôn hiện) – bấm vào thông báo là về đúng trang VBDLIS</label>
         <label class="opt"><input type="checkbox" id="optEnter"${S.opts.enterLuu !== false ? ' checked' : ''}> Mọi ô đã điền khớp dữ liệu thì đặt sẵn con trỏ ở nút “Lưu” (thửa đất, “Cập nhật” hồ sơ quét…): kiểm tra xong chỉ cần nhấn Enter</label>
       </div>
       <div class="card">
@@ -1999,7 +2000,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         ? HOLD_TXT[h.kind] || 'chờ bạn'
         : h.stop || h.hard || h.noted || S.userStopAt
           ? 'đã dừng – xem bảng điền, xong tắt rồi bật lại 🤖'
-          : h.dlg
+          : h.cap
+            ? 'chờ bạn xác nhận “không phải người máy” (tiện ích không tự giải) – xác nhận xong 🤖 tự làm tiếp'
+            : h.dlg
             ? 'chờ bạn trả lời hộp hỏi – trả lời xong 🤖 làm tiếp'
             : HOLD_TXT.err;
     const holdTxt = AUTO() ? [...S.autoHold.entries()].map(([id, h]) => `⏸ 🤖 TB ${id}: ${holdOne(h)}`).join(' · ') : '';
@@ -2107,13 +2110,26 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       ATT.badge = false;
       send({ type: 'vbdlis-badge', text: '' });
     }
+    if (ATT.os) {
+      ATT.os = false;
+      send({ type: 'vbdlis-notify-clear' });
+    }
+  }
+  // (25/11 – bạn: “thêm thông báo nổi khi cần bạn xác nhận”) thông báo nổi của Windows (góc màn hình). Hiện khi bạn đang ở tab / cửa sổ khác;
+  // opt.os = luôn hiện (vd. cần xác nhận “không phải người máy”), opt.sticky = nằm đó tới khi bạn bấm. Tắt ở tab Biên nhận → “Khi 🤖 dừng chờ bạn”
+  function osNotify(text, opt = {}) {
+    if (S.opts.thongBao === false) return;
+    if (!opt.os && document.visibilityState === 'visible' && document.hasFocus()) return; // bạn đang xem trang này
+    ATT.os = true;
+    send({ type: 'vbdlis-notify', title: opt.title || 'VBDLIS Điền Nhanh – cần bạn', text, sticky: !!opt.sticky });
   }
   // bắt đầu chờ bạn: kêu 1 lần; bạn đang ở tab / cửa sổ khác thì tên tab nháy cho tới khi bạn quay lại hoặc hết chờ
-  function needYou(text, kind) {
+  function needYou(text, kind, opt) {
     if (!ATT.badge) {
       ATT.badge = true;
       send({ type: 'vbdlis-badge', text: '!' });
     }
+    osNotify(text, opt || {});
     if (S.opts.amBao === false) return;
     beep(kind);
     clearInterval(ATT.timer);
@@ -2568,6 +2584,19 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // quy trình”) – vai trò Chuyên viên, lần chạy do 🤖 tự bắt đầu: vướng ở MỘT TB → ⏸ tạm hoãn TB đó (lý do chung), đóng cửa sổ của TB đó, làm TB khác
   // lỗi CHUNG (mọi TB đều vướng) → vẫn dừng: chưa có dữ liệu, sai / chưa đặt tài khoản, trang không trả lời lệnh, tiện ích vừa tải lại,
   // không thấy ô tìm của danh sách, không cài được phần đưa file vào trang, bấm chuyển trang mà trang không chuyển
+  // (25/11 – trang báo “Xác thực người dùng – Vui lòng xác nhận bạn không phải là người máy!” sau nút Cập nhật; bạn hỏi tiện ích tự giải được không
+  // → KHÔNG: đó là chỗ VBDLIS kiểm tra có người thật). Tiện ích chỉ NHẬN RA ô xác thực (reCAPTCHA / hCaptcha / Turnstile) và hộp báo đó để dừng
+  // đúng chỗ, kêu bạn, chờ bạn tự xác nhận rồi 🤖 làm tiếp. Không bấm vào ô xác thực, không bấm “Đóng” hộp báo
+  const CAPTCHA_SEL = 'textarea[name="g-recaptcha-response"], textarea.g-recaptcha-response, textarea[name="h-captcha-response"], input[name="cf-turnstile-response"]';
+  // null = trang không có ô xác thực; { solved } = đã / chưa xác nhận (ô trả lời có mã)
+  function captchaState() {
+    const resp = [...document.querySelectorAll(CAPTCHA_SEL)].filter((t) => !t.closest('#' + HOST_ID));
+    const frames = [...document.querySelectorAll('iframe')].filter((f) => /recaptcha|hcaptcha|turnstile|captcha/i.test((f.getAttribute('src') || '') + ' ' + (f.title || '')) && shownEl(f));
+    if (!resp.length && !frames.length) return null;
+    return { solved: resp.some((t) => String(t.value || '').trim().length > 20) };
+  }
+  const captchaText = (t) => /xac (thuc|nhan) nguoi dung|khong phai (la )?nguoi may|not a robot|captcha/.test(norm(t || ''));
+  const NS_CAPTCHA = /khong phai (la )?nguoi may|xac thuc nguoi dung|not a robot|captcha/;
   const NS_GLOBAL = /chua co du lieu tb|tai khoan dang dang nhap|chua dat tai khoan|chua co tai khoan|khong chay duoc lenh|tien ich vua duoc tai lai|mat ket noi|khong thay o tim|khong cai duoc|ma trang khong chuyen/;
   // dừng vì BẠN (bấm ■ Dừng / tắt 🤖, vừa bấm – gõ trên trang, bạn chọn người khác ở cửa sổ chọn người, Chạy thử…) → không tạm hoãn TB
   const NS_USER = /^da dung theo yeu cau|ban vua bam|ban dang (thao tac|bam|go|tat|chon)|ban da chon|chay thu|trong cua so dang chon/;
@@ -3042,10 +3071,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const l = { icon: '⏳', cls: 'muted', html: esc(text), text: String(text || '') };
       log.push(l);
       show();
+      const t0s = Date.now();
       const set = (icon, cls, extra) => {
         l.icon = icon;
         l.cls = cls;
-        l.html = esc(text) + (extra ? ` <span class="muted">– ${esc(extra)}</span>` : '');
+        // (26/11) bước mất từ 1 giây trở lên → ghi số giây (bạn thấy ngay bước nào chậm)
+        const sec = (Date.now() - t0s) / 1000;
+        const dur = icon !== '⏸' && sec >= 1 ? ` <span class="muted">(${sec.toFixed(1).replace('.', ',')} giây)</span>` : '';
+        l.html = esc(text) + (extra ? ` <span class="muted">– ${esc(extra)}</span>` : '') + dur;
         show();
       };
       return { l, ok: (m) => set('✓', 'ok', m), bad: (m) => set('✗', 'bad', m), skip: (m) => set('•', 'muted', m), wait: (m) => set('⏸', 'warn', m) };
@@ -3471,9 +3504,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           // đã bấm “Thêm” nhưng cửa sổ hiện chậm → chờ thêm tối đa 30 giây rồi điền vào cửa sổ đó (không bấm Thêm lần 2)
           cur.wait('đã bấm “Thêm”, đang chờ cửa sổ hiện…');
           let seen = false;
-          for (let k = 0; k < 30 && !seen; k++) {
+          for (const tw = Date.now(); Date.now() - tw < 30000 * slowK() && !seen; ) {
             stopIf();
-            await sleep(1000);
+            await new Promise((r) => setTimeout(r, 300)); // (26/11) 0,3 giây một lần (trước 1 giây)
             const tp = await topNow();
             seen = !!tp && it.win.test(modalKey(tp));
           }
@@ -3644,13 +3677,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             throw new Error(`đã bấm “Lưu” nhưng cửa sổ ${it.kind === 'chu' ? 'chủ' : 'thửa'} chưa đóng (trang báo lỗi / thiếu ô?) – 🤖 không đứng chờ bạn`);
           }
           if (Date.now() - t0 > WAIT_MAX_MS) throw new Error('chờ bấm Lưu quá 20 phút – đã dừng; tắt rồi bật lại 🤖 để làm tiếp');
-          await sleep(1000);
+          await new Promise((r) => setTimeout(r, 300)); // (26/11) xem cửa sổ đã đóng chưa 0,3 giây một lần (trước 1 giây)
         }
         stopNeed();
         // đã vào đơn chưa (cây Chủ sử dụng / Thửa đất và tài sản – trang có thể nạp lại chậm)
         let ok = false;
-        for (let k = 0; k < 16 && !ok; k++) {
-          await sleep(500);
+        for (const tw = Date.now(); Date.now() - tw < 8000 * slowK() && !ok; ) {
+          await new Promise((r) => setTimeout(r, 300));
           ok = await donHas(it);
           if (ok === null) {
             const tp = await topNow();
@@ -4875,7 +4908,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       viewTb(x); // (25/11) TB ở trên chạy theo TB đang kiểm
       const r = await searchList(x, alive);
       if (r.err) throw new Error(r.err);
-      S.sweepNext = Date.now() + 5000;
+      S.sweepNext = Date.now() + 1000; // (26/11) trước 5 giây
       const left = () => {
         const n = chkList().length;
         if (n) return ` · còn ${n} TB ✓ chưa kiểm`;
@@ -5112,6 +5145,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const ck = listTabState() !== 'other' ? chkList()[0] : null;
         if (ck && bulkOn() && !bulkCovered(ck)) return bulkOrWait(manual); // ⚡ TB ✓ này chưa được soát hàng loạt xét
         if (ck) {
+          S.chkStreak = (S.chkStreak || 0) + 1;
           const c = await runChk(ck);
           if (!c) return;
           x = ck;
@@ -5144,7 +5178,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         }
         const g = traGone(x, r); // TB chặng cuối (lãnh đạo đã trả về) mà không còn hồ sơ trong danh sách → ✓ Xong
         if (!r.row) {
-          S.sweepNext = Date.now() + 5000; // 5 giây sau mới tìm TB kế tiếp (giữa 2 lần tìm, bảng điền rảnh cho bạn dùng)
+          S.sweepNext = Date.now() + 1000; // (26/11) 1 giây sau tìm TB kế tiếp (trước 5 giây)
           roundAdd(x.tb); // đã tìm trong lượt này mà không thấy hồ sơ (TB thấy hồ sơ thì không tính – mở làm, chặng sau làm luôn)
           if (g.k === 'xong') roundXongEvt(x, g.text);
           const dn = roundDone();
@@ -6588,9 +6622,20 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (anyOk(await act('hasCellText', { text: qtR }))) cur.skip('đã chọn từ trước');
       else if (rp.phuongXa.use === 'off') cur.skip('bỏ tích ở mẫu tab Trường – tiện ích không chọn (bạn chọn tay)');
       else {
+        const dc0 = String((await readField('Địa chỉ tài sản')) || '');
         const f = mustFill(await fillSec('donVi', { phuongXa: rp.phuongXa.use === 'fix' ? rp.phuongXa.value : tb.phuongXa || DEFAULT_PHUONG }, true));
         cur.ok(f.results[0] && f.results[0].msg);
-        if (f.results.some((x) => x.changed)) await sleep(1500); // trang tự điền địa chỉ mặc định sau khi đổi Phường/Xã
+        if (f.results.some((x) => x.changed)) {
+          // trang tự điền địa chỉ mặc định sau khi đổi Phường/Xã – (26/11) thấy địa chỉ đổi là đi tiếp ngay, tối đa 1,5 giây như trước
+          for (const tw = Date.now(); Date.now() - tw < 1500 * speedK(); ) {
+            await new Promise((r) => setTimeout(r, 250));
+            const dc = String((await readField('Địa chỉ tài sản')) || '');
+            if (dc.trim() && dc !== dc0) {
+              await new Promise((r) => setTimeout(r, 200)); // cho trang điền xong hẳn
+              break;
+            }
+          }
+        }
       }
       stopIf();
 
@@ -6694,9 +6739,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             // đã bấm "Thêm thửa đất" nhưng cửa sổ hiện chậm → chờ thêm tối đa 30 giây rồi điền vào cửa sổ đó
             cur.wait('đã bấm “Thêm thửa đất”, đang chờ cửa sổ hiện…');
             let seen = false;
-            for (let k = 0; k < 30 && !seen; k++) {
+            for (const tw = Date.now(); Date.now() - tw < 30000 * slowK() && !seen; ) {
               stopIf();
-              await sleep(1000);
+              await new Promise((r) => setTimeout(r, 300)); // (26/11) 0,3 giây một lần (trước 1 giây)
               seen = (await act('modalState')).some((x) => x.open && THUA_ADD.test(modalKey(x)));
             }
             if (!seen) throw new Error(pf.err);
@@ -6840,20 +6885,19 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             throw new Error(`đã bấm “Lưu” nhưng cửa sổ thửa ${t.soThua}/${t.soTo} chưa đóng (trang báo lỗi / thiếu ô?) – 🤖 không đứng chờ bạn`);
           }
           if (Date.now() - t0 > WAIT_MAX_MS) throw new Error('chờ bấm Lưu quá 20 phút – đã dừng; tắt rồi bật lại 🤖 để làm tiếp');
-          await sleep(1000);
+          await new Promise((r) => setTimeout(r, 300)); // (26/11) xem cửa sổ đã đóng chưa 0,3 giây một lần (trước 1 giây)
         }
         stopNeed();
-        // trang có thể hỏi tiếp ~1 giây sau khi cửa sổ đóng (vd. “Cập nhật địa chỉ tài sản”) → chờ bạn trả lời
-        for (let k = 0; k < 5; k++) {
-          await sleep(500);
-          if (await waitDialogs(cur)) break;
-        }
-        // chờ bảng cập nhật (trang có thể nạp lại bảng chậm)
+        // trang có thể hỏi tiếp ~1 giây sau khi cửa sổ đóng (vd. “Cập nhật địa chỉ tài sản”) → trả lời / chờ bạn; cùng lúc xem bảng thửa.
+        // (26/11) bảng đã có thửa này mà 1,8 giây không có hộp hỏi → đi tiếp ngay (trước: luôn đứng 2,5 giây rồi mới xem bảng)
         let inTable = false;
-        for (let k = 0; k < 16 && !inTable; k++) {
-          await sleep(500);
+        const tc = Date.now();
+        for (let asked = false; Date.now() - tc < 8000 * slowK(); ) {
+          await new Promise((r) => setTimeout(r, 300));
+          if (!asked && (await waitDialogs(cur))) asked = true;
           rows = await readTable();
           inTable = !!rows && rows.some((r) => sameThua(r, t));
+          if (inTable && (asked || Date.now() - tc >= 1800)) break;
         }
         if (!inTable) {
           // bạn đóng cửa sổ không lưu (VBDLIS báo thửa trùng / bạn bỏ) → bỏ qua thửa này, thử thửa sau
@@ -7193,7 +7237,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const fm = norm(failMsg);
         setHold(tb.tb, {
           kind: 'err',
-          stop: NS_STOP.test(fm) || noRetry ? 1 : 0, // bạn bấm ■ Dừng / Chạy thử / bạn chọn người khác / chờ bạn quyết → 🤖 không tự chạy lại
+          stop: (NS_STOP.test(fm) || noRetry) && !NS_CAPTCHA.test(fm) ? 1 : 0, // bạn bấm ■ Dừng / Chạy thử / bạn chọn người khác / chờ bạn quyết → 🤖 không tự chạy lại
+          cap: NS_CAPTCHA.test(fm) ? 1 : 0, // trang cần bạn xác nhận “không phải người máy” → bạn xác nhận xong là 🤖 chạy lại
           hard: NS_HARD.test(fm) ? 1 : 0, // lỗi chung không tự hết
           user: NS_USER.test(fm) && !NS_STOP.test(fm) ? 1 : 0, // bạn vừa bấm / gõ trên trang → bạn ngưng 20 giây là 🤖 chạy lại
           dlg: dlgAtFail ? 1 : 0, // có hộp hỏi chưa dạy → hộp đóng (bạn trả lời) là 🤖 chạy lại
@@ -7203,6 +7248,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         });
       }
       S.runEndAt = Date.now();
+      setTimeout(() => autoKick(0), 300); // (25/11) xong / dừng một lần chạy → 🤖 xét màn hình ngay
       // chặng cuối (hồ sơ lãnh đạo trả về – TB cũ): trả lại con trỏ tiếp nhận như trước (không làm lệch “TB chưa làm tiếp theo”);
       // (25/11) TB ở trên giữ TB vừa làm
       if (stage3 && recvAtStart != null && String(S.recv) !== String(recvAtStart) && S.data.some((x) => String(x.tb) === String(recvAtStart))) {
@@ -8605,6 +8651,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
             : 'Quy trình xử lý: tiện ích dừng ở Thực hiện / Cập nhật cho bạn bấm, tô vàng Đã xử lý.',
         }[k]
       );
+      return;
+    }
+    if (e.target.id === 'optThongBao') {
+      S.opts = { ...S.opts, thongBao: e.target.checked };
+      safeSet({ tbOpts: S.opts });
+      if (e.target.checked) osNotify('Thử thông báo nổi – bấm vào đây là về trang VBDLIS.', { os: true, title: 'VBDLIS Điền Nhanh – thử thông báo' });
+      else send({ type: 'vbdlis-notify-clear' });
+      setStatus(e.target.checked ? 'Sẽ hiện thông báo nổi ở góc màn hình khi cần bạn (vừa gửi một thông báo thử).' : 'Đã tắt thông báo nổi.');
       return;
     }
     if (e.target.id === 'optAmBao' || e.target.id === 'optEnter') {
@@ -10374,8 +10428,34 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       // nút theo mẫu không được làm đổi cửa sổ: vẫn Hồ sơ quét, đủ 2 dòng có tập tin, đúng nút Cập nhật, không có hộp hỏi
       if (scanScreen() !== 'hsq' || visIn('#btnCapNhatHoSoQuet') !== cap || !['don', 'tbxn'].every(kindDone) || pageDialog())
         throw new Error('cửa sổ Hồ sơ quét đã đổi (thiếu dòng / có hộp hỏi / nút Cập nhật khác) sau nút theo mẫu tab Trường – tiện ích không bấm “Cập nhật”; bạn xem rồi tắt rồi bật lại 🤖');
+      // (25/11) cửa sổ có ô “Tôi không phải là người máy” chưa xác nhận → chờ BẠN xác nhận (tiện ích không tự giải) rồi mới bấm Cập nhật
+      const capWait = async (msg) => {
+        needYou('Cần bạn xác nhận “không phải người máy” (cửa sổ Hồ sơ quét) – xác nhận xong 🤖 tự bấm Cập nhật', 'bad', {
+          os: true,
+          sticky: true,
+          title: 'VBDLIS – cần bạn xác nhận không phải người máy',
+        });
+        c.wait(msg);
+        const tw = Date.now();
+        const tU = USER.at;
+        for (;;) {
+          stopIf();
+          if (Date.now() - tw > 10 * 60 * 1000) {
+            const e = ask('chờ bạn xác nhận “không phải người máy” quá 10 phút – xác nhận xong 🤖 tự làm tiếp', '');
+            e.captcha = true;
+            throw e;
+          }
+          const cs = captchaState();
+          // hộp báo đã đóng và: ô xác thực đã có mã (bạn đã xác nhận) – hoặc trang không có ô nhận ra được: bạn đã bấm trên trang rồi ngưng 4 giây
+          if (!pageDialog() && (cs ? cs.solved : USER.at > tU && Date.now() - USER.at > 4000)) break;
+          await new Promise((r) => setTimeout(r, 500));
+        }
+        stopNeed();
+      };
+      if (captchaState() && !captchaState().solved)
+        await capWait('cửa sổ có ô “Tôi không phải là người máy” chưa xác nhận – bạn tích ô đó (tiện ích không tự giải); xác nhận xong 🤖 tự bấm “Cập nhật”');
       // bạn cho phép tự bấm: đúng hồ sơ, đủ 2 dòng có tập tin → Cập nhật → chờ Lưu kho mở lại có hồ sơ quét đủ 2 loại
-      const t0 = Date.now();
+      let t0 = Date.now();
       S.armedScan = null;
       stopIf();
       cap.click();
@@ -10384,6 +10464,17 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       for (;;) {
         stopIf();
         const d = pageDialog();
+        if (d && captchaText(`${d.title || ''} ${d.text || ''}`)) {
+          // “Xác thực người dùng – không phải người máy”: KHÔNG bấm Đóng, không tự giải → chờ bạn đóng hộp + xác nhận, rồi bấm Cập nhật lại
+          await capWait('trang báo cần xác nhận “không phải người máy” – bạn bấm Đóng hộp báo rồi tích ô “Tôi không phải là người máy” (tiện ích không tự giải); xác nhận xong 🤖 tự bấm “Cập nhật” lại');
+          const cap2 = scanScreen() === 'hsq' ? visIn('#btnCapNhatHoSoQuet') : null;
+          if (cap2) {
+            c.wait('đã xác nhận – bấm “Cập nhật” lại, chờ trang lưu…');
+            cap2.click();
+          }
+          t0 = Date.now();
+          continue;
+        }
         if (d) {
           if (kySoDlg()) await kySoBox(d); // tập tin chưa được ký số (24/11)
           const tl = AUTO() ? (await act('answerDialog', { rules: [] })).find((x) => x.ok) : null; // hộp bạn đã dạy
@@ -12150,6 +12241,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const list = S.data.filter(ok);
     return [...list.filter((x) => traPhase(S.stage[String(x.tb)])), ...list.filter((x) => !traPhase(S.stage[String(x.tb)]))];
   }
+  // (26/11) 🤖 ở Danh sách hồ sơ thụ lý đang / sẽ làm gì – dòng trạng thái (chỉ ghi lại khi đổi)
+  function listNote(t) {
+    if (S.listNoteT === t) return;
+    S.listNoteT = t;
+    setStatus(t);
+  }
+  const CHK_BATCH = 5; // (26/11) mỗi đợt kiểm lại tối đa 5 TB ✓ rồi tìm lại TB ◐
   // lượt tìm của 🤖 ở Danh sách hồ sơ thụ lý (bạn yêu cầu 24/11: “load lại 1 loạt danh sách – TB nào đã nhập nhưng chưa xong thì phải làm hết”):
   // các TB đã tìm trong lượt này (thấy → đã mở làm; không thấy → ✓ Xong / bỏ qua). Mỗi TB ◐ tìm đúng 1 lần mỗi lượt, theo thứ tự (chặng cuối trước);
   // hết lượt mới sang tiếp nhận TB mới / bắt đầu lượt sau. Giữ qua tải lại trang (sessionStorage của thẻ – trang tải lại sau mỗi hồ sơ làm xong,
@@ -12197,6 +12295,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const r = keepPrev && S.sweepRound && Date.now() - (S.sweepRound.at || 0) < 2 * ROUND_MS ? S.sweepRound : null;
     const prev = r && Array.isArray(r.xong) ? r.xong : []; // chỉ lượt VỪA xong (kể cả vừa hết hạn)
     S.sweepRound = prev.length ? { ids: [], xong: [], prev, at: Date.now() } : null;
+    S.chkStreak = 0; // lượt mới – đếm lại số TB ✓ kiểm liền
     saveRound();
     if (!keepPrev) bulkSave(null); // bật 🤖 / bấm ▶: lần soát hàng loạt tới không phải chờ 1 phút
   }
@@ -14025,7 +14124,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const it = c ? S.ld.items[c.key] || {} : {};
     const backSig = () => {
       if (!c || !(it.st === 'loi' || it.st === 'bo')) return '';
-      if (Date.now() - (it.failAt || 0) < 20000 || Date.now() - USER.at < 20000) return '';
+      if (Date.now() - (it.failAt || 0) < 20000 || Date.now() - USER.at < QUIET_MS) return '';
       return `ldback:${c.key}:${it.n || 0}`;
     };
     // (soát 24/11) cửa sổ đứng yên mà 🤖 không có việc ở đó (hồ sơ đã ✓ / chờ xác nhận / bỏ qua / chưa tới giờ thử lại, cửa sổ lạ…), bạn không thao
@@ -14040,7 +14139,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         S.ldStk = { key: key2, at: Date.now() };
         return '';
       }
-      if (Date.now() - S.ldStk.at < (ms || 30000) || !userQuiet(20000) || pageWorking()) return '';
+      if (Date.now() - S.ldStk.at < (ms || 30000) || !userQuiet(QUIET_MS) || pageWorking()) return '';
       return `ldback:${why}:${Math.floor(Date.now() / 60000)}`;
     };
     if (top && CHOOSER_MODAL.test(k)) {
@@ -14059,7 +14158,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (S.opts.thuThucThi || (S.ld.tt && S.ld.tt.key === keyC) || (xC && xC.wait)) return '';
       // (24/11) cửa sổ chọn người mở sẵn (bạn mở / lần chạy trước dừng): hồ sơ còn phải ký duyệt, bạn không thao tác 20 giây, trang không “Đang xử lý…”,
       // không ai khác được chọn → 🤖 làm tiếp: chọn đúng người nhận bước 4, Thực thi (đủ kiểm tra) – bạn yêu cầu “xem nó đang ở đâu thì làm tiếp”
-      if (AUTO() && info && !info.loading && info.rows.length && userQuiet(20000) && !pageWorking()) {
+      if (AUTO() && info && !info.loading && info.rows.length && userQuiet(QUIET_MS) && !pageWorking()) {
         if (USER.btn === 'thuc thi' && Date.now() - USER.btnAt < 60000) return ''; // bạn vừa tự bấm Thực thi
         if (markedRows(info.rows).some((r) => accNorm(r.acc) !== accNorm(ldRecv()))) return ''; // bạn đang chọn người khác → chờ bạn
         if (keyC && (!xC || xC.st === 'cho' || (xC.st === 'loi' && (xC.n || 0) < LD_MAX && Date.now() >= (xC.retryAt || 0))))
@@ -14096,8 +14195,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       // bạn vừa thao tác trên trang (15 giây; ô tìm đang có chữ BẠN gõ → 60 giây) hoặc trên bảng điền (20 giây) → chờ
       const sb = sbnSearch();
       const userQ = !!sb && !!sb.input.value.trim() && sb.input.value !== S.sweepTyped;
-      const quiet = Date.now() - USER.at >= (userQ ? 60000 : 15000) || (!userQ && (S.autoOnAt || 0) > USER.at);
-      if (!quiet || Date.now() - (S.panelAt || 0) < 20000) return '';
+      const quiet = Date.now() - USER.at >= (userQ ? 30000 : 5000) || (!userQ && (S.autoOnAt || 0) > USER.at);
+      if (!quiet || Date.now() - (S.panelAt || 0) < QUIET_MS) return '';
       const rows = ldScanPage();
       const r = rows.find(ldCand);
       if (r) return `lds:${r.key}:${(S.ld.items[r.key] || {}).n || 0}`;
@@ -14132,7 +14231,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       return `ldr:${S.ld.idleAt}`;
     }
     // màn hình khác, không có cửa sổ: bạn không thao tác 20 giây (vừa bật 🤖 thì đi ngay) → 🤖 sang “Xử lý công việc”
-    if (Date.now() - USER.at < 20000 && !((S.autoOnAt || 0) > USER.at)) return '';
+    if (Date.now() - USER.at < QUIET_MS && !((S.autoOnAt || 0) > USER.at)) return '';
     if (btnLuuHoSo() && (await recvTyped())) return ''; // màn hình Tiếp nhận đang có chữ bạn gõ → không rời trang
     if (!navXuLyCongViec()) {
       if (!btnLuuHoSo() && !btnXuLyHoSo()) deadPageReload(); // trang lỗi (vd. sau khi tải lại) → tải lại, chờ tăng dần
@@ -14168,7 +14267,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (!lv || (!(S.stage[String(lv.tb)] || {}).hoan && !lv.done) || USER.at > lv.at + 1500) S.cvLeave = null;
       else if (!top && onListPage()) S.cvLeave = null;
       else
-        return (!lv.now && Date.now() - lv.at < 20000) || Date.now() - USER.at < 20000 || Date.now() - (S.panelAt || 0) < 20000
+        return (!lv.now && Date.now() - lv.at < QUIET_MS) || Date.now() - USER.at < QUIET_MS || Date.now() - (S.panelAt || 0) < QUIET_MS
           ? ''
           : `cvback:${lv.tb}:${lv.at}`;
     }
@@ -14293,8 +14392,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       // bạn vừa thao tác trên trang (15 giây; ô tìm đang có chữ BẠN gõ → 60 giây) hoặc trên bảng điền (20 giây) → không gõ vào ô tìm
       const sb = sbnSearch();
       const userQ = !!sb && !!sb.input.value.trim() && sb.input.value !== S.sweepTyped;
-      const quiet = Date.now() - USER.at >= (userQ ? 60000 : 15000) || (!userQ && (S.autoOnAt || 0) > USER.at);
-      if (!quiet || Date.now() - (S.panelAt || 0) < 20000) return '';
+      const quiet = Date.now() - USER.at >= (userQ ? 30000 : 5000) || (!userQ && (S.autoOnAt || 0) > USER.at);
+      if (!quiet || Date.now() - (S.panelAt || 0) < QUIET_MS) return '';
       // (25/11 – bạn: “đang ở trang xử lý công việc mà tb ý đang ở trạng thái chưa xong thì bấm vào tiếp nhận hồ sơ và chọn tiếp nhận hồ sơ tiếp”)
       // TB bạn vừa chọn (10 phút – danh sách TB, ‹ ›, → TB chưa làm, đổi về Chưa xong) là ○ chưa tiếp nhận → sang Tiếp nhận làm TB đó ngay,
       // không chờ hết lượt tìm TB ◐
@@ -14308,18 +14407,51 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (!(rt && rt.tb === pk.tb && Date.now() - (rt.at || 0) < 10 * 60 * 1000)) return `recv:${pk.tb}`;
       }
       const ps = sweepList();
-      const swSig = () => (Date.now() < (S.sweepNext || 0) ? '' : `sweep:${Math.floor(Date.now() / 5000)}`);
+      const swSig = () => (Date.now() < (S.sweepNext || 0) ? '' : `sweep:${Math.floor(Date.now() / 3000)}`);
       // lượt tìm chưa xong (còn TB ◐ chưa tìm lần nào trong lượt này – lượt giữ qua tải lại trang) → tìm tiếp
       // TB bạn vừa bỏ tạm hoãn (chặng trước lãnh đạo) → tìm làm lại TB đó trước (bạn yêu cầu 24/11: không đứng chờ bạn bấm ▶)
       const rd = (S.redo || [])
         .map((id) => S.data.find((y) => String(y.tb) === id))
         .find((x) => x && needsList(x) && !S.autoHold.has(String(x.tb)) && ((S.redoN || {})[String(x.tb)] || 0) < 3);
       if (rd && Date.now() >= (S.sweepNext || 0)) return `golist:${rd.tb}`;
-      if (roundNext(ps)) return swSig();
-      // tìm hết TB ◐ → kiểm các TB ✓ Xong chưa kiểm (bạn yêu cầu 24/11), xong mới sang tiếp nhận / lượt mới. Thanh lọc đang ở mục khác “Tất cả” → bỏ
-      // qua lượt kiểm (mọi lần kiểm đều chưa chắc), báo bạn 1 lần
+      const dn0 = roundDone();
+      const left0 = ps.filter((y) => !dn0.has(String(y.tb)));
+      if (left0.length) {
+        const wt = Math.ceil(((S.sweepNext || 0) - Date.now()) / 1000);
+        listNote(
+          `🤖 Danh sách hồ sơ thụ lý: tìm TB ◐ (đã nhập nhưng chưa xong) – còn ${left0.length} TB trong lượt này: ${left0.slice(0, 8).map((y) => y.tb).join(', ')}${left0.length > 8 ? '…' : ''}${
+            wt > 2 ? ` (lượt mới bắt đầu sau ~${Math.ceil(wt / 5) * 5} giây)` : ''
+          }`
+        );
+        return swSig();
+      }
+      // (26/11 – bạn: “vẫn không quét các tb đã nhập nhưng chưa xong … nó vẫn mất thời gian vào 1 cái gì đó”) hết TB ◐ phải tìm → còn TB chưa
+      // tiếp nhận thì tiếp nhận TRƯỚC; kiểm lại TB ✓ Xong (24/11) chỉ khi RẢNH, mỗi đợt tối đa CHK_BATCH TB rồi bắt đầu lượt tìm TB ◐ mới
+      // (trước: kiểm hết TB ✓ – cả TB ✓ suy ra kiểm lại mỗi 30 phút – rồi mới tiếp nhận / tìm lại TB ◐)
+      {
+        const nx0 = S.opts.tuSangTB === false ? null : recvNext();
+        if (nx0 && navTiepNhan()) {
+          let rt = null;
+          try {
+            rt = JSON.parse(sessionStorage.getItem('vbdlis-dien-nhanh-recv') || 'null');
+          } catch (e) {}
+          if (!(rt && rt.tb === String(nx0.tb) && Date.now() - (rt.at || 0) < 10 * 60 * 1000)) {
+            roundReset(true);
+            listNote(`🤖 Hết TB ◐ phải tìm – sang Tiếp nhận hồ sơ TB ${nx0.tb}`);
+            return `recv:${nx0.tb}`;
+          }
+        }
+      }
+      // Thanh lọc đang ở mục khác “Tất cả” → bỏ qua lượt kiểm (mọi lần kiểm đều chưa chắc), báo bạn 1 lần
       const ckN = chkList().length;
-      if (ckN && listTabState() !== 'other') return swSig();
+      if (ckN && (S.chkStreak || 0) >= CHK_BATCH) {
+        roundReset(true); // đã kiểm CHK_BATCH TB ✓ liền → tìm lại các TB ◐ trước (lãnh đạo có thể vừa trả về)
+        if (ps.length) return swSig();
+      }
+      if (ckN && listTabState() !== 'other') {
+        listNote(`🤖 Rảnh (hết TB ◐ phải tìm, hết TB chưa tiếp nhận) – kiểm lại TB ✓ Xong xem còn sót hồ sơ không: còn ${ckN} TB`);
+        return swSig();
+      }
       if (ckN && S.holdNote !== 'chkTab') {
         S.holdNote = 'chkTab';
         setStatus(`🤖 Còn ${ckN} TB ✓ Xong chưa kiểm lại – thanh lọc của Danh sách hồ sơ thụ lý đang ở mục khác “Tất cả”: bấm “Tất cả” để 🤖 kiểm.`, true);
@@ -14329,14 +14461,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       roundReset(true); // xong một lượt – lượt sau bắt đầu lại (vẫn nhớ các TB lượt vừa xong đã tích ✓)
       // lượt tìm xong (mọi TB đã tìm 1 lần, chưa thấy) / không còn TB phải tìm → còn TB chưa tiếp nhận thì sang màn hình Tiếp nhận hồ sơ
       // làm TB đó (bạn: “tiếp tục làm TB khác”); hết TB chưa tiếp nhận thì 🤖 quay lại Danh sách hồ sơ thụ lý tìm tiếp
-      const nx = S.opts.tuSangTB === false ? null : recvNext();
-      if (nx && navTiepNhan()) {
-        let rt = null;
-        try {
-          rt = JSON.parse(sessionStorage.getItem('vbdlis-dien-nhanh-recv') || 'null');
-        } catch (e) {}
-        // vừa sang tiếp nhận TB này (10 phút) mà vẫn ở đây (trang không chuyển được) → không sang lại, tìm tiếp
-        if (!(rt && rt.tb === String(nx.tb) && Date.now() - (rt.at || 0) < 10 * 60 * 1000)) return `recv:${nx.tb}`;
+      // (vừa sang tiếp nhận TB chưa tiếp nhận mà trang không chuyển được → không sang lại – đã xét ở trên)
+      if (!ps.length && !ckN) listNote('🤖 Danh sách hồ sơ thụ lý: hết việc (không còn TB ◐ phải tìm, TB chưa tiếp nhận, TB ✓ phải kiểm) – 🤖 chờ, xét lại liên tục');
+      if (ps.length && !ckN) {
+        // (26/11) vừa tìm hết một lượt TB ◐ (chưa TB nào có việc – đang chờ lãnh đạo) → 15 giây sau tìm lượt mới (không tải lại danh sách liên tục)
+        S.sweepNext = Math.max(S.sweepNext || 0, Date.now() + 15000);
+        listNote(`🤖 Đã tìm hết lượt ${ps.length} TB ◐ (đang chờ lãnh đạo / chưa có việc) – 15 giây sau tìm lượt mới`);
+        return '';
       }
       return ps.length ? swSig() : '';
     }
@@ -14383,14 +14514,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (!sameTb) {
         // (25/11 – bạn: “nếu mà trang tiếp nhận hồ sơ đã điền mà khác tb mình đang nhập thì hãy f5 lại trang và điền như bình thường”)
         // bạn không thao tác 20 giây → tải lại trang (F5) cho trống, 🤖 điền TB đang nhập như thường
-        if (stageOf(tr) !== 'chua' || !userQuiet(20000) || !recvF5Ok(tr.tb)) return '';
+        if (stageOf(tr) !== 'chua' || !userQuiet(QUIET_MS) || !recvF5Ok(tr.tb)) return '';
         setStatus(`🤖 Trang Tiếp nhận đang có dữ liệu không phải TB ${tr.tb} – tải lại trang (F5) rồi điền TB ${tr.tb}.`);
         log0(`🤖 trang Tiếp nhận có dữ liệu của TB khác – F5 rồi điền TB ${tr.tb}`);
         setTimeout(() => location.reload(), 300);
         return '';
       }
       if (!rr || rr.tb !== String(tr.tb) || Date.now() - (rr.at || 0) > 30 * 60 * 1000) return ''; // đúng TB mà không phải 🤖 đang làm dở (có thể bạn đang gõ)
-      return userQuiet(20000) ? `tn:${tr.tb}:r` : '';
+      return userQuiet(QUIET_MS) ? `tn:${tr.tb}:r` : '';
     }
     if (sbn === null) return '';
     if (btnXuLyHoSo() || !btnLuuHoSo()) return ''; // màn hình tiếp nhận MỚI: có nút “Lưu hồ sơ”, chưa có “Xử lý hồ sơ”
@@ -14420,7 +14551,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (!nx) {
         const g = goListSig();
         if (!g) return '';
-        if (Date.now() - USER.at < 20000 && !((S.autoOnAt || 0) > USER.at)) return '';
+        if (Date.now() - USER.at < QUIET_MS && !((S.autoOnAt || 0) > USER.at)) return '';
         if (await recvTyped()) return '';
         return g;
       }
@@ -14435,6 +14566,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // - màn hình đã chạy mà DỪNG (lỗi / chờ bạn) thì không tự chạy lại nữa – bạn bấm ▶ hoặc bật lại Tự động
   // - màn hình tiếp nhận mới: đợi thêm 1 nhịp cho trang tải xong
   let autoBlank = 0;
+  let autoBlankAt = 0;
   async function autoTick() {
     if (!host.isConnected) return clearInterval(autoTimer);
     if (Date.now() - (S.listUrlAt || 0) > 10000) {
@@ -14454,7 +14586,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (hh.kind === 'tt' && USER.btnAt > hh.at && holdFree(hid, hh)) {
           dropHold(hid);
           S.autoSig = '';
-          S.autoCool = Date.now() + 4000;
+          S.autoCool = Date.now() + 2000;
           return;
         }
       }
@@ -14465,7 +14597,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         return;
       }
       if (!sig) {
-        if (++autoBlank >= 2) S.autoSig = '';
+        if (!autoBlank++) autoBlankAt = Date.now();
+        if (autoBlank >= 2 && Date.now() - autoBlankAt >= 1500) S.autoSig = ''; // trống đủ 1,5 giây mới coi là đã rời màn hình
         S.autoPend = '';
         await autoResume('');
         return;
@@ -14481,7 +14614,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (holdFree(htb, h)) {
           dropHold(htb);
           S.autoSig = '';
-          S.autoCool = Date.now() + 4000;
+          S.autoCool = Date.now() + 2000;
           return;
         } else {
           const note = `${htb}|${h.at}`;
@@ -14503,8 +14636,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         return;
       }
       // màn hình tiếp nhận mới / hồ sơ mất nút Xử lý hồ sơ sau khi chuyển lãnh đạo: phải thấy 2 nhịp liền mới chạy
-      if ((sig.startsWith('tn:') || sig.startsWith('ldx:') || sig.startsWith('xlcv:') || /^ld(r|p|v|nav|back):/.test(sig)) && S.autoPend !== sig) {
-        S.autoPend = sig;
+      if ((sig.startsWith('tn:') || sig.startsWith('ldx:') || sig.startsWith('xlcv:') || /^ld(r|p|v|nav|back):/.test(sig)) && (S.autoPend !== sig || Date.now() - (S.autoPendAt || 0) < 900)) {
+        if (S.autoPend !== sig) S.autoPendAt = Date.now();
+        S.autoPend = sig; // thấy lại sau ≥ 0,9 giây (trang tải xong) mới chạy
         return;
       }
       S.autoPend = '';
@@ -14529,7 +14663,26 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       autoTicking = false;
     }
   }
-  const autoTimer = setInterval(autoTick, 2500);
+  const autoTimer = setInterval(autoTick, 1000); // (25/11) trước 2,5 giây
+  // (25/11 – bạn: “chế độ tự động phản ứng rất chậm tôi muốn nó phản ứng tình huống nhanh hơn”) trang đổi → 🤖 xét ngay (gom 250 ms, cách nhau
+  // ≥ 600 ms); bảng điền đổi không tính
+  let kickT = 0;
+  let kickAt = 0;
+  const autoKick = (ms = 250) => {
+    if (kickT || !AUTO()) return;
+    kickT = setTimeout(() => {
+      kickT = 0;
+      if (Date.now() - kickAt < 600) return autoKick(600 - (Date.now() - kickAt));
+      kickAt = Date.now();
+      autoTick();
+    }, ms);
+  };
+  try {
+    new MutationObserver((ms) => {
+      if (!AUTO() || S.running) return;
+      if (ms.some((m) => m.target !== host && !(m.target.closest && m.target.closest('#' + HOST_ID)))) autoKick();
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'aria-hidden'] });
+  } catch (e) {}
   // ---------- 🤖 tự làm tiếp (bạn yêu cầu 24/11: “khi đang ở tự động thì phải xem nó đang ở đâu thì bắt đầu làm tiếp các bước còn lại; nhiều lúc nó
   // dừng lại, tôi phải bấm chạy cả tb nó mới chạy tiếp; không được có thời gian chờ chết”) ----------
   // Màn hình hồ sơ / cửa sổ của chuỗi đứng yên RESUME_MS mà 🤖 không chạy gì (lần chạy trước dừng / bộ theo dõi không nhận ra việc), bạn không thao
@@ -14537,11 +14690,15 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // RESUME_MAX lần (đếm lại khi TB đi tiếp được); vẫn đứng → ⏸ tạm hoãn TB đó (lý do chung), 🤖 đóng cửa sổ của TB đó, làm TB khác.
   // Màn hình của TB đã xong / đã tạm hoãn / đang chờ lãnh đạo (không còn việc ở đây) → 🤖 đóng cửa sổ (không lưu), về danh sách làm TB khác.
   // Không tự làm tiếp: vai trò Lãnh đạo (bộ theo dõi riêng), đang “Chạy thử”, bạn bấm ■ Dừng, TB chờ bạn tự bấm Thực thi / Thực hiện
-  const RESUME_MS = 30000;
+  const RESUME_MS = 10000; // (25/11) trước 30 giây
   const RESUME_MAX = 2;
   const RESUME_WIN_MS = 15 * 60 * 1000;
-  const HOLD_RETRY_MS = 45000; // TB “đã dừng” (lần chạy 🤖 lỗi) → 45 giây sau (bạn không thao tác) 🤖 tự chạy lại
-  const userQuiet = (ms) => Date.now() - Math.max(USER.at, USER.viewAt || 0) >= ms && Date.now() - (S.panelAt || 0) >= ms;
+  const HOLD_RETRY_MS = 15000; // TB “đã dừng” (lần chạy 🤖 lỗi) → 15 giây sau (bạn không thao tác) 🤖 tự chạy lại (25/11: trước 45 giây)
+  // (25/11 – bạn: “chế độ tự động phản ứng rất chậm”) bạn ngưng thao tác bao lâu thì 🤖 làm: bấm / gõ trên trang theo ms; rê / lăn chuột
+  // (chỉ đang xem) tối đa 3 giây; dùng bảng điền tối đa 8 giây. Trước 25/11: rê chuột cũng bắt chờ đủ 20 giây
+  const QUIET_MS = 8000;
+  const userQuiet = (ms) =>
+    Date.now() - USER.at >= ms && Date.now() - (USER.viewAt || 0) >= Math.min(ms, 3000) && Date.now() - (S.panelAt || 0) >= Math.min(ms, QUIET_MS);
   const resumeN = (id) => {
     const r = (S.resumeN || {})[id];
     return r && Date.now() - (r.at || 0) < RESUME_WIN_MS ? r.n || 0 : 0;
@@ -14619,10 +14776,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     }
     // đứng yên đủ lâu; bạn không thao tác (trang / bảng điền); lần chạy trước đã xong một lúc; không có hộp hỏi / báo thật đang mở. Bạn đã bấm / lăn
     // chuột trên trang SAU lần chạy cuối của 🤖 (màn hình có thể là việc của bạn) → chờ bạn ngưng 3 phút
-    const touched = Math.max(USER.at, USER.viewAt || 0) > (S.runEndAt || 0);
+    const touched = USER.at > (S.runEndAt || 0); // (25/11) chỉ bấm / gõ – rê chuột không tính
     // (25/11 – bật 🤖 là chạy hết) bạn vừa bật 🤖 (1 phút, chưa thao tác trên trang sau đó) mà trang không có việc của 🤖 → đi ngay, không chờ
     const justOn = !w.x && now - (S.autoOnAt || 0) < 60000 && (S.autoOnAt || 0) > USER.at; // rê chuột không tính
-    if (!justOn && (now - S.stk.at < RESUME_MS || !userQuiet(touched ? 180000 : w.userWork ? 90000 : 20000) || now - (S.runEndAt || 0) < 15000)) return;
+    if (!justOn && (now - S.stk.at < RESUME_MS || !userQuiet(touched ? 30000 : w.userWork ? 30000 : QUIET_MS) || now - (S.runEndAt || 0) < 5000)) return;
     if (pageWorking()) return;
     if (pageDialog() || realDlgOpen(await act('dialogState'))) return;
     const id = w.x ? String(w.x.tb) : '';
@@ -14707,7 +14864,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     if (!AUTO() || isLd() || S.sweepPause || S.userStopAt) return;
     const now = Date.now();
     // màn hình đã dừng không có số TB: 5 phút sau (bạn không thao tác) cho chạy lại – mỗi chữ ký tối đa 2 lần
-    if (userQuiet(20000))
+    if (userQuiet(QUIET_MS))
       for (const s0 of [...S.autoFail]) {
         if (sigTb(s0) || now - ((S.autoFailAt || {})[s0] || 0) <= 5 * 60 * 1000) continue;
         const ne = ((S.autoFailN || {})[s0] || 0) + 1;
@@ -14718,10 +14875,15 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
     const due = [...S.autoHold].filter(([hid, h]) => {
       if (h.kind !== 'err' || h.stop || h.hard || h.noted) return false;
-      if (h.user) return now - (h.at || 0) >= 5000 && userQuiet(20000);
-      if (h.nav || h.glob) return now - (h.at || 0) >= 30000 && userQuiet(20000);
+      if (h.cap) {
+        // chờ bạn xác nhận “không phải người máy”: hộp báo đã đóng và ô xác thực đã có mã (không nhận ra ô: bạn ngưng 5 giây)
+        const cs = captchaState();
+        return now - (h.at || 0) >= 2000 && !pageDialog() && (cs ? cs.solved : userQuiet(5000));
+      }
+      if (h.user) return now - (h.at || 0) >= 5000 && userQuiet(QUIET_MS);
+      if (h.nav || h.glob) return now - (h.at || 0) >= 12000 && userQuiet(QUIET_MS);
       if (h.dlg) return now - (h.at || 0) >= 3000 && userQuiet(5000);
-      return now - (h.at || 0) >= HOLD_RETRY_MS && userQuiet(20000);
+      return now - (h.at || 0) >= HOLD_RETRY_MS && userQuiet(QUIET_MS);
     });
     if (!due.length || pageDialog() || realDlgOpen(await act('dialogState'))) return;
     for (const [id, h] of due) {
@@ -14741,7 +14903,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         log0(`🤖 TB ${id}: lỗi chung (trang chậm / không đưa được file…) – tự chạy lại`);
         continue;
       }
-      const n0 = h.user ? 0 : resumeN(id); // dừng vì bạn thao tác không tính là TB lỗi
+      const n0 = h.user || h.cap ? 0 : resumeN(id); // dừng vì bạn thao tác / chờ bạn xác thực không tính là TB lỗi
       if (n0 >= RESUME_MAX) {
         if (!(S.stage[id] || {}).hoan) markStage(id, 'hoan', 'auto', { lyDo: h.why || `🤖 dừng ở TB này nhiều lần – sửa xong bỏ tạm hoãn để 🤖 làm lại` });
         delete S.resumeN[id];
@@ -14751,11 +14913,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         log0(`⏸ TB ${id}: 🤖 đã tự chạy lại ${RESUME_MAX} lần vẫn dừng – tạm hoãn, làm TB khác`);
         continue;
       }
-      if (!h.user) S.resumeN = { ...(S.resumeN || {}), [id]: { n: n0 + 1, at: now } };
+      if (!h.user && !h.cap) S.resumeN = { ...(S.resumeN || {}), [id]: { n: n0 + 1, at: now } };
       dropHold(id);
       for (const s0 of [...S.autoFail]) if (sigTb(s0) === id) S.autoFail.delete(s0);
       S.autoSig = '';
-      log0(`🤖 TB ${id}: lần chạy trước dừng – tự chạy lại${h.user ? '' : ` (lần ${n0 + 1}/${RESUME_MAX})`}`);
+      log0(`🤖 TB ${id}: ${h.cap ? 'bạn đã xác nhận “không phải người máy”' : 'lần chạy trước dừng'} – tự chạy lại${h.user || h.cap ? '' : ` (lần ${n0 + 1}/${RESUME_MAX})`}`);
     }
   }
   // (soát 24/11) ⏸ do 🤖 tự làm tiếp / tự chạy lại cũng đếm vào bộ ngắt 5 TB: nhiều TB liền nhau đều vướng → có thể trang đổi / mạng lỗi → tắt 🤖, kêu
@@ -14786,7 +14948,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // bạn không thao tác → tải lại trang, chờ tăng dần (1, 2, 5, 10 phút); trang đăng nhập (có ô mật khẩu) → không tải lại
   const DEAD_KEY = 'vbdlis-dien-nhanh-dead';
   function deadPageReload() {
-    if (!AUTO() || !userQuiet(20000) || document.querySelector('input[type="password"]')) return;
+    if (!AUTO() || !userQuiet(QUIET_MS) || document.querySelector('input[type="password"]')) return;
     const now = Date.now();
     let st = null;
     try {

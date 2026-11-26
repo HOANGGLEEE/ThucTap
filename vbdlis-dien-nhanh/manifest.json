@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
   "name": "VBDLIS Điền Nhanh",
-  "version": "1.21.25",
+  "version": "1.21.30",
   "description": "Điền nhanh biên nhận, chủ sử dụng, thửa đất và giấy tờ vào VBDLIS từ dữ liệu TBXN. Nút Tự động hết (tự bấm Lưu) – mặc định tắt.",
   "permissions": [
     "activeTab",
     "scripting",
     "storage",
     "unlimitedStorage",
-    "offscreen"
+    "offscreen",
+    "notifications"
   ],
   "background": {
     "service_worker": "background.js"
@@ -38,6 +39,15 @@
     "https://bgi.mplis.gov.vn/*"
   ],
   "content_scripts": [
+    {
+      "matches": [
+        "https://bgi.mplis.gov.vn/*"
+      ],
+      "js": [
+        "boot.js"
+      ],
+      "run_at": "document_end"
+    },
     {
       "matches": [
         "https://bgi.mplis.gov.vn/*"

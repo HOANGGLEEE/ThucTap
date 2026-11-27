@@ -1942,7 +1942,6 @@
       id: 'thu-nghiem',
       getURL: (p) => '../' + p,
       sendMessage: async (msg) => {
-        if (msg.type === 'vbdlis-rec-inject') return { ok: true };
         // thông báo nổi (trang thử không có chrome.notifications): ghi lại để kiểm
         if (msg.type === 'vbdlis-notify' || msg.type === 'vbdlis-notify-clear') { (window.__mockNotes = window.__mockNotes || []).push({ type: msg.type, title: msg.title, text: msg.text, sticky: !!msg.sticky }); return { ok: true }; }
         if (msg.type === 'vbdlis-arm-file') return { ok: true, result: window.vbdlisArmFile() };
@@ -1969,7 +1968,7 @@
   // Không có ?nopanel=1 thì sau mỗi lần trang tải lại bảng điền được nạp lại – như tiện ích mở lại bảng.
   (async () => {
     const khongPanel = new URLSearchParams(location.search).get('nopanel') === '1';
-    for (const f of ['../page-setter.js', '../filler.js', '../recorder.js', '../panel.js']) {
+    for (const f of ['../page-setter.js', '../filler.js', '../panel.js']) {
       if (khongPanel && f === '../panel.js') continue;
       await new Promise((ok) => { const s = document.createElement('script'); s.src = f + '?t=' + Date.now(); s.onload = ok; document.body.appendChild(s); });
     }

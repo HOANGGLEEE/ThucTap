@@ -283,12 +283,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ ok: true, frames: await runInFrames(sender.tab.id, msg) });
         return;
       }
-      if (msg.type === 'vbdlis-rec-inject') {
-        // bật bộ ghi thao tác trên trang (khung chính) nếu chưa có
-        await chrome.scripting.executeScript({ target: { tabId: sender.tab.id }, files: ['recorder.js'] });
-        sendResponse({ ok: true });
-        return;
-      }
       if (msg.type === 'vbdlis-select2') {
         sendResponse({ ok: true, frames: await fireSelect2(sender.tab.id, msg.label) });
         return;

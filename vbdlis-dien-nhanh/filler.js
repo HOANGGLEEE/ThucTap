@@ -6,7 +6,7 @@
 // (Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Đóng – chỉ khi bật “Tự động hết”). Bộ điền không bao giờ bấm Kết ISO / Chuyển tiếp /
 // Thực thi / Trả hồ sơ: Chuyển tiếp + Thực thi (chuyển hồ sơ cho đúng tài khoản) do bảng điền tự bấm, có kiểm tra riêng.
 (() => {
-  const VERSION = 37;
+  const VERSION = 39;
   // cửa sổ chủ sử dụng (cùng mẫu với bảng điền)
   const CHU_WIN = /^((thong tin|them|moi|cap nhat|sua|chi tiet) )*(ca nhan|chu su dung|nguoi su dung|chu so huu)\b/;
   const THUA_WIN = /^((them|moi|thong tin|chi tiet|cap nhat|sua) )*thua dat\b/;
@@ -380,6 +380,8 @@
   }
   // hộp báo lỗi / nhắc nhở – không bao giờ tự trả lời theo hộp đã dạy
   const DLG_ERR = /(vui long|khong the|khong duoc|that bai|khong thanh cong|(co|bi|gap|xay ra) loi|^loi\b|\berror\b)/;
+  // (27/11) hộp KHÔNG được “đồng ý hết”: xác thực người dùng / người máy / captcha, đăng nhập, mật khẩu, bảo mật, cấp quyền; hỏi xóa / hủy / thu hồi / đăng xuất
+  const AGREE_NO = /xac thuc|nguoi may|captcha|dang nhap|mat khau|bao mat|cap quyen|\bxoa\b|huy bo|huy ho so|huy don|huy dang ky|thu hoi|dang xuat/;
 
   // ---- mỗi lần một cửa sổ / hộp hỏi MỞ RA có một số riêng (🤖 chạy mẫu đúng một lần mỗi lần cửa sổ mở) ----
   // Cửa sổ ẩn đi rồi hiện lại: trong lúc nó ẩn có cửa sổ khác (cửa sổ con) mở lên, và nó hiện lại ngay (3 giây) sau khi cửa sổ đó
@@ -414,7 +416,8 @@
           OPEN.gone.delete(e);
           break;
         }
-      OPEN.live.set(el, reuse ? { id: reuse.id, k } : { id: `${TOKEN}.${++OPEN.seq}`, k });
+      // t: lúc cửa sổ mở (lần mở cũ hiện lại → giữ giờ cũ) – bảng điền biết cửa sổ mở trước / sau lúc TB bị tạm hoãn (27/11)
+      OPEN.live.set(el, reuse ? { id: reuse.id, k, t: reuse.t || now } : { id: `${TOKEN}.${++OPEN.seq}`, k, t: now });
       if (!reuse) fresh = true;
     }
     if (fresh) OPEN.lastNew = now;
@@ -423,6 +426,10 @@
   const openIdOf = (el) => {
     const r = el && OPEN.live.get(el);
     return r ? r.id : '';
+  };
+  const openAtOf = (el) => {
+    const r = el && OPEN.live.get(el);
+    return r ? r.t || 0 : 0;
   };
 
   // Tên cửa sổ: ưu tiên phần tử tiêu đề thật (.modal-title…), bỏ chữ của nút (×, Đóng…)
@@ -987,7 +994,7 @@
         openSweep();
         const m = topModal();
         const title = m ? modalTitle(m) : '';
-        return { ...base, open: !!m, name: m ? scopeName(m) : '', title, key: titleKey(title), oid: openIdOf(m) };
+        return { ...base, open: !!m, name: m ? scopeName(m) : '', title, key: titleKey(title), oid: openIdOf(m), oat: openAtOf(m) };
       }
       case 'readThuaTable':
         return { ...base, ...readThuaTable() };
@@ -1262,6 +1269,18 @@
             if (hit.length === 1 && !hit[0].el.disabled && isVisible(hit[0].el)) {
               hit[0].el.click();
               return { ...base, ok: true, open: true, title, text: raw, btn: hit[0].text, learned: true, key, err: DLG_ERR.test(text) };
+            }
+          }
+          // (27/11 – bạn: “nếu gặp popup hỏi … có chữ đồng ý hãy đồng ý hết cho tôi rồi làm tiếp”) agreeAll: hộp chưa có luật / chưa dạy mà có ĐÚNG MỘT
+          // nút “Đồng ý” → bấm. KHÔNG bấm: hộp xác thực người dùng / đăng nhập / mật khẩu (trang kiểm tra người thật), hộp hỏi xóa / hủy / thu hồi
+          if (msg.agreeAll) {
+            const said1 = norm(`${modalTitle(d)} ${said0}`);
+            if (!AGREE_NO.test(said1)) {
+              const ag = buttonsByText(['Đồng ý'], d, []).filter((x) => !x.disabled && isVisible(x));
+              if (ag.length === 1) {
+                ag[0].click();
+                return { ...base, ok: true, open: true, title, btn: (ag[0].value || ag[0].textContent || '').replace(/\s+/g, ' ').trim(), agree: true, key, err: DLG_ERR.test(said1) };
+              }
             }
           }
           return { ...base, ok: false, open: true, title, text: raw, key };

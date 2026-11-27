@@ -616,6 +616,20 @@
   function luuThuaDon(){
     if (!window.__fromDon) { log('(người dùng bấm Lưu – Thông tin thửa đất)'); closeM(); return; }
     const v = (id) => document.getElementById(id).value.trim();
+    // (27/11) sessionStorage 'mockThuaMat' = '1': lần Lưu thửa này bị MẤT (cửa sổ đóng, đơn không có thửa) – một lần
+    if (sessionStorage.getItem('mockThuaMat') === '1') {
+      sessionStorage.removeItem('mockThuaMat');
+      log('(giả lập: bấm Lưu thửa ' + v('tSoThua') + '/' + v('tSoTo') + ' nhưng lần lưu bị mất – cửa sổ đóng, đơn không có thửa)');
+      window.__fromDon = false; moLaiDon(); return;
+    }
+    // (27/11) sessionStorage 'mockThuaCham' = ms: trang lưu chậm (cửa sổ còn mở trong lúc lưu) – một lần
+    const cham = +(sessionStorage.getItem('mockThuaCham') || 0);
+    if (cham > 0 && !window.__mockThuaDangLuu) {
+      sessionStorage.removeItem('mockThuaCham');
+      window.__mockThuaDangLuu = true;
+      log('(bấm Lưu thửa ' + v('tSoThua') + '/' + v('tSoTo') + ' – trang đang lưu, ' + cham + ' ms)');
+      return setTimeout(() => { luuThuaDon(); window.__mockThuaDangLuu = false; }, cham);
+    }
     if (hopTonTai(v('tSoThua'), v('tSoTo'), () => dongThuaDon())) return;
     const dt = AutoNumeric.getAutoNumericElement('#tDienTich').getNumber();
     if (window.__mockCayThat) {
@@ -1201,7 +1215,10 @@
     tb.innerHTML = '<tr><td colspan="4">Đang tải...</td></tr>';
     hgNap = setTimeout(() => {
       const cap = (chonBox.querySelector('input[name="capDonVi"]:checked') || {}).value || 'tatca';
-      const ds = CAN_BO[chonTu].filter((r) => LOC_CAP[cap](r[2]));
+      let ds = CAN_BO[chonTu].filter((r) => LOC_CAP[cap](r[2]));
+      // sessionStorage 'mockDsTrong' = n: n lần tải đầu ra “Không có dữ liệu” (như trang thật 26/11) – bấm “Tải lại danh sách tài khoản” mới có
+      const trong = +(sessionStorage.getItem('mockDsTrong') || 0);
+      if (trong > 0) { sessionStorage.setItem('mockDsTrong', String(trong - 1)); ds = []; log('(giả lập: danh sách tài khoản trống – Không có dữ liệu)'); }
       tb.innerHTML = ds.length ? ds.map((r, i) => `<tr><td>${i + 1}</td><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('') : '<tr><td colspan="4">Không có dữ liệu</td></tr>';
       // window.__mockDauCu = { acc, cls, green }: như trang thật 24/11 – một dòng KHÁC còn dấu cũ (lớp, có thể nền xanh) mà không có ✓ ở cột STT
       const dc = window.__mockDauCu;

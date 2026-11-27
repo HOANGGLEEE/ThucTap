@@ -20,7 +20,7 @@
   const DEFAULT_DIEU_KIEN = 'Chưa đủ điều kiện cấp giấy';
   const KHONG_DOI = '(không đổi)';
   const DEAD_MSG = 'Tiện ích vừa được tải lại nên bảng này đã mất kết nối. Bấm biểu tượng tiện ích (Alt+Q) để mở bảng mới – dữ liệu vẫn còn nguyên.';
-  const PANEL_VERSION = '1.21.35'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
+  const PANEL_VERSION = '1.21.43'; // tăng mỗi lần sửa bảng – bảng khác phiên bản sẽ bị thay bằng bảng mới
   // bảng đang hiện hay bạn đã ẩn (×) – trang tải lại khi bật Tự động hết thì chỉ mở lại bảng nếu bạn không ẩn
   const noteShown = (on) => {
     try {
@@ -632,7 +632,7 @@
 
   // ---------- giao diện ----------
   const CSS = `
-.ldt{width:100%;border-collapse:collapse;margin:4px 0;font-size:12px}.ldt td{padding:2px 4px;border-top:1px solid #e2e8f0;vertical-align:top}.ldt td:first-child{white-space:nowrap}.ldblock{color:#b91c1c;font-weight:600;margin:4px 0}
+.ldblock{color:#b91c1c;font-weight:600;margin:4px 0}.ldx{border:1px solid #e2e8f0;border-radius:8px;padding:10px 10px 8px;margin-bottom:8px}.ldx-top{display:flex;align-items:flex-end;gap:14px}.ldx-n{display:flex;flex-direction:column;flex:none}.ldx-n b{font-size:34px;line-height:1;font-weight:700;color:#0f766e;font-variant-numeric:tabular-nums}.ldx-n span{font-size:11.5px;color:#64748b;margin-top:4px}.ldx-bars{flex:1;display:flex;align-items:flex-end;gap:5px;height:58px}.ldx-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:10px;color:#94a3b8}.ldx-bar i{display:block;width:100%;min-height:2px;background:#cbd5e1;border-radius:2px 2px 0 0}.ldx-bar.td i{background:#0f766e}.ldx-bar.td{color:#0f766e;font-weight:600}.ldx-bar em{font-style:normal;margin-top:3px}.ldx-bar span{line-height:1;margin-bottom:2px;color:#64748b;font-variant-numeric:tabular-nums}.ldx-bar.td span{color:#0f766e}.ldx-sum{font-size:11.5px;color:#64748b;margin-top:6px}.ldx-chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.ldx-chip{font-size:12px;padding:2px 9px;border-radius:999px;background:#f1f5f9;color:#334155}.ldx-chip b{font-variant-numeric:tabular-nums;margin-right:3px}.ldx-chip.cho{background:#e0f2fe;color:#075985}.ldx-chip.lam{background:#fef3c7;color:#92400e}.ldx-chip.loi{background:#fee2e2;color:#991b1b}.ldx-recv{display:flex;align-items:center;gap:6px;font-size:12.5px;border-top:1px solid #f1f5f9;padding-top:7px}.ldx-recv .btn{padding:1px 8px;margin-left:auto}.ldx-recv.no{color:#b91c1c;font-weight:600}.ldl{margin:2px 0 8px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}.ldr{display:grid;grid-template-columns:1fr auto;gap:1px 8px;padding:6px 9px;border-left:3px solid #cbd5e1;border-top:1px solid #f1f5f9;font-size:12px}.ldl>.ldr:first-child{border-top:0}.ldr .so{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.ldr .st{text-align:right;white-space:nowrap;color:#475569}.ldr .why{grid-column:1/-1;color:#64748b;font-size:11.5px}.ldr.cho{border-left-color:#38bdf8}.ldr.lam{border-left-color:#f59e0b}.ldr.lam .st{color:#b45309}.ldr.loi{border-left-color:#dc2626}.ldr.loi .st{color:#b91c1c}.ldr.bo{border-left-color:#94a3b8}.ldr.ok{border-left-color:#16a34a}.ldr.ok .st{color:#15803d}.ldl-empty{padding:10px;color:#64748b;font-size:12px}.ldd{margin:4px 0 6px}.ldd>summary{cursor:pointer;color:#0f766e;font-size:12px;padding:2px 0}.ldd .ldl{margin-top:4px}.ldd ol{margin:4px 0 2px 18px;padding:0;font-size:11.5px;color:#475569}.ldd ol li{margin:1px 0}.ldd .f,.ldd .opt{margin-top:4px}.pn.vld .cvonly,.pn.vld #note{display:none!important}
 :host{all:initial}
 *{box-sizing:border-box;font-family:"Segoe UI",system-ui,Arial,sans-serif}
 .pn{position:relative;width:var(--w,420px);height:var(--h,auto);max-height:var(--mh,calc(100vh - 90px));display:flex;flex-direction:column;background:#fff;color:#1f2937;border:1px solid #cbd5e1;border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.28);font-size:12.5px;line-height:1.35;overflow:hidden}
@@ -746,11 +746,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     <div class="row" id="stageRow"><span class="muted" style="flex:none">Trạng thái:</span><select id="tbStage" title="Tiện ích tự đánh dấu: ○ Chưa xong tới khi Thực thi chuyển lãnh đạo (đã tiếp nhận, đã nhập đơn vẫn là Chưa xong – dòng bên cạnh ghi giờ từng bước); ◐ Đã nhập nhưng chưa xong khi đã chuyển lãnh đạo; ✓ Xong khi Trả hồ sơ xong (đã ở bước Trả kết quả mà chưa trả xong vẫn là ◐). Sai thì sửa tay ở đây."><option value="chua">○ Chưa xong</option><option value="tn">◐ Đã nhập nhưng chưa xong (đã chuyển lãnh đạo)</option><option value="xong">✓ Xong</option><option value="hoan">⏸ Tạm hoãn</option><option value="redo">↺ Làm lại từ Tiếp nhận hồ sơ (xóa lịch sử)</option></select><span id="stageInfo" class="muted"></span></div>
     <div class="row prog" id="progRow"><span id="progTxt" class="muted"></span><span class="sp"></span><button class="btn" id="scanQBtn" style="display:none" title="Hàng chờ file quét (DDK, TBXN) – bấm để xem">📎 0</button><button class="btn bulk" id="bulkBtn" title="Soát hàng loạt">⚡ Soát loạt</button><button class="btn" id="nextTodo" title="Chọn TB chưa tiếp nhận tiếp theo">→ TB chưa làm</button><button class="btn" id="progList" title="Bảng tiến độ tất cả TB – lọc TB chưa xong, xuất ra Excel">☰ Tiến độ</button></div>
     <div class="evt" id="evt" style="display:none"></div>
-    <div class="row"><button class="btn" id="scan" title="Kiểm tra tiện ích còn tìm thấy đủ ô, nút cần dùng trên màn hình đang mở (khi VBDLIS đổi giao diện) – kèm danh sách nhãn → ô">Kiểm tra trang</button><button class="btn" id="dataBtn">Dữ liệu</button><button class="btn auto run" id="autoBtn" title="🤖 Tự động hết (25/11: thay nút 🤖): bấm BẬT là tiện ích chạy hết ngay từ màn hình đang mở (tiếp nhận → nhập đơn → chuyển lãnh đạo → tìm hồ sơ → trả hồ sơ, hết TB này sang TB khác); bấm TẮT là dừng. Tự bấm Lưu, Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, tác vụ 2–3, Chuyển tiếp / Thực thi (đúng tài khoản trong cài đặt), Trả hồ sơ. Ô lệch / hộp hỏi lạ / lỗi thì dừng, kêu ting chờ bạn. Kết ISO: chỉ khi bạn bật “Tự Kết ISO” (tab Biên nhận).">🤖 Tự động: TẮT</button><span class="sp"></span><button class="btn" id="resetDone" title="Xóa dấu ✓ của TB này">Xóa dấu ✓</button></div>
+    <div class="row"><button class="btn cvonly" id="scan" title="Kiểm tra tiện ích còn tìm thấy đủ ô, nút cần dùng trên màn hình đang mở (khi VBDLIS đổi giao diện) – kèm danh sách nhãn → ô">Kiểm tra trang</button><button class="btn cvonly" id="dataBtn">Dữ liệu</button><button class="btn auto run" id="autoBtn" title="🤖 Tự động hết (25/11: thay nút 🤖): bấm BẬT là tiện ích chạy hết ngay từ màn hình đang mở (tiếp nhận → nhập đơn → chuyển lãnh đạo → tìm hồ sơ → trả hồ sơ, hết TB này sang TB khác); bấm TẮT là dừng. Tự bấm Lưu, Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, tác vụ 2–3, Chuyển tiếp / Thực thi (đúng tài khoản trong cài đặt), Trả hồ sơ. Ô lệch / hộp hỏi lạ / lỗi thì dừng, kêu ting chờ bạn. Kết ISO: chỉ khi bạn bật “Tự Kết ISO” (tab Biên nhận).">🤖 Tự động: TẮT</button><span class="sp"></span><button class="btn" id="resetDone" title="Xóa dấu ✓ của TB này">Xóa dấu ✓</button></div>
     <div class="note" id="note" style="display:none"></div>
     <div id="ldBox" style="display:none"></div>
     <div class="tabs">
-      <button data-tab="bn">Biên nhận</button><button data-tab="chu">Chủ SD</button><button data-tab="thua">Thửa đất</button><button data-tab="gt">Giấy tờ</button><button data-tab="tr" title="Lấy tất cả các trường trên màn hình đang mở, tích trường cần điền">Trường</button>
+      <button data-tab="bn">Biên nhận</button><button data-tab="chu" class="cvonly">Chủ SD</button><button data-tab="thua" class="cvonly">Thửa đất</button><button data-tab="gt" class="cvonly">Giấy tờ</button><button data-tab="tr" title="Lấy tất cả các trường trên màn hình đang mở, tích trường cần điền">Trường</button>
     </div>
     <div id="content"></div>
   </div>
@@ -778,7 +778,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   const TABS = {
     bn: (tb) =>
       (tb
-        ? `<div class="card ${isDone(tb, 'bn') ? 'done' : ''}">
+        ? `<div class="card cvonly ${isDone(tb, 'bn') ? 'done' : ''}">
         <div class="ct">Biên nhận & người nộp<span class="sp"></span>${isDone(tb, 'bn') ? '<span class="chk">✓ đã điền</span>' : ''}</div>
         ${fld('Phường/Xã', 'phuongXa', tb, { ph: DEFAULT_PHUONG })}
         ${fld('Quy trình', 'quyTrinh', tb, { ph: DEFAULT_QUY_TRINH })}
@@ -790,8 +790,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         <div class="hint">Đóng hết cửa sổ con, đứng ở màn hình tiếp nhận hồ sơ rồi bấm.</div>
         <button class="btn pri full" data-fill="bienNhan">Điền vào màn hình tiếp nhận</button>
       </div>`
-        : '<div class="hint">Chưa có dữ liệu TB (vai trò Lãnh đạo không cần dữ liệu) – các ô cài đặt dưới vẫn dùng được: tài khoản Lãnh đạo / Chuyên viên, Chạy thử, Tốc độ, tiếng báo.</div>') +
-      `<div class="card">
+        : '<div class="hint cvonly">Chưa có dữ liệu TB (vai trò Lãnh đạo không cần dữ liệu) – các ô cài đặt dưới vẫn dùng được: tài khoản Lãnh đạo / Chuyên viên, Chạy thử, Tốc độ, tiếng báo.</div>') +
+      `<div class="card cvonly">
         <div class="ct">🤖 thêm thửa nào ở bước tiếp nhận</div>
         <select id="optThuaTN">
           <option value="dau"${S.opts.thuaTN !== 'tatca' ? ' selected' : ''}>Chỉ thửa đầu tiên – đủ để lưu hồ sơ (các thửa nhập ở Nhập đơn đăng ký)</option>
@@ -802,20 +802,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         <div class="ct">Khi 🤖 dừng chờ bạn</div>
         <label class="opt"><input type="checkbox" id="optAmBao"${S.opts.amBao !== false ? ' checked' : ''}> Kêu “ting” và nháy tên tab (để bạn làm việc khác trong lúc VBDLIS chạy chậm)</label>
         <label class="opt"><input type="checkbox" id="optThongBao"${S.opts.thongBao !== false ? ' checked' : ''}> Thông báo nổi ở góc màn hình (khi bạn đang ở tab / cửa sổ khác; cần xác nhận “không phải người máy” thì luôn hiện) – bấm vào thông báo là về đúng trang VBDLIS</label>
-        <label class="opt"><input type="checkbox" id="optEnter"${S.opts.enterLuu !== false ? ' checked' : ''}> Mọi ô đã điền khớp dữ liệu thì đặt sẵn con trỏ ở nút “Lưu” (thửa đất, “Cập nhật” hồ sơ quét…): kiểm tra xong chỉ cần nhấn Enter</label>
-      </div>
-      <div class="card">
-        <div class="ct">Tự động (bạn cho phép)</div>
-        <label class="opt"><input type="checkbox" id="optTuChu"${S.opts.tuLuuChu !== false ? ' checked' : ''}> Nhập chủ sử dụng tự động: mọi ô khớp dữ liệu thì tiện ích tự bấm “Lưu” cửa sổ chủ rồi sang chủ sau (thiếu dữ liệu, hoặc trang hỏi “Giấy tờ tùy thân đã tồn tại…” thì vẫn dừng chờ bạn)</label>
-        <label class="opt"><input type="checkbox" id="optTuHsq"${S.opts.tuHsq !== false ? ' checked' : ''}> Lưu kho hồ sơ quét tự động: tự thêm dòng (bấm “Lưu” ở cửa sổ nhỏ “Thông tin hồ sơ quét”) và tự “Tải lên” file từ hàng chờ</label>
-        <label class="opt"><input type="checkbox" id="optTuQT"${S.opts.tuQT !== false ? ' checked' : ''}> Quy trình xử lý tự động: tác vụ Cập nhật dữ liệu pháp lý (bấm “Thực hiện”, “Đồng ý”), Lưu kho hồ sơ quét (bấm “Cập nhật”, “Đóng”), tích “Đã xử lý”</label>
-        <div class="hint">Nút <b>🤖 Tự động</b>: bật thì tiện ích làm hết – tự bấm cả Lưu hồ sơ, Lưu thông tin đăng ký, Hoàn tất, Chuyển tiếp, Thực thi (chỉ chuyển cho đúng 2 tài khoản dưới). Tắt thì tiện ích không bấm các nút đó. Trả hồ sơ: 🤖 bấm Thực hiện, Đồng ý. Kết ISO: chỉ khi bạn bật “Tự Kết ISO” (mục dưới).</div>
       </div>
       <div class="card">
         <div class="ct">🤖 Tự động hết – chuyển tiếp hồ sơ</div>
         <div class="f"><label>Chuyên viên</label><input id="optCtCV" value="${esc(S.opts.ctCV || '')}" placeholder="tài khoản, vd. bgi.abc123_vy" spellcheck="false"><span></span></div>
         <div class="f"><label>Lãnh đạo</label><input id="optCtLD" value="${esc(S.opts.ctLD || '')}" placeholder="tài khoản, vd. bgi.xyz456_vy" spellcheck="false"><span></span></div>
-        <div class="hint">Lưu hồ sơ → Xử lý hồ sơ → tích “Tiếp nhận hồ sơ” → Chuyển tiếp cho <b>Chuyên viên</b> (bước “2. Chuyên viên”) → Xử lý hồ sơ → nhập đơn (Lưu thông tin đăng ký, Hoàn tất, Đóng) → tích “Nhập đăng ký”, “Giấy tờ đính kèm” → Chuyển tiếp cho <b>Lãnh đạo</b> (bước “3. Lãnh đạo UBND xã”). Tiện ích chỉ chọn dòng có <b>Tên tài khoản</b> đúng y như trên; không thấy, thấy 2 dòng, hoặc bước nhận khác → dừng, kêu ting.</div>
+        <div class="hint cvonly">Lưu hồ sơ → Xử lý hồ sơ → tích “Tiếp nhận hồ sơ” → Chuyển tiếp cho <b>Chuyên viên</b> (bước “2. Chuyên viên”) → Xử lý hồ sơ → nhập đơn (Lưu thông tin đăng ký, Hoàn tất, Đóng) → tích “Nhập đăng ký”, “Giấy tờ đính kèm” → Chuyển tiếp cho <b>Lãnh đạo</b> (bước “3. Lãnh đạo UBND xã”). Tiện ích chỉ chọn dòng có <b>Tên tài khoản</b> đúng y như trên; không thấy, thấy 2 dòng, hoặc bước nhận khác → dừng, kêu ting.</div>
         <div class="f"><label>Tốc độ</label><select id="optTocDo">${[
           ['nhanh', 'Nhanh – chờ ít giữa các bước'],
           ['vua', 'Bình thường'],
@@ -825,8 +817,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           .map(([v, t]) => `<option value="${v}"${(S.opts.tocDo || 'vua') === v ? ' selected' : ''}>${t}</option>`)
           .join('')}</select><span></span></div>
         <label class="opt"><input type="checkbox" id="optThuTT"${S.opts.thuThucThi ? ' checked' : ''}> Chạy thử: chọn sẵn đúng người rồi DỪNG ở “Thực thi” / “Trả hồ sơ” để tôi tự bấm (nên bật cho 1–2 hồ sơ đầu trên VBDLIS thật)</label>
-        <label class="opt"><input type="checkbox" id="optTuISO"${S.opts.tuISO === true ? ' checked' : ''}> <b>Tự Kết ISO</b> (mặc định tắt): hồ sơ lãnh đạo trả về, Quy trình chỉ còn thiếu “Kết ISO” → 🤖 tự bấm Xử lý tác vụ → Thực hiện → Đồng ý, tích “Đã xử lý”, rồi chuyển bước Trả kết quả, Trả hồ sơ. Tắt: bạn tự Kết ISO như cũ</label>
-        <label class="opt"><input type="checkbox" id="optSangTB"${S.opts.tuSangTB !== false ? ' checked' : ''}> Chuyển lãnh đạo xong thì tự sang TB chưa làm tiếp theo (bấm “Về trang tiếp nhận hồ sơ”, tiếp nhận luôn)</label>
+        <label class="opt cvonly"><input type="checkbox" id="optTuISO"${S.opts.tuISO === true ? ' checked' : ''}> <b>Tự Kết ISO</b> (mặc định tắt): hồ sơ lãnh đạo trả về, Quy trình chỉ còn thiếu “Kết ISO” → 🤖 tự bấm Xử lý tác vụ → Thực hiện → Đồng ý, tích “Đã xử lý”, rồi chuyển bước Trả kết quả, Trả hồ sơ. Tắt: bạn tự Kết ISO như cũ</label>
+        <label class="opt cvonly"><input type="checkbox" id="optSangTB"${S.opts.tuSangTB !== false ? ' checked' : ''}> Chuyển lãnh đạo xong thì tự sang TB chưa làm tiếp theo (bấm “Về trang tiếp nhận hồ sơ”, tiếp nhận luôn)</label>
       </div>`,
     chu: (tb) =>
       `<div class="card">
@@ -1601,7 +1593,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           .filter((n) => n.split(' ').length >= 2)
       ),
     ];
-    const accs = [S.opts.ctCV, S.opts.ctLD, S.opts.ctB4].filter(Boolean).map((a) => norm(a));
+    const accs = [S.opts.ctCV, S.opts.ctLD].filter(Boolean).map((a) => norm(a));
     const badS = (s) => {
       const raw = String(s || '');
       const v = norm(raw);
@@ -1647,7 +1639,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         };
         if (x.on && !x.ban && x.src !== 'tb' && x.val !== undefined) {
           const v = String(x.val);
-          const acc = [S.opts.ctCV, S.opts.ctLD, S.opts.ctB4].filter(Boolean).some((a) => norm(v).includes(norm(a)));
+          const acc = [S.opts.ctCV, S.opts.ctLD].filter(Boolean).some((a) => norm(v).includes(norm(a)));
           if (/\d{9,}/.test(v) || PII_LAB.test(norm(x.label)) || TAI_KHOAN.test(v) || acc || badS(v)) dropped++;
           else y.val = x.val;
         }
@@ -2187,7 +2179,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const r0 = recvTB();
     const k0 = fromIdx != null && fromIdx >= 0 ? fromIdx : S.data.indexOf(r0);
     for (let j = 1; j <= S.data.length; j++) {
-      if (noWrap && k0 + j >= S.data.length) break; // Tự động hết: không quay lại các TB phía trước
+      // (27/11) cả 🤖 cũng quay lại các TB ○ phía trước con trỏ (trước đây không quay lại – TB ⏸ về Chưa xong / bỏ dở bị bỏ sót)
       const x = S.data[(k0 + j) % S.data.length];
       if (x && stageOf(x) === 'chua' && !(S.stage[String(x.tb)] || {}).tnClick && x !== r0 && !(AUTO() && S.autoHold.has(String(x.tb)))) return x;
     }
@@ -2657,7 +2649,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     return `🤖 vướng ở bước “${t || 'tự động'}” – xem dòng báo của lần chạy; sửa xong bỏ tạm hoãn để 🤖 làm lại`;
   };
   // hộp báo LỖI bạn đã dạy (tab Trường) vừa được bấm theo mẫu → bước đang làm chưa xong (không coi là đã qua): báo lỗi để TB này tạm hoãn
-  const taughtErr = (hit) => new Error(`trang báo lỗi “${String(hit.title || '').slice(0, 60)}” – tiện ích đã bấm “${hit.btn}” theo hộp bạn dạy; bước này chưa xong`);
+  const taughtErr = (hit) =>
+    new Error(`trang báo lỗi “${String(hit.title || '').slice(0, 60)}” – tiện ích đã bấm “${hit.btn}” ${hit.agree ? '(đồng ý hết)' : 'theo hộp bạn dạy'}; bước này chưa xong`);
   // dấu tạm giữ đã được thả chưa (bạn đã tự làm bước tiện ích chờ)
   function holdFree(id, h) {
     if (h.kind === 'tt') {
@@ -2697,7 +2690,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // “XÁC NHẬN THÊM MỚI HỒ SƠ – Bạn có thật sự muốn thêm mới hồ sơ hay không?  ĐỒNG Ý / KHÔNG” → Đồng ý
   const LHS_DIALOGS = [...AUTO_DIALOGS, { re: '(xac nhan them moi ho so|that su muon them moi ho so)', btn: ['Đồng ý'] }];
   // hộp báo sau Lưu hồ sơ: số biên nhận đã được dùng cho hồ sơ khác (trang thật 23/11 – hồ sơ của số này đã có trên VBDLIS)
-  const SBN_USED = /da (duoc )?su dung cho ho so khac/;
+  // (27/11) chữ hộp do bộ điền đọc dính liền (“…tồn tạiĐỒNG Ý”) – không dùng \b ở cuối
+  const SBN_USED = /da (duoc )?su dung cho ho so khac|ho so (nay )?da ton tai/;
   // hộp hỏi ngay sau khi tiện ích bấm “Thực hiện” ở cửa sổ “Trả hồ sơ” → Đồng ý (bạn yêu cầu “bấm thực hiện rồi đồng ý”);
   // hộp báo lỗi (vui lòng…, không thể…, thất bại…) thì không
   // chỉ hộp HỎI xác nhận việc trả hồ sơ (vd. “Bạn có chắc chắn muốn trả hồ sơ này?”), chỉ 1 lần; hộp báo lỗi / hộp khác → dừng chờ bạn
@@ -3103,8 +3097,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     // 🤖 tự làm tiếp: hồ sơ đang mở đọc được số biên nhận đúng TB này (lúc quyết định) – vướng thì ⏸ + làm TB khác ngay (không kêu, không thử lại mù)
     if (fromAuto && fromAuto.startsWith('resume:') && tb && sigTb(fromAuto) === String(tb.tb)) tbKnown = true;
     const prog0 = S.progN || 0; // số bước đã ghi lúc bắt đầu – lần chạy 🤖 ghi thêm được bước mà TB không bị tạm hoãn → bộ ngắt 5 TB đếm lại
-    const show = () =>
-      setResult(
+    const show = () => {
+      if (tb) S.runTb = String(tb.tb); // (27/11) TB lần chạy đang làm – bạn tắt 🤖 thì nhớ TB này để bật lại làm tiếp
+      return setResult(
         keepPrev +
           `<div class="sum">${esc(title)}</div>` +
           log.map((l) => `<div class="ln ${l.cls}">${l.icon} ${l.html}</div>`).join('') +
@@ -3112,6 +3107,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           sheet +
           tail
       );
+    };
     const step = (text) => {
       const l = { icon: '⏳', cls: 'muted', html: esc(text), text: String(text || '') };
       log.push(l);
@@ -3136,13 +3132,15 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     // Trả về 'answered' | 'unknown' (hộp lạ – để bạn trả lời) | null (không có hộp / đang tắt Tự động hết)
     const autoDlg = async () => {
       if (!AUTO()) return null;
-      const rs = await act('answerDialog', { rules: AUTO_DIALOGS });
+      // (27/11 – bạn: “nếu gặp popup hỏi … có chữ đồng ý hãy đồng ý hết cho tôi rồi làm tiếp”) hộp chưa có luật / chưa dạy mà có đúng một nút
+      // “Đồng ý” → bấm (filler: agreeAll – không bấm hộp xác thực / đăng nhập, hộp hỏi xóa / hủy / thu hồi)
+      const rs = await act('answerDialog', { rules: AUTO_DIALOGS, agreeAll: true });
       const hit = rs.find((x) => x.ok);
       if (hit) {
-        log.push({ icon: '•', cls: 'muted', html: esc(`Trang hỏi “${hit.title}” – tiện ích bấm “${hit.btn}” (${hit.learned ? 'theo hộp bạn đã dạy ở tab Trường' : 'Tự động hết'})`) });
+        log.push({ icon: '•', cls: 'muted', html: esc(`Trang hỏi “${hit.title}” – tiện ích bấm “${hit.btn}” (${hit.learned ? 'theo hộp bạn đã dạy ở tab Trường' : hit.agree ? 'đồng ý hết' : 'Tự động hết'})`) });
         show();
         await sleep(900);
-        if (hit.learned && hit.err) throw taughtErr(hit); // hộp LỖI đã dạy: bấm theo mẫu, bước này chưa xong (24/11)
+        if ((hit.learned || hit.agree) && hit.err) throw taughtErr(hit); // hộp LỖI: đã bấm, bước này chưa xong (24/11)
         return 'answered';
       }
       return rs.some((x) => x.open) ? 'unknown' : null;
@@ -3351,6 +3349,23 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const f = (await act('donHas', { kind: it.kind, values: it.values })).find((x) => x.ok);
       return f ? !!f.has : null; // null = cửa sổ “Nhập đơn đăng ký” không nằm trên cùng
     };
+    // (27/11) đọc cây đơn khi trang đã nạp xong: không “Đang xử lý…”, 2 lần đọc liền giống nhau (tới 12 giây) – lần trước bấm Lưu mà chưa kịp ghi
+    // nhận (bạn tắt 🤖) thì cây có thể nạp chậm
+    const donHasSettled = async (it) => {
+      let prev;
+      let same = 0;
+      for (const t0 = Date.now(); Date.now() - t0 < 12000 * slowK(); ) {
+        stopIf();
+        const h = await donHas(it);
+        if (h === true || h === null) return h;
+        if (!pageWorking() && h === prev) {
+          if (++same >= 2) return h;
+        } else same = 0;
+        prev = h;
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      return prev === undefined ? null : prev;
+    };
     // ngữ cảnh cho các bước Quy trình xử lý (runQuyTrinh / runScan)
     const qtCtx = {
       step: (t) => (cur = step(t)),
@@ -3497,8 +3512,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         stopIf();
         cur = step(it.label);
         const pendKey = `${tb.tb}|don-${it.key}|pending`;
+        const redoKey = `${tb.tb}|don-${it.key}|redo`; // (27/11) số lần đã điền lại mục này vì lần trước chưa vào đơn
         const finish = (msg, skip) => {
           delete S.done[pendKey];
+          delete S.done[redoKey];
           S.done[`${tb.tb}|${it.key}`] = true;
           saveUi();
           if (it.kind === 'thua') {
@@ -3527,15 +3544,28 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           finish('đã có trong đơn', true);
           continue;
         }
-        // lần trước đã mở cửa sổ cho mục này mà đơn vẫn chưa có → hỏi lại trước khi mở lại (tránh nhập trùng)
-        if (S.done[pendKey] === true || (fromAuto && S.done[pendKey] === 'confirm')) {
-          S.done[pendKey] = 'confirm';
+        // (27/11 – bạn: “tắt ngay sau khi bấm Lưu một thửa … khi bật lại, nếu hồ sơ đã có thửa đó thì tiếp tục thửa kế tiếp, nếu chưa có thì hoàn
+        // thiện và lưu lại đúng thửa đang dở”) lần trước đã mở cửa sổ mục này (có thể đã bấm Lưu) mà cây chưa có → chờ cây nạp xong rồi xem lại:
+        // có → xong, làm mục sau; vẫn chưa có → điền lại, Lưu (bộ điền xem lại cây trước khi bấm Thêm – không thêm trùng). Tối đa 2 lần điền lại
+        if (S.done[pendKey]) {
+          const was = S.done[pendKey];
+          cur.wait(was === 'saving' ? 'lần trước đã bấm “Lưu” mục này – chờ đơn nạp xong rồi xem lại…' : 'lần trước đã mở cửa sổ mục này – xem lại đơn…');
+          const h2 = await donHasSettled(it);
+          if (h2 === true) {
+            finish(was === 'saving' ? 'đã có trong đơn (lần trước đã lưu)' : 'đã có trong đơn', true);
+            continue;
+          }
+          if (h2 === null) throw new Error('cửa sổ “Nhập đơn đăng ký” không nằm trên cùng – xong cửa sổ đang mở rồi 🤖 làm tiếp');
+          const n = (+S.done[redoKey] || 0) + (was === 'saving' ? 1 : 0);
+          if (n > 2) throw new Error(`đã bấm Lưu mục này ${n} lần mà đơn vẫn chưa có – bạn xem trên VBDLIS (trang báo lỗi?)`);
+          if (n) S.done[redoKey] = n;
           saveUi();
-          const eC = new Error(
-            'lần trước cửa sổ đã đóng nhưng đơn chưa có mục này. Nếu bạn đã bấm Đóng thì tắt rồi bật lại 🤖 lần nữa để mở lại; nếu đã bấm Lưu mà trong đơn không hiện thì kiểm tra tay'
-          );
-          eC.noRetry = true; // bạn quyết (có thể đã lưu) – 🤖 không tự mở lại mục này
-          throw eC;
+          cur.wait(was === 'saving' ? `lần trước bấm Lưu mà đơn chưa có mục này – điền lại, Lưu (lần ${n + 1})` : 'lần trước điền dở mục này – điền lại, Lưu');
+        }
+        // (27/11) ghi dấu “🤖 đang làm mục này” TRƯỚC khi mở cửa sổ – bạn tắt 🤖 lúc đang điền thì bật lại tiện ích biết cửa sổ còn mở là của 🤖
+        if (!S.done[pendKey]) {
+          S.done[pendKey] = true;
+          saveUi();
         }
         // tự bấm “Thêm → Cá nhân / Thửa đất” rồi điền
         let r = await send({ type: 'vbdlis-fill', ...tplMsg(it.kind, it.values) });
@@ -3593,7 +3623,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           stopIf(); // bạn bấm ■ Dừng / tắt 🤖 lúc chờ sau nút theo mẫu → không bấm Lưu
           const ms = await act('markSave', { win: it.kind });
           const marks = ms.filter((x) => x.ok);
-          if (marks.length === 1) return anyOk(await act('clickMark', { id: marks[0].id })) ? '' : 'không bấm được nút Lưu';
+          if (marks.length === 1) {
+            S.done[pendKey] = 'saving'; // (27/11) đã bấm Lưu – bạn tắt 🤖 trước khi tiện ích kịp ghi nhận thì lần sau chờ đơn nạp rồi xem lại
+            saveUi();
+            if (anyOk(await act('clickMark', { id: marks[0].id }))) return '';
+            S.done[pendKey] = true;
+            saveUi();
+            return 'không bấm được nút Lưu';
+          }
           return marks.length ? 'thấy nút Lưu ở nhiều khung' : (ms.find((x) => x.why) || {}).why || 'không thấy nút Lưu';
         };
         if (canAuto && !donCertain && !AUTO()) noAuto = 'chưa chắc hồ sơ của TB này';
@@ -3728,6 +3765,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         // đã vào đơn chưa (cây Chủ sử dụng / Thửa đất và tài sản – trang có thể nạp lại chậm)
         let ok = false;
         for (const tw = Date.now(); Date.now() - tw < 8000 * slowK() && !ok; ) {
+          stopIf(); // (27/11) bạn tắt 🤖 lúc chờ → dừng ngay, giữ dấu “đã bấm Lưu” (bật lại thì xem lại đơn) – không kết luận “bỏ qua”
           await new Promise((r) => setTimeout(r, 300));
           ok = await donHas(it);
           if (ok === null) {
@@ -3737,6 +3775,18 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           }
         }
         if (!ok) {
+          // (27/11) chính 🤖 đã bấm Lưu (trang không báo “đã tồn tại”) mà mục chưa vào đơn → lần lưu bị mất, KHÔNG phải bạn đóng cửa sổ: điền lại,
+          // Lưu đúng mục này (tối đa 2 lần) – không bỏ qua thửa, không để đơn thiếu
+          if (autoSaved && !tonTai) {
+            const n = (+S.done[redoKey] || 0) + 1;
+            if (n > 2) throw new Error(`đã bấm Lưu ${it.kind === 'chu' ? 'chủ' : 'thửa'} này ${n} lần mà đơn vẫn chưa có – bạn xem trên VBDLIS (trang báo lỗi?)`);
+            S.done[redoKey] = n;
+            S.done[pendKey] = true;
+            saveUi();
+            cur.wait(`đã bấm “Lưu” mà đơn chưa có mục này (lần lưu bị mất?) – điền lại, Lưu (lần ${n + 1})`);
+            items.splice(items.indexOf(it) + 1, 0, it);
+            continue;
+          }
           if (it.kind !== 'thua')
             throw new Error(
               'cửa sổ đã đóng nhưng đơn chưa có mục này (bấm Đóng?) – tắt rồi bật lại 🤖 để làm tiếp (tiện ích sẽ hỏi lại trước khi mở lại)'
@@ -3866,7 +3916,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           cur.ok(`trang báo “${okSay}”`);
         };
         const s1 = S.stage[String(tb.tb)] || {};
-        if (s1.htClick && !s1.don)
+        // (27/11) lần trước đã bấm Hoàn tất mà chưa thấy câu báo (bạn tắt 🤖 / trang tải lại) → bấm lại MỘT lần (cùng đơn, Mã đơn khớp đúng số biên
+        // nhận – kiểm ở dưới), vẫn phải có câu báo thành công; lần thứ hai vẫn không thấy thì nhờ bạn xem
+        if (s1.htClick && !s1.don && !s1.htRetry) {
+          await setMark(tb.tb, 'htRetry', Date.now());
+          await setMark(tb.tb, 'htClick', null);
+          step('Lưu thông tin đăng ký, Hoàn tất').skip(`lần trước đã bấm “Hoàn tất” lúc ${fmtTime(s1.htClick)} mà chưa thấy câu báo thành công – bấm lại một lần`);
+        } else if (s1.htClick && !s1.don)
           // lần trước đã bấm Hoàn tất mà chưa thấy báo thành công (trang tải lại?) → không bấm lại, nhờ bạn xem
           throw ask(
             `đã bấm “Hoàn tất” lúc ${fmtTime(s1.htClick)} mà chưa thấy “Lưu đơn đăng ký thành công” – bạn xem lại đơn; đơn đã xong thì bấm nút dưới`,
@@ -3891,9 +3947,21 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           // 🤖 (bạn chọn 23/11): nút bạn tích thêm trong mẫu cửa sổ Nhập đơn đăng ký (tab Trường) – bấm trước “Lưu thông tin đăng ký”
           const exD = await tplChainExtras({ base: 'donDK', decide: ['luu thong tin dang ky', 'hoan tat'], step, dlgOk: true });
           if (exD) throw new Error(`${exD} – tiện ích dừng trước “Lưu thông tin đăng ký”, bạn xem rồi tắt rồi bật lại 🤖`);
-          if (!donCertain) {
-            unsureNote('don');
-            donGuess = tb; // chuyển tiếp sau đó (cùng lần chạy) phải là hồ sơ của đúng TB này
+          // (27/11 – bạn chọn “lưu đơn chặt hơn: số biên nhận phải khớp và phải có câu báo thành công”) Mã đơn của cửa sổ đơn phải ĐÚNG số biên nhận
+          // của TB này (và chỉ một TB có số đó); Mã đơn trống thì số biên nhận của hồ sơ đang mở phải đúng số đó. Không khớp → không bấm Lưu thông tin
+          // đăng ký (TB tạm hoãn, 🤖 làm TB khác). Thay luật 24/11 “chưa chắc hồ sơ vẫn lưu”
+          {
+            const fM = (await act('donRead')).find((x) => x.ok);
+            const maM = (fM && fM.maDon) || '';
+            const soM = maM || (await dossierSo());
+            const nSame = soM ? S.data.filter((y) => y.soBienNhan && soKey(y.soBienNhan) === soKey(soM)).length : 0;
+            if (!soM || soKey(soM) !== soKey(tb.soBienNhan || '') || nSame !== 1)
+              throw new Error(
+                `${maM ? `Mã đơn ${maM}` : soM ? `số biên nhận của hồ sơ ${soM}` : 'không đọc được Mã đơn / số biên nhận'} – không khớp đúng số biên nhận của TB ${tb.tb} (${
+                  tb.soBienNhan || 'chưa có'
+                })${nSame > 1 ? `, ${nSame} TB cùng số` : ''}: tiện ích không bấm “Lưu thông tin đăng ký”`
+              );
+            donCertain = true;
           }
           await pressDon('Lưu thông tin đăng ký', 'lt', 'Cập nhật đơn đăng ký thành công');
           S.armed = { tb: String(tb.tb), stage: 'don', at: Date.now(), lech: 0 };
@@ -3955,13 +4023,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     };
     // noLearn: chỉ trả lời theo rules (không bấm hộp bạn đã dạy ở tab Trường) – dùng ở chỗ phải ĐỌC hộp để biết trang báo gì
     const dlgNow = async (rules, noLearn) => {
-      const rs = await act('answerDialog', { rules: AUTO() ? rules || AUTO_DIALOGS : [], ...(noLearn ? { learned: [] } : {}) });
+      // noLearn: chỗ phải ĐỌC hộp trước (vd. số biên nhận đã dùng) → không “đồng ý hết” ở lần gọi này
+      const rs = await act('answerDialog', { rules: AUTO() ? rules || AUTO_DIALOGS : [], ...(noLearn ? { learned: [] } : { agreeAll: AUTO() }) });
       const hit = rs.find((x) => x.ok);
       if (hit) {
-        log.push({ icon: '•', cls: 'muted', html: esc(`Trang hỏi “${hit.title}” – tiện ích bấm “${hit.btn}” (${hit.learned ? 'theo hộp bạn đã dạy ở tab Trường' : 'Tự động hết'})`) });
+        log.push({ icon: '•', cls: 'muted', html: esc(`Trang hỏi “${hit.title}” – tiện ích bấm “${hit.btn}” (${hit.learned ? 'theo hộp bạn đã dạy ở tab Trường' : hit.agree ? 'đồng ý hết' : 'Tự động hết'})`) });
         show();
         await sleep(900);
-        if (hit.learned && hit.err) throw taughtErr(hit); // hộp LỖI đã dạy: bấm theo mẫu, bước này chưa xong (24/11)
+        if ((hit.learned || hit.agree) && hit.err) throw taughtErr(hit); // hộp LỖI: đã bấm, bước này chưa xong (24/11)
         return { answered: true, learned: !!hit.learned, title: hit.title, text: hit.text || hit.title || '' };
       }
       const o = rs.find((x) => x.open);
@@ -4551,7 +4620,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (!m) throw new Error('không thấy cửa sổ “Chọn người xử lý tác vụ tiếp theo”');
       cur = step('Chọn người nhận');
       const info0 = await chooserSettled(m, alive);
-      if (!info0) throw new Error('danh sách người nhận chưa tải xong (hoặc còn đang thay đổi)');
+      if (!info0) throw new Error(chooserNotReady());
       const st = norm(info0.step);
       const k = k0 || Object.keys(STEP_OF).find((key) => STEP_OF[key].test(st)) || '';
       if (!k || !STEP_OF[k].test(st) || !/\(tiep theo\)/.test(st) || /tra ve|\(truoc\)/.test(st))
@@ -4585,7 +4654,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (ex) throw ask(`${ex} – tiện ích không bấm Thực thi; bạn xem rồi tắt rồi bật lại 🤖`, '');
         if (!(m.isConnected && shownEl(m))) throw new Error('cửa sổ chọn người vừa đóng sau khi làm theo mẫu tab Trường');
         const info1 = await chooserSettled(m, alive);
-        if (!info1) throw new Error('danh sách người nhận chưa tải xong (hoặc còn đang thay đổi)');
+        if (!info1) throw new Error(chooserNotReady());
         if (norm(info1.step) !== st) throw ask(`mẫu tab Trường vừa đổi ô bước nhận thành “${info1.step}” – tiện ích không bấm Thực thi; bạn xem rồi tắt rồi bật lại 🤖`, '');
         const mk1 = markedRows(info1.rows);
         if (!k0 && mk1.length === 1 && accNorm(mk1[0].acc) !== accNorm(acc))
@@ -4600,7 +4669,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         needYou('Chọn người nhận – bạn xem', 'bad');
         throw ask(`${p.why} – bạn tự chọn đúng người (${acc}) rồi bấm “Thực thi”`, '');
       }
-      cur.ok(`${p.row.acc} – ${p.row.name}${p.row.unit ? ' – ' + p.row.unit : ''} · bước “${p.step}”`);
+      cur.ok(`${p.row.acc} – ${p.row.name}${p.row.unit ? ' – ' + p.row.unit : ''} · bước “${p.step}”${info0.reloads ? ` · bảng trống – đã bấm “Tải lại danh sách tài khoản” ${info0.reloads} lần` : ''}`);
       const go = [...m.querySelectorAll('button, a')].find((b) => shownEl(b) && (b.id === 'btnExecuteCommand' || btnText(b) === 'thuc thi'));
       if (!go) throw new Error('không thấy nút “Thực thi”');
       // chưa bật Tự động hết / đang “Chạy thử” / cửa sổ này mở sẵn lúc bạn bấm ▶ (không qua bước Chuyển tiếp của tiện ích)
@@ -4924,6 +4993,15 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (nx) {
           x = nx;
           continue;
+        }
+        // (27/11) 🤖: tìm hết một lượt không thấy → không đứng tìm lại mãi (trước: lặp tới 30 phút, chặn tiếp nhận TB khác) – làm việc khác,
+        // TB này lượt sau tìm lại (TB phải tìm lại: tối đa 3 lần – redoN)
+        if (fromAuto) {
+          look.skip(`chưa thấy hồ sơ (đã tìm ${tried.size} TB) – 🤖 làm việc khác, lượt sau tìm lại`);
+          tailNeed = '-';
+          S.listRun = false;
+          S.sweepNext = Date.now() + 5000;
+          return;
         }
         if (Date.now() - t0 > 30 * 60 * 1000)
           throw new Error(`30 phút vẫn chưa thấy hồ sơ nào trong Danh sách hồ sơ thụ lý (lượt cuối tìm ${tried.size} TB) – tắt rồi bật lại 🤖 để tìm tiếp`);
@@ -5772,9 +5850,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           `tài khoản đang đăng nhập là “${me}”, khác tài khoản lãnh đạo trong cài đặt (“${S.opts.ctLD}”) – vai trò Lãnh đạo chỉ chạy bằng tài khoản lãnh đạo (sửa ô Lãnh đạo ở tab Biên nhận, hoặc đổi Vai trò về Chuyên viên)`
         );
       const acc = ldRecv();
-      if (!acc) throw ldBlockErr('chưa có tài khoản nhận bước 4 (chuyên viên hoàn tất hồ sơ) – điền ô Chuyên viên ở tab Biên nhận (hoặc ô “Người nhận bước 4” ở bảng Lãnh đạo)');
+      if (!acc) throw ldBlockErr('chưa có tài khoản nhận bước 4 (chuyên viên hoàn tất hồ sơ) – điền ô Chuyên viên ở tab Biên nhận (mục “🤖 Tự động hết – chuyển tiếp hồ sơ”)');
       if ((me && accNorm(acc) === me) || (lead && accNorm(acc) === lead))
-        throw ldBlockErr(`tài khoản nhận bước 4 (“${acc}”) là tài khoản lãnh đạo – điền tài khoản chuyên viên vào ô “Người nhận bước 4” (bảng Lãnh đạo)`);
+        throw ldBlockErr(`ô Chuyên viên (“${acc}”) đang là tài khoản lãnh đạo – điền tài khoản chuyên viên nhận bước 4 vào ô Chuyên viên ở tab Biên nhận`);
       return acc;
     };
     // lỗi của một hồ sơ đã ghi dấu ngay tại chỗ (runLeader không đếm thêm lần lỗi)
@@ -5826,7 +5904,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const acc = ldPre();
       cur = step('Chọn người nhận bước 4');
       let info0 = await chooserSettled(m, alive);
-      if (!info0) throw new Error('danh sách người nhận chưa tải xong (hoặc còn đang thay đổi)');
+      if (!info0) throw new Error(chooserNotReady());
+      const rl0 = info0.reloads || 0; // (26/11) số lần đã bấm “Tải lại danh sách tài khoản” (bảng trống)
       const so = await dossierSo();
       const key = so ? soKey(so) : '';
       if (!key) throw ask('không đọc được Số biên nhận của hồ sơ – tiện ích không chọn người (tránh chuyển nhầm hồ sơ)', '');
@@ -5854,7 +5933,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (ex) throw ask(`${ex} – tiện ích không bấm Thực thi; bạn xem rồi tắt rồi bật lại 🤖`, '');
         if (!(m.isConnected && shownEl(m))) throw new Error('cửa sổ chọn người vừa đóng sau khi làm theo mẫu tab Trường');
         const info1 = await chooserSettled(m, alive);
-        if (!info1) throw new Error('danh sách người nhận chưa tải xong (hoặc còn đang thay đổi)');
+        if (!info1) throw new Error(chooserNotReady());
         if (norm(info1.step) !== st) throw ask(`bước nhận đổi thành “${info1.step}” sau khi làm theo mẫu tab Trường – tiện ích không chuyển`, '');
         if (adopt) {
           const mk1 = markedRows(info1.rows);
@@ -5872,7 +5951,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         needYou('Chọn người nhận – bạn xem', 'bad');
         throw ask(`${p.why} – bạn tự chọn đúng người (${acc}) rồi bấm “Thực thi”`, '');
       }
-      cur.ok(`${p.row.acc} – ${p.row.name}${p.row.unit ? ' – ' + p.row.unit : ''} · bước “${p.step}”`);
+      cur.ok(`${p.row.acc} – ${p.row.name}${p.row.unit ? ' – ' + p.row.unit : ''} · bước “${p.step}”${rl0 ? ` · bảng trống – đã bấm “Tải lại danh sách tài khoản” ${rl0} lần` : ''}`);
       const go = [...m.querySelectorAll('button, a')].find((x) => shownEl(x) && (x.id === 'btnExecuteCommand' || btnText(x) === 'thuc thi'));
       if (!go) throw new Error('không thấy nút “Thực thi”');
       if (!AUTO() || S.opts.thuThucThi || !ours) {
@@ -6323,6 +6402,47 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         return;
       }
       // Cửa sổ nào đang mở → chọn bước: “Nhập đơn đăng ký” / chọn người chuyển tiếp / Quy trình xử lý / hồ sơ đã lưu / Tiếp nhận hồ sơ
+      // (27/11 – bạn: “tắt tự động lúc tool đang điền chủ sử dụng hoặc thửa đất, khi bật lại thì tool đưa luôn TB đang làm vào Tạm hoãn”)
+      // cửa sổ chủ / thửa của đơn mà 🤖 đang làm dở (có dấu “…|pending” của TB lần chạy trước) còn mở → đã bấm Lưu thì chờ trang lưu xong (cửa sổ tự
+      // đóng); chưa bấm / lưu không xong → đóng cửa sổ (không lưu). Lần chạy này đối chiếu cây đơn rồi điền lại, Lưu đúng mục còn thiếu – không trùng
+      if (fromAuto && AUTO()) {
+        const tw = (await act('modalState')).find((x) => x.open);
+        const kw = tw ? modalKey(tw) : '';
+        if (tw && (CHU_MODAL.test(kw) || (THUA_MODAL.test(kw) && !THUA_ADD.test(kw)))) {
+          const ids = [String(S.runTb || ''), chainTbId(), String(S.recv || '')].filter(Boolean);
+          const re = CHU_MODAL.test(kw) ? /^\d+\|don-chu\d+\|pending$/ : /^\d+\|don-thua\d+\|pending$/;
+          const pk = Object.keys(S.done).find((k) => re.test(k) && ids.includes(k.split('|')[0]));
+          if (pk) {
+            const cw = step(`Cửa sổ “${tw.name}” còn mở từ lần chạy trước`);
+            cur = cw;
+            const winRe = '^' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const gone = async () => {
+              const t1 = (await act('modalState')).find((x) => x.open);
+              return !t1 || modalKey(t1) !== kw;
+            };
+            let closed = false;
+            if (S.done[pk] === 'saving') {
+              // đã bấm Lưu → chờ trang lưu xong (cửa sổ tự đóng), tới 15 giây
+              cw.wait('lần trước đã bấm “Lưu” – chờ trang lưu xong…');
+              for (const t0w = Date.now(); Date.now() - t0w < 15000 * slowK() && !closed; ) {
+                stopIf();
+                await new Promise((r) => setTimeout(r, 400));
+                if (!pageWorking() && !(await act('dialogState')).some((x) => x.open)) closed = await gone();
+              }
+            }
+            if (!closed) {
+              const rc = (await act('closeTop', { win: winRe })).some((y) => y.ok);
+              if (rc) closed = await waitUntil(gone, 5000, () => {
+                stopIf();
+                return true;
+              });
+            }
+            if (!closed) throw new Error(`bạn đang thao tác ở ${tw.name} – tiện ích không đóng được cửa sổ này; bấm Lưu hoặc Đóng, 🤖 làm tiếp`);
+            cw.ok(S.done[pk] === 'saving' ? 'trang đã xử lý cú bấm Lưu lần trước – đối chiếu đơn rồi làm tiếp' : 'đóng (không lưu) – đối chiếu đơn, điền lại mục đang dở');
+            await sleep(600);
+          }
+        }
+      }
       const top0 = (await act('modalState')).find((x) => x.open);
       const k0 = top0 ? modalKey(top0) : '';
       // chữ ký 'sweep:' chỉ dành cho trang danh sách (không có cửa sổ nào mở) – trang đã đổi thì thôi
@@ -6367,7 +6487,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const nav = navXuLyCongViec();
         const ps = sweepList();
         const ck = ps.length ? [] : chkList(); // (24/11) hết TB ◐ mà còn TB ✓ chưa kiểm lại → cũng sang danh sách
-        if (!nav || (!ps.length && !ck.length)) return;
+        if (!nav || (!ps.length && !ck.length && !redoList().length)) return;
         title = '🤖 Sang Xử lý công việc';
         cur = step('Xử lý công việc');
         try {
@@ -6470,7 +6590,8 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         }
       }
       if (top0 && (CHU_MODAL.test(k0) || (THUA_MODAL.test(k0) && !THUA_ADD.test(k0))))
-        throw new Error(`đang mở ${top0.name} – kiểm tra rồi bấm Lưu (hoặc Đóng) để về cửa sổ trước, rồi tắt / bật lại 🤖`);
+        // (27/11) cửa sổ bạn tự mở (không phải mục 🤖 làm dở) → chờ bạn, không tạm hoãn TB
+        throw new Error(`bạn đang thao tác ở ${top0.name} – kiểm tra rồi bấm Lưu (hoặc Đóng) để về cửa sổ trước, 🤖 làm tiếp`);
       // cửa sổ Quy trình xử lý / Cập nhật dữ liệu pháp lý → tự làm tác vụ 2 rồi 3; Lưu kho hồ sơ quét / Hồ sơ quét → tác vụ 3
       // (Quy trình phải nằm trên cùng – không bị cửa sổ chủ / thửa / tìm kiếm… của đơn che)
       const scr = scanScreen();
@@ -6784,15 +6905,41 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           cur.skip('đã có trong bảng');
           continue;
         }
-        // lần trước cửa sổ đã đóng mà không thấy thửa trong bảng → hỏi lại trước khi mở lại (tránh nhập trùng)
-        if (S.done[pendKey] === true || (fromAuto && S.done[pendKey] === 'confirm')) {
-          S.done[pendKey] = 'confirm';
+        // (27/11) lần trước đã mở cửa sổ thửa này (có thể đã bấm Lưu – bạn tắt 🤖) mà bảng chưa có → chờ bảng ổn định (không “Đang xử lý…”,
+        // 2 lần đọc giống nhau, tới 12 giây) rồi xem lại: có → xong; vẫn chưa → điền lại, Lưu (tối đa 2 lần)
+        if (S.done[pendKey]) {
+          const redoKeyT = `${tb.tb}|thua${i}|redo`;
+          cur.wait(S.done[pendKey] === 'saving' ? 'lần trước đã bấm “Lưu” thửa này – chờ bảng nạp xong rồi xem lại…' : 'lần trước đã mở cửa sổ thửa này – xem lại bảng…');
+          let have2 = false;
+          let prevN = -1;
+          let same = 0;
+          for (const t0r = Date.now(); Date.now() - t0r < 12000 * slowK(); ) {
+            stopIf();
+            const rr = (await readTable()) || [];
+            have2 = rr.some((r) => sameThua(r, t));
+            if (have2) break;
+            if (!pageWorking() && rr.length === prevN && !(await act('modalState')).some((x) => x.open)) {
+              if (++same >= 2) break;
+            } else same = 0;
+            prevN = rr.length;
+            await new Promise((r) => setTimeout(r, 500));
+          }
+          if (have2) {
+            delete S.done[pendKey];
+            delete S.done[redoKeyT];
+            S.done[`${tb.tb}|tn${i}`] = true;
+            saveUi();
+            setStageList(tb.tb, 'nhap', thuaKey(t), true);
+            added++;
+            cur.skip('đã có trong bảng (lần trước đã lưu)');
+            continue;
+          }
+          const wasT = S.done[pendKey];
+          const n = (+S.done[redoKeyT] || 0) + (wasT === 'saving' ? 1 : 0);
+          if (n > 2) throw new Error(`đã bấm Lưu thửa này ${n} lần mà bảng vẫn chưa có – bạn xem trên VBDLIS (trang báo lỗi?)`);
+          if (n) S.done[redoKeyT] = n;
           saveUi();
-          const eC = new Error(
-            'lần trước cửa sổ đã đóng nhưng bảng không có thửa này. Nếu bạn đã bấm Hủy bỏ thì tắt rồi bật lại 🤖 lần nữa để mở lại thửa này; nếu đã bấm Lưu mà bảng không hiện thì kiểm tra tay trên trang'
-          );
-          eC.noRetry = true;
-          throw eC;
+          cur.wait(wasT === 'saving' ? `lần trước bấm Lưu mà bảng chưa có thửa này – điền lại, Lưu (lần ${n + 1})` : 'lần trước điền dở thửa này – điền lại, Lưu');
         }
         const terr = thuaErrors(t, tb, `thửa ${t.soThua}/${t.soTo}`);
         if (terr.length) throw new Error('dữ liệu chưa đúng: ' + terr.join('; '));
@@ -6801,6 +6948,10 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         if (open && !THUA_ADD.test(modalKey(open)))
           throw new Error(`đang mở ${open.name} – đóng cửa sổ đó rồi tắt / bật lại 🤖`);
         let f;
+        if (!S.done[pendKey]) {
+          S.done[pendKey] = true; // (27/11) ghi TRƯỚC khi mở cửa sổ thêm thửa (tắt 🤖 lúc đang điền → bật lại biết thửa nào đang dở)
+          saveUi();
+        }
         {
           const r = await send({ type: 'vbdlis-fill', ...tplMsg('thua', buildValues('thua', tb, i)) });
           if (!r || !r.ok) throw new Error(friendly((r && r.error) || 'Không chạy được'));
@@ -6846,7 +6997,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           stopIf(); // bạn bấm ■ Dừng / tắt 🤖 lúc chờ sau nút theo mẫu → không bấm Lưu
           const ms = await act('markSave', { win: 'thua' });
           const marks = ms.filter((x) => x.ok);
-          if (marks.length === 1) return anyOk(await act('clickMark', { id: marks[0].id })) ? '' : 'không bấm được nút Lưu';
+          if (marks.length === 1) {
+            S.done[pendKey] = 'saving'; // (27/11) đã bấm Lưu thửa – tắt 🤖 trước khi kịp ghi nhận thì lần sau chờ bảng nạp rồi xem lại
+            saveUi();
+            if (anyOk(await act('clickMark', { id: marks[0].id }))) return '';
+            S.done[pendKey] = true;
+            saveUi();
+            return 'không bấm được nút Lưu';
+          }
           return marks.length ? 'thấy nút Lưu ở nhiều khung' : (ms.find((x) => x.why) || {}).why || 'không thấy nút Lưu';
         };
         if (AUTO() && !bad.length && !skipT.length) {
@@ -6963,6 +7121,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         let inTable = false;
         const tc = Date.now();
         for (let asked = false; Date.now() - tc < 8000 * slowK(); ) {
+          stopIf(); // (27/11) bạn tắt 🤖 lúc chờ → dừng ngay, giữ dấu “đã bấm Lưu” – không kết luận “bỏ qua”
           await new Promise((r) => setTimeout(r, 300));
           if (!asked && (await waitDialogs(cur))) asked = true;
           rows = await readTable();
@@ -6970,6 +7129,18 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           if (inTable && (asked || Date.now() - tc >= 1800)) break;
         }
         if (!inTable) {
+          // (27/11) chính 🤖 đã bấm Lưu (trang không báo “đã tồn tại”) mà bảng chưa có thửa → lần lưu bị mất: điền lại, Lưu (tối đa 2 lần)
+          if (autoSavedT && !tonTaiT) {
+            const rkT = `${tb.tb}|thua${i}|redo`;
+            const n = (+S.done[rkT] || 0) + 1;
+            if (n > 2) throw new Error(`đã bấm Lưu thửa ${t.soThua}/${t.soTo} ${n} lần mà bảng vẫn chưa có – bạn xem trên VBDLIS (trang báo lỗi?)`);
+            S.done[rkT] = n;
+            S.done[pendKey] = true;
+            saveUi();
+            cur.wait(`đã bấm “Lưu” mà bảng chưa có thửa này (lần lưu bị mất?) – điền lại, Lưu (lần ${n + 1})`);
+            runList.splice(runList.findIndex((y) => y.i === i) + 1, 0, { t, i });
+            continue;
+          }
           // bạn đóng cửa sổ không lưu (VBDLIS báo thửa trùng / bạn bỏ) → bỏ qua thửa này, thử thửa sau
           delete S.done[pendKey];
           saveUi();
@@ -7140,14 +7311,28 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           let d = await dlgNow(LHS_DIALOGS, true);
           // “Số biên nhận … đã được sử dụng cho hồ sơ khác” (trang thật 23/11) – đúng số của TB này: hồ sơ đã có trên VBDLIS →
           // ghi ◐ Đã nhập nhưng chưa xong (đã tiếp nhận – không tiếp nhận lại), bấm Đồng ý, tải lại trang, 🤖 sang TB tiếp theo (bạn yêu cầu 23/11)
-          if (d && !d.answered && SBN_USED.test(norm(d.text || '')) && digitsOf(tb.soBienNhan).length >= 8 && digitsOf(d.text || '').includes(digitsOf(tb.soBienNhan))) {
+          // (27/11 – bạn: “Khi nhập hồ sơ mà hệ thống báo ‘Hồ sơ đã tồn tại’: đánh dấu đúng TB đó là Đã nhập chưa xong, dùng hồ sơ đã có để tiếp tục ở
+          // phần Xử lý công việc”) hộp không ghi số → ô Số biên nhận trên trang phải đúng số của TB này (và chỉ một TB có số đó)
+          let usedOk = false;
+          if (d && !d.answered && SBN_USED.test(norm(d.text || '')) && digitsOf(tb.soBienNhan).length >= 8) {
+            if (digitsOf(d.text || '').includes(digitsOf(tb.soBienNhan))) usedOk = true;
+            else if (!/\d{6,}/.test(digitsOf(d.text || ''))) {
+              const sbF = String((await readField('Số biên nhận')) || '');
+              usedOk = !!sbF && soKey(sbF) === soKey(tb.soBienNhan) && S.data.filter((y) => y.soBienNhan && soKey(y.soBienNhan) === soKey(sbF)).length === 1;
+            }
+          }
+          if (usedOk) {
             S.armed = null;
             await setMark(tb.tb, 'tnClick', null);
             markStage(tb.tb, 'tn', 'suy');
             await setMark(tb.tb, 'daDung', Date.now());
-            cur.ok(`trang báo “${d.text.slice(0, 160)}” – hồ sơ của TB ${tb.tb} đã có trên VBDLIS: ghi ◐ Đã nhập nhưng chưa xong`);
+            cur.ok(`trang báo hồ sơ đã có (số biên nhận ${tb.soBienNhan}) – hồ sơ của TB ${tb.tb} đã có trên VBDLIS: ghi ◐ Đã nhập nhưng chưa xong`);
             const okD = (await act('answerDialog', { rules: [{ re: SBN_USED.source, btn: ['Đồng ý', 'OK', 'Đóng'] }] })).some((x) => x.ok);
-            const nx = nextTodo(true);
+            // (27/11) không tiếp nhận lại, không sang TB khác: sang Xử lý công việc, tìm đúng số biên nhận này, mở hồ sơ đã có và làm tiếp từ bước hồ sơ
+            // đang ở (Quy trình cho biết bước – còn ở bước 1 / 2 thì TB về ○ Chưa xong, làm tiếp bình thường)
+            redoSet(tb.tb, true);
+            setChainTb(tb.tb);
+            const nx = nextTodo(true); // con trỏ tiếp nhận sang TB chưa làm sau (TB này đã có hồ sơ)
             if (nx) {
               setPtr(nx.tb);
               saveUi();
@@ -7156,19 +7341,21 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
               await stageChain;
               await store.set({ tbCur: S.cur, tbRecv: S.recv, tbCurBy: S.curBy || '' });
             } catch (e) {}
-            cur = step(nx ? `Tải lại trang, sang TB ${nx.tb} – ${whoOf(nx)}` : 'Tải lại trang');
+            cur = step(`Sang Xử lý công việc – tìm hồ sơ ${tb.soBienNhan} (TB ${tb.tb})`);
             cur.ok(okD ? 'đã bấm Đồng ý hộp báo' : 'hộp báo đã đóng');
-            cur = null;
             tailNeed = '-';
-            tailOk = `<div class="hint">TB ${esc(tb.tb)}: số biên nhận đã được dùng cho hồ sơ khác – hồ sơ đã có trên VBDLIS, tiện ích ghi <b>◐ Đã nhập nhưng chưa xong</b> (bạn kiểm tra lại hồ sơ đó). ${
-              nx ? `🤖 tải lại trang rồi tiếp nhận TB <b>${esc(nx.tb)}</b>.` : 'Hết TB chưa làm.'
-            }</div>`;
+            const navU = navXuLyCongViec() || listUrlLink();
+            if (!navU) {
+              cur = null;
+              tailOk = `<div class="hint">TB ${esc(tb.tb)}: hồ sơ đã có trên VBDLIS – tiện ích ghi <b>◐</b>. Không thấy mục “Xử lý công việc” ở thanh trái – bạn mở Danh sách hồ sơ thụ lý, 🤖 tìm và làm tiếp TB này.</div>`;
+              return;
+            }
             S.autoSig = '';
-            setTimeout(() => {
-              try {
-                location.reload();
-              } catch (e) {}
-            }, 1500);
+            await goAndWait(navU, 'Xử lý công việc', onListPage, listUrlLink());
+            if (onListPage() && !(await topNow())) {
+              await sleep(800);
+              await runGoList(tb); // trang không tải lại (chỉ đổi phần giữa) → tìm, mở hồ sơ ngay trong lần chạy này
+            }
             return;
           }
           // hộp khác mà bạn đã dạy ở tab Trường → trả lời theo mẫu (sau khi đã xét hộp “số biên nhận đã dùng”)
@@ -7364,6 +7551,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   try {
     chrome.storage.onChanged.addListener((ch, area) => {
       if (area !== 'local') return;
+      if (ch.tbLdDays) {
+        S.ldDays = ch.tbLdDays.newValue || {}; // (26/11) thẻ khác vừa ghi số đã ký duyệt
+        try {
+          renderLd();
+        } catch (e) {}
+      }
       if (ch.tbOpts || ch.tbAutoTab) {
         const wasAuto = AUTO();
         if (ch.tbOpts) S.opts = { ...(ch.tbOpts.newValue || {}) };
@@ -8440,7 +8633,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       S.cvLeave = null;
       S.sweepSeen = {};
       saveSweepSeen();
-      roundReset();
+      // (27/11) KHÔNG bắt đầu lượt mới: tắt giữa chừng không tính là hết lượt – bật lại thì làm tiếp lượt đang dở
+      bulkSave(null);
+      resumePick(); // TB đang làm lúc bạn tắt → làm tiếp TB đó trước
       setSweepPause(false);
       S.sweepNext = 0;
       S.autoOnAt = Date.now();
@@ -8463,6 +8658,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     S.opts = { ...S.opts, tuDong: false };
     S.cvLeave = null;
     userStopSet(false);
+    // (27/11) đang chạy → nhớ TB đang làm (bật lại làm tiếp đúng TB này, phần còn thiếu đọc lại trên hồ sơ). Tắt 🤖 không tạm hoãn TB
+    if (S.running && S.runTb && !isLd()) {
+      S.resumeTb = { tb: String(S.runTb), at: Date.now() };
+      safeSet({ tbResume: S.resumeTb });
+    }
     if (S.running) S.stopReq = true; // đang chạy → dừng luôn
     S.goListPending = false; // thôi tự chạy tiếp sau khi trang chuyển
     safeRemove('tbGoList');
@@ -8470,6 +8670,32 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     setStatus('🤖 Tự động hết: TẮT – tiện ích không tự bấm Lưu hồ sơ / Lưu thông tin đăng ký / Hoàn tất / Chuyển tiếp / Trả hồ sơ nữa.');
     safeSet({ tbOpts: S.opts });
     render();
+  }
+
+  // (27/11 – bạn: “Khi tôi tắt rồi bật lại tự động: Lưu mã TB và tiến độ đang làm. Khi bật lại, ưu tiên tiếp tục TB đó”) TB đang làm lúc bạn tắt 🤖
+  // (S.resumeTb, giữ 6 giờ): chưa tiếp nhận → con trỏ tiếp nhận về TB đó; đã tiếp nhận / đã nhập đơn / đang ở chặng sau → 🤖 tìm hồ sơ của TB đó
+  // ở Danh sách hồ sơ thụ lý trước các TB khác (redo), làm tiếp từ bước hồ sơ đang ở (màn hình đúng hơn tiến độ đã ghi). Đang mở sẵn hồ sơ / đơn
+  // của TB đó thì làm tiếp ngay ở đó
+  function resumePick() {
+    const rp = S.resumeTb;
+    S.resumeTb = null;
+    safeRemove('tbResume');
+    if (!rp || !rp.tb || Date.now() - (rp.at || 0) > 6 * 3600 * 1000) return;
+    const x = S.data.find((y) => String(y.tb) === String(rp.tb));
+    if (!x) return;
+    const st = S.stage[String(x.tb)] || {};
+    if (st.hoan || st.xong || st.tra) return;
+    if (st.ld && !traPhase(st)) return; // đã chuyển lãnh đạo, đang chờ lãnh đạo trả về – không có việc để làm tiếp, lượt tìm thường lo
+    if (stageOf(x) === 'chua' && !st.tnClick) {
+      setPtr(x.tb);
+      saveUi();
+      pickSet(x.tb);
+    } else {
+      redoSet(x.tb, true);
+      if (String(x.tb) !== String(S.recv)) setChainTb(x.tb);
+    }
+    viewTb(x);
+    log0(`🤖 bật lại – làm tiếp TB ${x.tb} (TB đang làm lúc bạn tắt)`);
   }
 
   // ---------- sự kiện ----------
@@ -8640,14 +8866,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       );
       return;
     }
-    if (e.target.id === 'optCtB4' || e.target.id === 'optLdBuoc' || e.target.id === 'optLdLoop' || e.target.id === 'optLdWait') {
+    if (e.target.id === 'optLdBuoc' || e.target.id === 'optLdLoop' || e.target.id === 'optLdWait') {
       const id = e.target.id;
-      if (id === 'optCtB4') {
-        const v = String(e.target.value || '').replace(/\s+/g, '');
-        e.target.value = v;
-        S.opts = { ...S.opts, ctB4: v };
-        setStatus(v ? `Người nhận bước 4: ${v}.` : `Người nhận bước 4: dùng ô Chuyên viên (${S.opts.ctCV || 'chưa đặt'}).`);
-      } else if (id === 'optLdBuoc') {
+      if (id === 'optLdBuoc') {
         const v = String(e.target.value || '').replace(/\s+/g, ' ').trim();
         S.opts = { ...S.opts, ldBuoc: v && norm(v) !== norm(LD_BUOC_DEF) ? v : '' };
         if (!v) e.target.value = LD_BUOC_DEF;
@@ -8708,21 +8929,6 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       setStatus(e.target.checked ? 'Xong TB thì tự sang TB chưa làm tiếp theo.' : 'Xong TB thì dừng, bạn tự mở TB sau.');
       return;
     }
-    if (e.target.id === 'optTuChu' || e.target.id === 'optTuHsq' || e.target.id === 'optTuQT') {
-      const k = { optTuChu: 'tuLuuChu', optTuHsq: 'tuHsq', optTuQT: 'tuQT' }[e.target.id];
-      S.opts = { ...S.opts, [k]: e.target.checked };
-      safeSet({ tbOpts: S.opts });
-      setStatus(
-        {
-          tuLuuChu: e.target.checked ? 'Chủ sử dụng: mọi ô khớp thì tiện ích tự bấm Lưu.' : 'Chủ sử dụng: tiện ích điền rồi chờ bạn bấm Lưu.',
-          tuHsq: e.target.checked ? 'Hồ sơ quét: tiện ích tự thêm dòng và tải file lên.' : 'Hồ sơ quét: tiện ích dừng để bạn tự thêm dòng.',
-          tuQT: e.target.checked
-            ? 'Quy trình xử lý: tiện ích tự Thực hiện / Đồng ý / Cập nhật và tích Đã xử lý.'
-            : 'Quy trình xử lý: tiện ích dừng ở Thực hiện / Cập nhật cho bạn bấm, tô vàng Đã xử lý.',
-        }[k]
-      );
-      return;
-    }
     if (e.target.id === 'optThongBao') {
       S.opts = { ...S.opts, thongBao: e.target.checked };
       safeSet({ tbOpts: S.opts });
@@ -8731,19 +8937,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       setStatus(e.target.checked ? 'Sẽ hiện thông báo nổi ở góc màn hình khi cần bạn (vừa gửi một thông báo thử).' : 'Đã tắt thông báo nổi.');
       return;
     }
-    if (e.target.id === 'optAmBao' || e.target.id === 'optEnter') {
-      const k = e.target.id === 'optAmBao' ? 'amBao' : 'enterLuu';
-      S.opts = { ...S.opts, [k]: e.target.checked };
+    if (e.target.id === 'optAmBao') {
+      S.opts = { ...S.opts, amBao: e.target.checked };
       safeSet({ tbOpts: S.opts });
-      if (k === 'amBao' && e.target.checked) {
+      if (e.target.checked) {
         audioReady();
         beep(); // nghe thử
       }
-      setStatus(
-        k === 'amBao'
-          ? e.target.checked ? 'Sẽ kêu “ting” và nháy tên tab khi cần bạn.' : 'Đã tắt tiếng báo.'
-          : e.target.checked ? 'Ô đã khớp hết thì con trỏ nằm sẵn ở nút Lưu – nhấn Enter để lưu.' : 'Đã tắt đặt sẵn con trỏ ở nút Lưu.'
-      );
+      setStatus(e.target.checked ? 'Sẽ kêu “ting” và nháy tên tab khi cần bạn.' : 'Đã tắt tiếng báo.');
       return;
     }
     if (e.target.id === 'tbStage') {
@@ -8808,6 +9009,21 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       return;
     }
     // bảng Lãnh đạo: Quét danh sách (chỉ đọc), Xóa dấu lỗi, “Chưa chuyển – làm lại hồ sơ …”
+    if (b.dataset.ldgo === 'cv') {
+      // (27/11) người nhận bước 4 = ô Chuyên viên (tab Biên nhận) → mở tab đó, đưa con trỏ vào ô
+      S.tab = 'bn';
+      saveUi();
+      render();
+      setTimeout(() => {
+        const i = $('#optCtCV');
+        if (i) {
+          i.scrollIntoView({ block: 'center' });
+          i.focus();
+          i.select();
+        }
+      }, 60);
+      return;
+    }
     if (b.id === 'ldScanBtn') {
       if (!onListPage()) return setStatus('Mở “Xử lý công việc” (Danh sách hồ sơ thụ lý) rồi bấm “Quét danh sách”.', true);
       const rows = ldScanPage();
@@ -10914,9 +11130,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           yes.click();
           answered = true;
         } else if (!answered || bad) {
-          const tl = AUTO() ? (await act('answerDialog', { rules: [] })).find((x) => x.ok) : null; // hộp bạn đã dạy ở tab Trường
+          const tl = AUTO() ? (await act('answerDialog', { rules: [], agreeAll: true })).find((x) => x.ok) : null; // hộp bạn đã dạy / đồng ý hết (27/11)
           if (tl) {
-            if (tl.learned && (tl.err || bad)) throw taughtErr(tl); // (soát 24/11) hộp báo lỗi theo chữ của tiện ích cũng là chưa xong
+            if ((tl.learned || tl.agree) && (tl.err || bad)) throw taughtErr(tl); // (soát 24/11) hộp báo lỗi theo chữ của tiện ích cũng là chưa xong
             await sleep(900);
             continue;
           }
@@ -11279,16 +11495,53 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     return top ? rows.filter((r, i) => t[i] === top) : [];
   };
   const chooserSig = (info) => (info.loading || !info.rows.length ? '' : `${norm(info.step)}#${info.rows.map((r) => accNorm(r.acc)).join(',')}`);
-  // danh sách người nhận đã ổn định: không còn “Đang tải…”, 2 lần đọc cách 0,7 giây giống hệt (bước + danh sách tài khoản)
+  // (26/11 – bạn, ảnh trang thật: bảng người nhận ghi “Không có dữ liệu”) bảng tài khoản đã tải xong mà TRỐNG (dòng “Không có dữ liệu”)
+  const chooserEmpty = (m) =>
+    !!m &&
+    !chooserInfo(m).loading &&
+    [...m.querySelectorAll('tbody tr')].some((tr) => shownEl(tr) && tr.children.length === 1 && /^(khong co du lieu|khong tim thay)/.test(norm(tr.textContent || '')));
+  // đường link “Tải lại danh sách tài khoản” của cửa sổ chọn người
+  const chooserReloadLink = (m) =>
+    [...m.querySelectorAll('a, button, span, label')].find((b) => shownEl(b) && !b.querySelector('a, button') && /^tai lai danh sach tai khoan$/.test(btnText(b))) || null;
+  // cửa sổ chọn người đọc xong (có người nhận, hoặc bảng trống – lần chạy sẽ bấm Tải lại danh sách tài khoản)
+  const chooserReady = (m, info) => !!info && !info.loading && (info.rows.length > 0 || chooserEmpty(m));
+  const CHOOSER_RELOAD_MAX = 3;
+  let chooserWhy = ''; // lý do lần chờ cuối không xong (bảng vẫn trống sau khi tải lại…)
+  const chooserNotReady = () => chooserWhy || 'danh sách người nhận chưa tải xong (hoặc còn đang thay đổi)';
+  // danh sách người nhận đã ổn định: không còn “Đang tải…”, 2 lần đọc cách 0,7 giây giống hệt (bước + danh sách tài khoản).
+  // (26/11) bảng tải xong mà “Không có dữ liệu” (1,5 giây) → bấm “Tải lại danh sách tài khoản” (bạn yêu cầu), chờ bảng tải lại; tối đa
+  // CHOOSER_RELOAD_MAX lần – vẫn trống thì thôi (chooserWhy). info.reloads = số lần đã bấm
   async function chooserSettled(m, alive, ms = 15000) {
-    const t0 = Date.now();
+    let t0 = Date.now();
     let prev = '';
+    let emptyAt = 0;
+    let reloads = 0;
+    chooserWhy = '';
     for (;;) {
       if (!alive()) return null;
       const info = chooserInfo(m);
       const sig = chooserSig(info);
-      if (sig && sig === prev) return info;
+      if (sig && sig === prev) return { ...info, reloads };
       prev = sig;
+      if (!sig && chooserEmpty(m)) {
+        if (!emptyAt) emptyAt = Date.now();
+        else if (Date.now() - emptyAt >= 1500) {
+          const a = chooserReloadLink(m);
+          if (!a) {
+            chooserWhy = 'bảng người nhận “Không có dữ liệu” và không thấy nút “Tải lại danh sách tài khoản” – bạn tải lại danh sách giúp';
+            return null;
+          }
+          if (reloads >= CHOOSER_RELOAD_MAX) {
+            chooserWhy = `bảng người nhận vẫn “Không có dữ liệu” sau ${reloads} lần bấm “Tải lại danh sách tài khoản” – bạn xem trên VBDLIS`;
+            return null;
+          }
+          reloads++;
+          setStatus(`Bảng người nhận “Không có dữ liệu” – tiện ích bấm “Tải lại danh sách tài khoản” (lần ${reloads}/${CHOOSER_RELOAD_MAX})…`);
+          clickPage(a);
+          emptyAt = 0;
+          t0 = Date.now(); // chờ bảng tải lại từ đầu
+        }
+      } else emptyAt = 0;
       if (Date.now() - t0 > ms * slowK()) return null;
       await sleep(700);
     }
@@ -11298,7 +11551,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   async function pickAccount(m, acc, alive) {
     const want = accNorm(acc);
     let info = await chooserSettled(m, alive);
-    if (!info) return { ok: false, why: 'danh sách người nhận chưa tải xong (hoặc còn đang thay đổi)' };
+    if (!info) return { ok: false, why: chooserNotReady() };
     const hits = info.rows.filter((r) => accNorm(r.acc) === want);
     if (hits.length !== 1)
       return {
@@ -12157,7 +12410,11 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     const ok = (x) => !!x && stageOf(x) === 'chua' && !(S.stage[String(x.tb)] || {}).tnClick && !S.autoHold.has(String(x.tb));
     const c = recvTB(); // (25/11) con trỏ tiếp nhận – không phải TB đang hiện (TB ở trên chạy theo 🤖)
     if (ok(c)) return c;
-    for (let j = S.data.indexOf(c) + 1; j < S.data.length; j++) if (ok(S.data[j])) return S.data[j];
+    const i0 = S.data.indexOf(c);
+    for (let j = i0 + 1; j < S.data.length; j++) if (ok(S.data[j])) return S.data[j];
+    // (27/11 – bạn: “còn 2 tb ở trạng thái chưa xong mà tool nó không tự nhảy lên làm”) quay lại cả các TB ○ ĐỨNG TRƯỚC con trỏ (TB ⏸ vừa về Chưa xong,
+    // TB bỏ dở…). An toàn: số biên nhận đã có hồ sơ thì trang báo “hồ sơ đã tồn tại” → 🤖 dùng hồ sơ đã có, không tạo trùng
+    for (let j = 0; j < i0; j++) if (ok(S.data[j])) return S.data[j];
     return null;
   }
   // màn hình Tiếp nhận có chữ bạn đã gõ (người nộp, giấy tờ, điện thoại, email, nội dung) → trả tên ô đó (🤖 không rời trang).
@@ -12171,9 +12428,12 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   }
   // 🤖 hết TB chưa tiếp nhận, còn TB “Đã tiếp nhận” chưa xong → tự sang “Xử lý công việc” (thanh trái) tìm tiếp – không chờ bạn bấm ▶
   // (bạn yêu cầu 22/11). Vừa bấm mà trang chưa chuyển (2 phút) → không bấm lặp
+  // (27/11) TB phải tìm lại hồ sơ ở danh sách (bật lại làm tiếp, hồ sơ đã tồn tại, đã bấm Lưu hồ sơ mà chưa thấy báo…)
+  const redoList = () =>
+    (S.redo || []).map((id) => S.data.find((y) => String(y.tb) === String(id))).filter((x) => x && needsList(x) && !S.autoHold.has(String(x.tb)));
   function goListSig() {
     // (24/11) cả khi chỉ còn TB ✓ Xong chưa kiểm lại (lượt kiểm TB ✓)
-    if (S.opts.tuSangTB === false || S.sweepPause || (!sweepList().length && !chkList().length) || recvNext() || !navXuLyCongViec()) return '';
+    if (S.opts.tuSangTB === false || S.sweepPause || (!sweepList().length && !chkList().length && !redoList().length) || recvNext() || !navXuLyCongViec()) return '';
     let g = null;
     try {
       g = JSON.parse(sessionStorage.getItem('vbdlis-dien-nhanh-xlcv') || 'null');
@@ -12240,12 +12500,22 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const id = String(x.tb);
       const st = S.stage[id] || {};
       if (!x.soBienNhan || st.hoan || st.tra || S.autoHold.has(id)) return false;
-      if (showStage(x) !== 'tn') return false;
+      // (27/11) cả TB ○ ĐÃ tiếp nhận (đã có hồ sơ) mà chưa chuyển lãnh đạo, và TB đã bấm Lưu hồ sơ mà chưa thấy báo – mở hồ sơ làm tiếp (trước đây không
+      // tìm: TB đó nằm im ở ○)
+      if (showStage(x) !== 'tn' && !rcvOpen(x)) return false;
       const sn = seen[id];
       return !(sn && typeof sn === 'object' && sn.snap === stageSnap(id) && Date.now() - (sn.at || 0) < (sn.wait ? SWEEP_WAIT_MS : SWEEP_AGAIN_MS));
     };
     const list = S.data.filter(ok);
-    return [...list.filter((x) => traPhase(S.stage[String(x.tb)])), ...list.filter((x) => !traPhase(S.stage[String(x.tb)]))];
+    // lãnh đạo đã trả về trước, rồi TB ○ đã tiếp nhận (có việc: nhập đơn / chuyển lãnh đạo), sau cùng TB ◐ đang chờ lãnh đạo
+    const tr = (x) => traPhase(S.stage[String(x.tb)]);
+    return [...list.filter(tr), ...list.filter((x) => !tr(x) && rcvOpen(x)), ...list.filter((x) => !tr(x) && !rcvOpen(x))];
+  }
+  // (27/11) TB ○ đã có hồ sơ trên VBDLIS mà chưa chuyển lãnh đạo (đã tiếp nhận / đã nhập đơn / số biên nhận đã dùng), hoặc đã bấm Lưu hồ sơ mà chưa thấy báo
+  function rcvOpen(x) {
+    const st = S.stage[String(x.tb)] || {};
+    if (st.hoan || st.tra || st.xong || st.ld || st.kq || st.trk) return false;
+    return showStage(x) === 'chua' && (stageOf(x) === 'tn' || (!!st.tnClick && !st.tn));
   }
   // (26/11) 🤖 ở Danh sách hồ sơ thụ lý đang / sẽ làm gì – dòng trạng thái (chỉ ghi lại khi đổi)
   function listNote(t) {
@@ -12475,7 +12745,16 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     }
     // lãnh đạo đã trả về: chặng cuối (mốc kq / chuyển bước Trả kết quả / đã bấm Trả hồ sơ), hoặc máy này (vai trò Lãnh đạo) đã ký duyệt chuyển bước 4
     // (kd) cho ĐÚNG tài khoản Chuyên viên này (người nhận bước 4 khác → hồ sơ không về danh sách của bạn)
-    const back = traPhase(s) || (!!s.kd && !s.tra && (!S.opts.ctB4 || accNorm(S.opts.ctB4) === accNorm(S.opts.ctCV || '')));
+    const back = traPhase(s) || (!!s.kd && !s.tra); // (27/11) người nhận bước 4 luôn là ô Chuyên viên
+    // (27/11 – bạn: “Chỉ đánh dấu Đã xong khi xác nhận công việc đã hoàn tất”) TB chưa chuyển lãnh đạo (không mốc lãnh đạo / đang chuyển lãnh đạo)
+    if (!back && !s.ld && !s.kd && !(s.fwd && s.fwd.k === 'ld' && !s.fwd.bad)) {
+      if (s.tnClick && !s.tn && !s.don && r && r.none && r.fresh && !goneWhy(r)) {
+        setMark(id, 'tnClick', null); // chắc chắn chưa có hồ sơ → lần Lưu hồ sơ trước chưa lưu: bỏ dấu, 🤖 tiếp nhận lại TB này
+        redoSet(id, false);
+        return { k: '', text: 'chưa có hồ sơ trong danh sách – lần bấm Lưu hồ sơ trước chưa lưu: 🤖 tiếp nhận lại TB này' };
+      }
+      return { k: 'wait', text: 'chưa chuyển lãnh đạo mà chưa thấy hồ sơ trong danh sách – giữ nguyên trạng thái, lượt sau tìm lại' };
+    }
     if (!back) {
       // (25/11 – bạn: “không tìm thấy hồ sơ rồi mà vẫn không tích đã xong”) TB ◐ tiện ích chưa thấy lãnh đạo trả về:
       // - chuyển lãnh đạo QUA tiện ích (🤖 / bạn bấm Thực thi, có mốc giờ) chưa đủ 1 ngày → lãnh đạo có thể chưa ký → giữ ◐ (như trước);
@@ -12528,8 +12807,44 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   const needsList = (x) => {
     if (!x || !x.soBienNhan) return false;
     const st = S.stage[String(x.tb)] || {};
-    return !st.tra && !st.hoan && (stageOf(x) === 'tn' || traPhase(st) || waitsTra(st));
+    // (27/11) cả TB đã bấm Lưu hồ sơ mà chưa thấy báo (tnClick) – tìm xem hồ sơ đã có chưa, không tiếp nhận lại
+    return !st.tra && !st.hoan && (stageOf(x) === 'tn' || traPhase(st) || waitsTra(st) || (!!st.tnClick && !st.tn));
   };
+  // (27/11 – quy tắc 4) hết lượt: bỏ dấu tạm hoãn mọi TB ⏸ (giữ nguyên các mốc đã làm – TB làm tiếp từ bước đang dở, không xóa lịch sử). TB đã tiếp
+  // nhận mà chưa chuyển lãnh đạo → 🤖 tìm ở danh sách làm tiếp; TB chưa tiếp nhận → tiếp nhận; TB ◐ → lượt tìm thường. Chỉ khi 🤖 đang bật, không
+  // chạy, bạn không tắt 🤖 giữa chừng; 2 lần cách nhau ít nhất 2 phút (TB vướng lại thì lượt sau mới thử lại)
+  const RELEASE_GAP_MS = 2 * 60 * 1000;
+  function releaseHolds() {
+    if (!AUTO() || isLd() || S.running || S.sweepPause || S.userStopAt) return 0;
+    let last = 0;
+    try {
+      last = +sessionStorage.getItem('vbdlis-dien-nhanh-release') || 0;
+    } catch (e) {}
+    if (Date.now() - last < RELEASE_GAP_MS) return 0;
+    const ids = S.data.filter((x) => {
+      const st = S.stage[String(x.tb)] || {};
+      return st.hoan && !st.xong && !st.tra;
+    }).map((x) => String(x.tb));
+    if (!ids.length) return 0;
+    try {
+      sessionStorage.setItem('vbdlis-dien-nhanh-release', String(Date.now()));
+    } catch (e) {}
+    for (const id of ids) {
+      const st = { ...S.stage[id] };
+      delete st.hoan;
+      S.stage[id] = st;
+      saveStage(id);
+      if (S.autoHold.has(id)) dropHold(id);
+      for (const s0 of [...S.autoFail]) if (sigTb(s0) === id) S.autoFail.delete(s0);
+      if (S.resumeN) delete S.resumeN[id];
+      if (S.redoN) delete S.redoN[id];
+      if (st.tn && !st.ld) redoSet(id, true);
+    }
+    log0(`🤖 hết lượt – ${ids.length} TB tạm hoãn về chưa xong: ${ids.join(', ')}`);
+    setEvt(`🤖 Đã duyệt hết lượt: chuyển <b>${ids.length} TB Tạm hoãn</b> về Chưa xong (${esc(ids.slice(0, 15).join(', '))}${ids.length > 15 ? '…' : ''}) – 🤖 làm lại ở lượt sau.`, true);
+    renderTop();
+    return ids.length;
+  }
   // ▶ vừa bấm “Xử lý công việc” cho một TB (chrome.storage tbGoList {tb, at, tabId}): trang chuyển thì bảng điền mới tìm tiếp TB đó
   const GOLIST_MS = 2 * 60 * 1000;
   // ▶ ở danh sách với TB chưa tiếp nhận → đã bấm sang Tiếp nhận hồ sơ (tbGoRecv): tới màn hình Tiếp nhận (trống) thì chạy như bấm ▶ cho TB đó
@@ -12577,17 +12892,17 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // Máy đăng nhập tài khoản lãnh đạo, Danh sách hồ sơ thụ lý: hồ sơ KH 2959.07777… đang ở bước “… Lãnh đạo …” → bấm vào hồ sơ → Xử lý hồ sơ
   // → Quy trình CHỈ có “Ký duyệt hồ sơ” → tích Đã xử lý → Chuyển tiếp → bước “4. Chuyên viên hoàn tất hồ sơ (Tiếp theo)” → đúng tài khoản
   // nhận bước 4 → Thực thi → kiểm tra hồ sơ đã rời bước lãnh đạo. Không cần dữ liệu TB. Bạn chọn 23/11: người nhận bước 4 = tài khoản
-  // Chuyên viên (tab Biên nhận; ô riêng “Người nhận bước 4” để đổi); hồ sơ lỗi → kêu ting, làm hồ sơ khác, thử lại sau – tối đa 3 lần rồi
+  // Chuyên viên (tab Biên nhận; 27/11 bỏ ô riêng “Người nhận bước 4”); hồ sơ lỗi → kêu ting, làm hồ sơ khác, thử lại sau – tối đa 3 lần rồi
   // bỏ qua; ký duyệt = chỉ tích “Đã xử lý” rồi Chuyển tiếp (không ký số). Hết hồ sơ → 🤖 tải lại danh sách sau N giây (Chạy liên tục)
   const isLd = () => S.opts.vaiTro === 'ld';
   const LD_BUOC_DEF = 'Chuyên viên hoàn tất';
   const LD_MAX = 3; // một hồ sơ lỗi tối đa 3 lần rồi bỏ qua (như bản 0.9.3)
   const LD_KEY = 'vbdlis-dien-nhanh-ld'; // sessionStorage của thẻ: dấu từng hồ sơ (giữ qua tải lại trang)
   const LD_STEP = /lanh dao/; // Bước XL của hồ sơ chờ lãnh đạo (vd. “3. Lãnh đạo UBND xã”)
-  const ldRecv = () => String(S.opts.ctB4 || S.opts.ctCV || '').replace(/\s+/g, '');
+  // (27/11 – bạn: “có cái (ô Chuyên viên ở mục Tự động hết) rồi thì cần gì điền chuyên viên (ô Người nhận bước 4) nữa”) người nhận bước 4 = ô Chuyên viên
+  const ldRecv = () => String(S.opts.ctCV || '').replace(/\s+/g, '');
   const ldBuocN = () => norm(S.opts.ldBuoc || LD_BUOC_DEF);
   const ldWaitMs = () => Math.max(15, parseInt(S.opts.ldWait, 10) || 60) * 1000;
-  const LD_ST = { cho: '○ chờ ký duyệt', lam: '⏳ đã bấm Thực thi – chờ xác nhận', ok: '✓ đã chuyển bước 4', loi: '✗ lỗi', bo: '⊘ bỏ qua' };
   function ldLoad() {
     try {
       const v = JSON.parse(sessionStorage.getItem(LD_KEY) || 'null');
@@ -12665,7 +12980,68 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     return it;
   }
   // hồ sơ đã rời bước lãnh đạo (đã chuyển bước 4). Máy này có dữ liệu TB của hồ sơ đó → ghi mốc “LĐ ký duyệt” (◐ Đã nhập nhưng chưa xong)
+  // ---------- (26/11 – bạn: “tôi muốn bên lãnh đạo biết số lượng đã đồng ý trong 1 ngày là bao nhiêu”) ----------
+  // Số hồ sơ đã ký duyệt, chuyển bước 4 theo NGÀY – lưu lâu dài trong bộ nhớ tiện ích của máy này (chrome.storage.local, khóa tbLdDays): không
+  // mất khi đóng thẻ / tắt máy, các thẻ cùng thấy (trước: chỉ đếm trong dấu của thẻ đang mở – sessionStorage, tối đa 300 hồ sơ). Mỗi hồ sơ đếm
+  // MỘT lần mỗi ngày, theo mã băm của số biên nhận (không lưu số biên nhận); tải lại danh sách mà hồ sơ vẫn ở bước lãnh đạo (chưa chuyển thật)
+  // → bỏ khỏi số đếm của ngày đó. Giữ 60 ngày gần nhất. Chỉ đếm hồ sơ tiện ích ghi nhận (🤖 làm, hoặc bạn bấm Thực thi ở cửa sổ tiện ích chọn sẵn)
+  const LD_DAYS_KEY = 'tbLdDays';
+  const LD_DAYS_KEEP = 60;
+  const ldDay = (t) => {
+    const d = new Date(t == null ? Date.now() : t);
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  };
+  const hashSo = (k) => {
+    let h = 2166136261;
+    for (let i = 0; i < k.length; i++) {
+      h ^= k.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0).toString(36);
+  };
+  let ldDaysChain = Promise.resolve();
+  function ldDayMark(key, on, t) {
+    if (!key) return;
+    const h = hashSo(String(key));
+    const d = ldDay(t);
+    ldDaysChain = ldDaysChain
+      .then(async () => {
+        const all = { ...((await store.get(LD_DAYS_KEY))[LD_DAYS_KEY] || {}) };
+        const set = new Set(all[d] || []);
+        if (on !== set.has(h)) {
+          if (on) set.add(h);
+          else set.delete(h);
+          if (set.size) all[d] = [...set];
+          else delete all[d];
+          const ks = Object.keys(all).sort();
+          ks.slice(0, Math.max(0, ks.length - LD_DAYS_KEEP)).forEach((k) => delete all[k]);
+          await store.set({ [LD_DAYS_KEY]: all });
+        }
+        S.ldDays = all;
+        renderLd();
+      })
+      .catch(() => {});
+  }
+  const ldDayN = (t) => ((S.ldDays || {})[ldDay(t)] || []).length;
+  function ldDaysHtml() {
+    const now = new Date();
+    const days = [...Array(7)].map((_, i) => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6 + i).getTime());
+    const ns = days.map((t) => ldDayN(t));
+    const max = Math.max(1, ...ns);
+    const bars = days
+      .map((t, i) => {
+        const d = new Date(t);
+        const h = Math.max(2, Math.round((ns[i] / max) * 32)); // cột cao tối đa 32px (chừa chỗ cho số và ngày)
+        return `<div class="ldx-bar${i === 6 ? ' td' : ''}" title="${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}: ${ns[i]} hồ sơ"><span>${ns[i] || ''}</span><i style="height:${h}px"></i><em>${pad2(d.getDate())}</em></div>`;
+      })
+      .join('');
+    const week = ns.reduce((a, x) => a + x, 0);
+    return `<div class="ldx-top"><div class="ldx-n"><b>${ns[6]}</b><span>hồ sơ ký duyệt hôm nay</span></div><div class="ldx-bars">${bars}</div></div>
+      <div class="ldx-sum">7 ngày qua: ${week} hồ sơ</div>`;
+  }
   function ldOk(key, so, msg) {
+    const prev = S.ld.items[key];
+    if (!(prev && prev.st === 'ok')) ldDayMark(key, true); // (26/11) đếm số đã ký duyệt hôm nay – hồ sơ đã ✓ trước đó thì giữ ngày cũ
     ldSet(key, { so, st: 'ok', okAt: Date.now(), fwdAt: 0, msg: msg || '', wait: 0, vN: 0 });
     if (S.ld.tt && S.ld.tt.key === key) S.ld.tt = null;
     if (S.ld.cur && S.ld.cur.key === key) S.ld.cur = null;
@@ -13016,6 +13392,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
           ldSet(key, { st: n >= LD_MAX ? 'bo' : 'loi', n, msg: `đã bấm Thực thi lúc ${fmtTime(since)} mà danh sách vẫn ghi bước “${r.stepText || r.step}”`, fwdAt: 0, retryAt: now + ldWaitMs(), failAt: now });
         }
       } else if (it.st === 'ok' && r && LD_STEP.test(r.step) && ldFresh(it.okAt, 120000)) {
+        ldDayMark(key, false, it.okAt); // (26/11) chưa chuyển thật → bỏ khỏi số đã ký duyệt của ngày đó
         const nR = Math.max((it.n || 0) + 1, LD_MAX - 1); // (soát 24/11) làm lại đúng 1 lần – lần sau vẫn vậy thì bỏ qua (⊘)
         ldSet(key, { st: nR >= LD_MAX ? 'bo' : 'loi', n: nR, msg: `đã chuyển lúc ${fmtTime(it.okAt)} mà sau khi tải lại danh sách vẫn ghi bước “${r.stepText || r.step}”${nR >= LD_MAX ? ' – bạn kiểm tra trên VBDLIS' : ' – 🤖 làm lại 1 lần'}`, retryAt: now, failAt: now });
       } else if (!r && full && (it.st === 'cho' || it.st === 'loi' || it.st === 'bo')) {
@@ -13049,51 +13426,76 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     return rows;
   }
   // bảng Lãnh đạo (thay các dòng TB khi vai trò là Lãnh đạo)
+  // (27/11 – bạn: “tối ưu lại bên lãnh đạo nhìn cho nó khoa học và gọn gàng”) bảng Lãnh đạo, từ trên xuống: dòng dừng (nếu có) → số ký duyệt hôm nay
+  // + cột 7 ngày → các ô trạng thái (chỉ ô có số) → người nhận bước 4 (nút Sửa) → danh sách hồ sơ theo mức cần chú ý (lỗi, bỏ qua, đang chuyển, chờ
+  // ký; đã chuyển gom vào mục thu gọn) → nút Quét danh sách / Xóa dấu lỗi → Cài đặt ký duyệt, 🤖 làm những gì (thu gọn)
   const ldCardHtml = () => {
-    const cv = S.opts.ctCV || '';
     const w = Math.round(ldWaitMs() / 1000);
-    return `<div class="card">
-        <div class="ct">👔 Lãnh đạo – ký duyệt, chuyển bước 4<span class="sp"></span><span class="muted" id="ldCount"></span></div>
-        <div class="f"><label>Người nhận bước 4</label><input id="optCtB4" value="${esc(S.opts.ctB4 || '')}" placeholder="${esc(
-      cv ? `trống = ${cv} (ô Chuyên viên, tab Biên nhận)` : 'tài khoản chuyên viên, vd. bgi.abc123_vy'
-    )}" spellcheck="false"><span></span></div>
+    const lead = S.opts.ctLD || '';
+    return `<div id="ldBlock"></div>
+      <div class="ldx">
+        <div id="ldHero"></div>
+        <div class="ldx-chips" id="ldChips"></div>
+        <div id="ldRecv"></div>
+      </div>
+      <div id="ldList"></div>
+      <div class="row"><button class="btn" id="ldScanBtn" title="Chỉ đọc trang Danh sách hồ sơ thụ lý đang mở – không bấm gì trên trang">Quét danh sách</button><button class="btn" id="ldClearBtn" title="Xóa dấu lỗi / bỏ qua để 🤖 thử lại các hồ sơ đó">Xóa dấu lỗi</button></div>
+      <details class="ldd" id="ldSet"><summary>Cài đặt ký duyệt</summary>
         <div class="f"><label>Bước nhận phải có</label><input id="optLdBuoc" value="${esc(S.opts.ldBuoc || LD_BUOC_DEF)}" spellcheck="false" title="Chữ phải có trong ô bước nhận của cửa sổ chọn người (vd. “4. Chuyên viên hoàn tất hồ sơ (Tiếp theo)”)"><span></span></div>
-        <label class="opt"><input type="checkbox" id="optLdLoop"${S.opts.ldLoop !== false ? ' checked' : ''}> <b>Chạy liên tục</b>: hết hồ sơ thì 🤖 tải lại danh sách sau <input type="number" id="optLdWait" min="15" step="5" value="${w}" style="width:58px"> giây để nhận hồ sơ mới (tới khi tắt 🤖); hồ sơ lỗi thử lại sau chừng ấy giây</label>
-        <div class="row"><button class="btn" id="ldScanBtn" title="Chỉ đọc trang Danh sách hồ sơ thụ lý đang mở – không bấm gì trên trang">Quét danh sách</button><button class="btn" id="ldClearBtn" title="Xóa dấu lỗi / bỏ qua để 🤖 thử lại các hồ sơ đó">Xóa dấu lỗi</button></div>
-        <div id="ldBlock"></div>
-        <div id="ldList"></div>
-        <div class="hint">Máy đăng nhập <b>tài khoản lãnh đạo</b>${
-          S.opts.ctLD ? ` (${esc(S.opts.ctLD)} – tiện ích dừng nếu thấy đăng nhập tài khoản khác)` : ' (điền ô Lãnh đạo ở tab Biên nhận để tiện ích kiểm tra đúng tài khoản)'
-        }, mở <b>Xử lý công việc</b> rồi bật <b>🤖</b>: mỗi hồ sơ KH 2959… đang ở bước “… Lãnh đạo …” → bấm vào hồ sơ → Xử lý hồ sơ → tích “Đã xử lý” <b>Ký duyệt hồ sơ</b> → Chuyển tiếp → bước “4. Chuyên viên hoàn tất hồ sơ (Tiếp theo)” → đúng tài khoản trên → <b>Thực thi</b> → kiểm tra hồ sơ đã rời bước lãnh đạo. Hồ sơ lỗi: kêu ting, làm hồ sơ khác, thử lại tối đa ${LD_MAX} lần rồi bỏ qua. 🤖 tắt: ▶ chỉ mở hồ sơ và tô vàng – bạn tự tích, tự bấm. “Chạy thử” (tab Biên nhận) bật: dừng ở Thực thi cho bạn bấm.</div>
-      </div>`;
+        <label class="opt"><input type="checkbox" id="optLdLoop"${S.opts.ldLoop !== false ? ' checked' : ''}> Chạy liên tục: hết hồ sơ thì tải lại danh sách sau <input type="number" id="optLdWait" min="15" step="5" value="${w}" style="width:58px"> giây; hồ sơ lỗi thử lại sau chừng ấy giây</label>
+      </details>
+      <details class="ldd" id="ldHow"><summary>🤖 làm những gì khi bật</summary>
+        <ol>
+          <li>Ở Danh sách hồ sơ thụ lý${lead ? ` (đăng nhập ${esc(lead)} – tài khoản khác thì dừng)` : ''}, bấm vào hồ sơ đang ở bước Lãnh đạo, bấm Xử lý hồ sơ.</li>
+          <li>Tích “Đã xử lý” ở Ký duyệt hồ sơ, bấm Chuyển tiếp.</li>
+          <li>Chọn bước “4. Chuyên viên hoàn tất hồ sơ”, đúng tài khoản nhận ở trên, bấm Thực thi.</li>
+          <li>Kiểm tra hồ sơ đã rời bước Lãnh đạo, rồi làm hồ sơ tiếp theo.</li>
+        </ol>
+        <div class="hint">Hồ sơ lỗi: thử lại tối đa ${LD_MAX} lần rồi bỏ qua. Bật “Chạy thử” (tab Biên nhận) thì 🤖 dừng ở Thực thi để bạn tự bấm.</div>
+      </details>`;
   };
-  function ldListHtml() {
-    const its = Object.entries(S.ld.items).sort((a, b) => (b[1].at || 0) - (a[1].at || 0));
-    const today = new Date().toDateString();
-    const nOk = its.filter(([, x]) => x.st === 'ok' && new Date(x.okAt || 0).toDateString() === today).length;
-    const nWait = its.filter(([, x]) => x.st === 'cho' || (x.st === 'loi' && (x.n || 0) < LD_MAX)).length;
-    const nBad = its.filter(([, x]) => x.st === 'bo' || x.st === 'loi').length;
-    const rows = its.slice(0, 40).map(([k, x]) => {
-      const waitU = !!x.wait && x.st !== 'ok';
-      const cls = x.st === 'ok' ? 'ok' : x.st === 'loi' || x.st === 'bo' ? 'bad' : x.st === 'lam' || waitU ? 'warn' : 'muted';
-      const extra =
-        x.st === 'ok'
-          ? ` ${fmtTime(x.okAt)}`
-          : x.st === 'loi'
-          ? ` ${x.n || 1}/${LD_MAX}${(x.retryAt || 0) > Date.now() ? ` – thử lại lúc ${fmtTime(x.retryAt)}` : ''}`
+  const hhmm = (t) => {
+    const d = new Date(t || 0);
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  };
+  // một dòng hồ sơ: số hồ sơ, trạng thái ngắn (giờ), lý do (lỗi / bỏ qua / đang chuyển)
+  function ldRowHtml(k, x) {
+    const waitU = !!x.wait && x.st !== 'ok';
+    const kind = x.st === 'ok' ? 'ok' : x.st === 'loi' ? 'loi' : x.st === 'bo' ? 'bo' : x.st === 'lam' || waitU ? 'lam' : 'cho';
+    const st = waitU
+      ? 'Chờ bạn bấm Thực thi'
+      : x.st === 'ok'
+        ? `Đã chuyển ${hhmm(x.okAt)}`
+        : x.st === 'loi'
+          ? `Lỗi ${x.n || 1}/${LD_MAX}${(x.retryAt || 0) > Date.now() ? `, thử lại ${hhmm(x.retryAt)}` : ''}`
           : x.st === 'lam'
-          ? ` ${fmtTime(x.fwdAt)}`
-          : '';
-      const why = x.msg ? `<div class="muted">${esc(x.msg)}</div>` : '';
-      const stT = waitU ? '⏸ chờ bạn bấm Thực thi (đã chọn sẵn người) – bật 🤖 để làm lại' : LD_ST[x.st] || x.st;
-      return `<tr><td>${esc(x.so || k)}</td><td class="${cls}">${esc(stT)}${esc(waitU ? '' : extra)}${why}</td></tr>`;
-    });
-    return {
-      html: rows.length
-        ? `<table class="ldt">${rows.join('')}</table>`
-        : '<div class="muted">Chưa có hồ sơ – mở “Xử lý công việc” (Danh sách hồ sơ thụ lý) rồi bấm “Quét danh sách” hoặc bật 🤖.</div>',
-      count: `✓ ${nOk} hôm nay · ○ ${nWait} chờ${nBad ? ` · ✗ ${nBad} lỗi` : ''}`,
-    };
+            ? `Đã bấm Thực thi ${hhmm(x.fwdAt)}`
+            : x.st === 'bo'
+              ? 'Bỏ qua'
+              : 'Chờ ký';
+    const why = kind !== 'ok' && kind !== 'cho' && x.msg ? `<div class="why">${esc(x.msg)}</div>` : '';
+    return `<div class="ldr ${kind}"${kind === 'ok' && x.msg ? ` title="${esc(x.msg)}"` : ''}><span class="so">${esc(x.so || k)}</span><span class="st">${esc(st)}</span>${why}</div>`;
+  }
+  function ldListHtml(okOpen) {
+    const all = Object.entries(S.ld.items);
+    const rank = (x) => (x.st === 'loi' ? 0 : x.st === 'bo' ? 1 : x.st === 'lam' || (x.wait && x.st !== 'ok') ? 2 : x.st === 'cho' ? 3 : 4);
+    const work = all.filter(([, x]) => x.st !== 'ok').sort((a, b) => rank(a[1]) - rank(b[1]) || (b[1].at || 0) - (a[1].at || 0));
+    const done = all.filter(([, x]) => x.st === 'ok').sort((a, b) => (b[1].okAt || 0) - (a[1].okAt || 0));
+    const n = { cho: 0, lam: 0, loi: 0, bo: 0 };
+    for (const [, x] of work) n[rank(x) === 0 ? 'loi' : rank(x) === 1 ? 'bo' : rank(x) === 2 ? 'lam' : 'cho']++;
+    const chip = (k, t) => (n[k] ? `<span class="ldx-chip ${k}"><b>${n[k]}</b>${t}</span>` : '');
+    const chips = chip('cho', 'chờ ký') + chip('lam', 'đang chuyển') + chip('loi', 'lỗi') + chip('bo', 'bỏ qua');
+    const html =
+      (work.length
+        ? `<div class="ldl">${work.slice(0, 40).map(([k, x]) => ldRowHtml(k, x)).join('')}</div>`
+        : `<div class="ldl"><div class="ldl-empty">Chưa có hồ sơ chờ ký. Mở Xử lý công việc rồi bật 🤖, hoặc bấm Quét danh sách.</div></div>`) +
+      (done.length
+        ? `<details class="ldd" id="ldDone"${okOpen ? ' open' : ''}><summary>Đã chuyển bước 4 trong phiên này (${done.length})</summary><div class="ldl">${done
+            .slice(0, 30)
+            .map(([k, x]) => ldRowHtml(k, x))
+            .join('')}</div></details>`
+        : '');
+    return { html, chips: chips || '<span class="ldx-chip">Không có hồ sơ chờ</span>', nBad: n.loi + n.bo };
   }
   // vai trò Lãnh đạo: ẩn các dòng TB, hiện bảng Lãnh đạo (ô cài đặt vẽ lại khi cài đặt đổi và bạn không đang gõ trong bảng)
   function renderLd() {
@@ -13106,20 +13508,30 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const e = $(s);
       if (e) e.style.display = on ? 'none' : '';
     });
+    pn.classList.toggle('vld', on); // (27/11) vai trò Lãnh đạo: ẩn các mục chỉ dành cho chuyên viên (cvonly, ghi chú TB)
     if (!on) {
       if (box.innerHTML) box.innerHTML = '';
       box.style.display = 'none';
       return;
     }
+    if (/^(chu|thua|gt)$/.test(S.tab)) S.tab = 'bn'; // tab của chuyên viên đã ẩn
     box.style.display = '';
-    const sig = JSON.stringify([S.opts.ctB4 || '', S.opts.ctCV || '', S.opts.ctLD || '', S.opts.ldBuoc || '', S.opts.ldLoop !== false, S.opts.ldWait || '']);
+    const sig = JSON.stringify([S.opts.ctCV || '', S.opts.ctLD || '', S.opts.ldBuoc || '', S.opts.ldLoop !== false, S.opts.ldWait || '']);
     if (!box.querySelector('#ldList') || (box.dataset.sig !== sig && !box.contains(root.activeElement))) {
+      const op = ['#ldSet', '#ldHow'].filter((q) => box.querySelector(q + '[open]'));
       box.innerHTML = ldCardHtml();
+      op.forEach((q) => (box.querySelector(q).open = true));
       box.dataset.sig = sig;
     }
-    const l = ldListHtml();
+    const l = ldListHtml(!!box.querySelector('#ldDone[open]'));
     box.querySelector('#ldList').innerHTML = l.html;
-    box.querySelector('#ldCount').textContent = l.count;
+    box.querySelector('#ldChips').innerHTML = l.chips;
+    box.querySelector('#ldHero').innerHTML = ldDaysHtml();
+    const cv = S.opts.ctCV || '';
+    box.querySelector('#ldRecv').outerHTML = cv
+      ? `<div class="ldx-recv" id="ldRecv">Chuyển bước 4 cho <b>${esc(cv)}</b><button class="btn" data-ldgo="cv" title="Người nhận bước 4 là ô Chuyên viên ở tab Biên nhận">Sửa</button></div>`
+      : `<div class="ldx-recv no" id="ldRecv">Chưa đặt tài khoản nhận bước 4<button class="btn" data-ldgo="cv">Đặt</button></div>`;
+    box.querySelector('#ldClearBtn').style.display = l.nBad ? '' : 'none';
     box.querySelector('#ldBlock').innerHTML = S.ld.block ? `<div class="ldblock">⛔ 🤖 dừng: ${esc(S.ld.block)} – sửa xong tắt rồi bật lại 🤖.</div>` : '';
   }
   const ldTailHint = () =>
@@ -14206,7 +14618,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       const cm = chooserModal();
       const info = cm ? chooserInfo(cm) : null;
       if (c && c.phase === 'ct' && !(it.st === 'loi' || it.st === 'bo' || it.st === 'lam')) {
-        if (!info || info.loading || !info.rows.length) return '';
+        if (!chooserReady(cm, info)) return ''; // (26/11) bảng trống → lần chạy bấm “Tải lại danh sách tài khoản”
         return `ldc:${c.key}:${c.at}`;
       }
       const soC = await dossierSo();
@@ -14216,7 +14628,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (S.opts.thuThucThi || (S.ld.tt && S.ld.tt.key === keyC) || (xC && xC.wait)) return '';
       // (24/11) cửa sổ chọn người mở sẵn (bạn mở / lần chạy trước dừng): hồ sơ còn phải ký duyệt, bạn không thao tác 20 giây, trang không “Đang xử lý…”,
       // không ai khác được chọn → 🤖 làm tiếp: chọn đúng người nhận bước 4, Thực thi (đủ kiểm tra) – bạn yêu cầu “xem nó đang ở đâu thì làm tiếp”
-      if (AUTO() && info && !info.loading && info.rows.length && userQuiet(QUIET_MS) && !pageWorking()) {
+      if (AUTO() && chooserReady(cm, info) && userQuiet(QUIET_MS) && !pageWorking()) {
         if (USER.btn === 'thuc thi' && Date.now() - USER.btnAt < 60000) return ''; // bạn vừa tự bấm Thực thi
         if (markedRows(info.rows).some((r) => accNorm(r.acc) !== accNorm(ldRecv()))) return ''; // bạn đang chọn người khác → chờ bạn
         if (keyC && (!xC || xC.st === 'cho' || (xC.st === 'loi' && (xC.n || 0) < LD_MAX && Date.now() >= (xC.retryAt || 0))))
@@ -14416,7 +14828,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
   // cửa sổ Quy trình xử lý: bảng tác vụ phải đứng yên 2 nhịp liền (trang nạp bảng chậm / còn bảng cũ) rồi mới đặt theo
   const QT_STEP = { tn: 1, cv: 2, kq: 4, tra: 5 };
   const qtTraDone = (rows) => rows.some((r) => qtKindOf(r) === 'tra' && r.chk && r.chk.checked); // đã Trả hồ sơ – chuỗi tự ghi ✓
-  async function syncQt(rows, v) {
+  async function syncQt(rows, v, oat) {
     const n = QT_STEP[v];
     if (!n || (v === 'tra' && qtTraDone(rows))) return;
     let so = '';
@@ -14428,7 +14840,40 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     S.syncQtPrev = { sig, at: p && p.sig === sig ? p.at : Date.now() };
     if (!so || !p || p.sig !== sig || Date.now() - p.at < 700) return;
     const l = tbOfSo(so).list;
-    if (l.length === 1) syncTo(l[0], n, `Quy trình xử lý`, true, true);
+    if (l.length !== 1) return;
+    if (n <= 2) qtUnhold(l[0], n, oat);
+    syncTo(l[0], n, `Quy trình xử lý`, true, true);
+  }
+  // (27/11 – bạn: “nếu bấm xử lý hồ sơ ra cái này (Quy trình: Nhập đăng ký + Giấy tờ đính kèm) thì phải cho tb về trạng thái chưa xong chứ sao lại
+  // cho làm tạm hoãn”) TB ⏸ tạm hoãn mà cửa sổ Quy trình xử lý của hồ sơ đó MỞ SAU lúc tạm hoãn (bạn / trang bấm Xử lý hồ sơ) và còn ở bước 1–2
+  // → bỏ tạm hoãn: TB về ○ Chưa xong (giữ các mốc đã làm), 🤖 làm tiếp ngay ở Quy trình này. Cửa sổ đã mở từ trước lúc tạm hoãn (🤖 vừa tạm hoãn
+  // TB đang làm / bạn vừa đánh ⏸ lúc cửa sổ đang mở) → giữ ⏸ như cũ (🤖 đóng cửa sổ, làm TB khác)
+  function qtUnhold(x, n, oat) {
+    if (!x || !AUTO() || isLd()) return false;
+    const id = String(x.tb);
+    const st = S.stage[id] || {};
+    if (!st.hoan || st.xong || st.tra) return false;
+    if (!oat || oat <= (st.hoan.at || 0) + 1000) return false;
+    const s = { ...st };
+    delete s.hoan;
+    S.stage[id] = s;
+    saveStage(id);
+    if (S.autoHold.has(id)) dropHold(id);
+    for (const s0 of [...S.autoFail]) if (sigTb(s0) === id) S.autoFail.delete(s0);
+    if (S.resumeN) delete S.resumeN[id];
+    if (S.redoN) delete S.redoN[id];
+    if (S.cvLeave && String(S.cvLeave.tb) === id) S.cvLeave = null;
+    const txt = `cửa sổ Quy trình xử lý mở lúc ${fmtTime(oat)} (${STEP_NAME[n]}) → bỏ ⏸ Tạm hoãn, TB về ${STAGE_ICON[showStage(x)]} ${STAGE_TEXT[showStage(x)]}`;
+    log0(`🔎 TB ${id}: ${txt}`);
+    S.syncNote = { at: Date.now(), tb: id, txt };
+    setEvt(
+      `🔎 TB ${esc(id)} – ${esc(whoOf(x))}: hồ sơ mở ở Quy trình xử lý (${esc(STEP_NAME[n])}) → bỏ <b>⏸ Tạm hoãn</b>, TB về <b>${esc(
+        STAGE_ICON[showStage(x)] + ' ' + STAGE_TEXT[showStage(x)]
+      )}</b>, 🤖 làm tiếp từ bước này.`,
+      true
+    );
+    renderTop();
+    return true;
   }
   // Danh sách hồ sơ thụ lý: cột Bước XL của các dòng đang hiện → đặt tiến độ các TB đó (chỉ đọc lại khi bảng đổi)
   let listSyncSig = '';
@@ -14467,7 +14912,19 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         const kk = (dlg.keys || [])[j];
         return S.tpl[kk] && (S.tpl[kk].btns || []).some((b) => b.on);
       });
-      if (i === undefined) return null;
+      if (i === undefined) {
+        // (27/11 – bạn: “gặp popup hỏi … có chữ đồng ý hãy đồng ý hết cho tôi rồi làm tiếp”) hộp chưa dạy có đúng một nút “Đồng ý” → bấm, làm tiếp
+        // (không bấm: hộp xác thực / đăng nhập, hộp hỏi xóa / hủy / thu hồi – filler). Bạn vừa bấm / gõ trên trang (1,5 giây) → chờ
+        if (Date.now() - USER.at > 1500) {
+          const ag = (await act('answerDialog', { rules: [], learned: [], agreeAll: true })).find((x) => x.ok);
+          if (ag) {
+            log0(`🤖 trang hỏi “${ag.title}” – bấm “${ag.btn}” (đồng ý hết)`);
+            setStatus(`🤖 Trang hỏi “${String(ag.title || '').slice(0, 60)}” – tiện ích bấm “${ag.btn}” (đồng ý hết), làm tiếp.`);
+            return '';
+          }
+        }
+        return null;
+      }
       return tplSigOf(S.tpl[dlg.keys[i]], (dlg.oids || [])[i] || '', 'tpl');
     }
     // vai trò Lãnh đạo: bộ theo dõi riêng (không tiếp nhận, không nhập đơn)
@@ -14517,7 +14974,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (!chooserTplGo()) return '';
       const cm = chooserModal();
       const info = cm ? chooserInfo(cm) : null;
-      if (!info || info.loading || !info.rows.length) return '';
+      if (!chooserReady(cm, info)) return '';
       const l = tbOfSo(await dossierSo()).list;
       if (l.length !== 1 || (S.stage[String(l[0].tb)] || {}).hoan) return '';
       // bảng tích của mẫu cửa sổ chọn người đang mở (bạn đang tích) → chờ bạn đóng bảng tích
@@ -14525,14 +14982,14 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
         autoWaitNote(S.tplDraft, '🤖 sẽ chọn tài khoản trong cài đặt rồi bấm Thực thi khi bạn đóng bảng tích (Lưu mẫu / Đóng)');
         return null;
       }
-      return `cho:${l[0].tb}:${norm(info.step)}`;
+      return `cho:${l[0].tb}:${norm(info.step)}${info.rows.length ? '' : ':trong'}`;
     }
     if (top && /^quy trinh xu ly\b/.test(k)) {
       const m = qtModal();
       const rows = m ? qtRows(m) : [];
       const v = qtVariant(rows);
       if (qtFilterText(m)) return ''; // ô tìm tác vụ có chữ (tác vụ bị ẩn) → không tự chạy
-      await syncQt(rows, v); // (26/11) Quy trình cho biết đúng bước → đặt tiến độ TB theo đó, 🤖 làm tiếp
+      await syncQt(rows, v, top.oat); // (26/11) Quy trình cho biết đúng bước → đặt tiến độ TB theo đó, 🤖 làm tiếp (27/11: cả TB ⏸ ở bước 1–2)
       if (v === 'tn' || v === 'cv') {
         // Quy trình “Tiếp nhận hồ sơ” / “Nhập đăng ký + Giấy tờ đính kèm” → tích Đã xử lý, chuyển tiếp (chỉ TB đang làm)
         const x = await curDossierTb();
@@ -14580,6 +15037,13 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       return need2 || need3 ? `qt:${need2}:${k3 && k3.checked}:${S.scanQ.length}:${openDossierNumbers().join(',')}` : '';
     }
     if (top) {
+      // (27/11) cửa sổ chủ / thửa của đơn mà 🤖 đang làm dở (có dấu “…|pending”, bạn tắt 🤖 giữa chừng) → làm tiếp ngay: chờ trang lưu / đóng cửa sổ
+      // (không lưu), đối chiếu cây đơn, điền lại và Lưu đúng mục còn thiếu (runAll – resume)
+      if ((CHU_MODAL.test(k) || (THUA_MODAL.test(k) && !THUA_ADD.test(k))) && Date.now() - USER.at > 3000) {
+        const re2 = CHU_MODAL.test(k) ? /^\d+\|don-chu\d+\|pending$/ : /^\d+\|don-thua\d+\|pending$/;
+        const pk2 = Object.keys(S.done).find((kk) => re2.test(kk) && isWorkTb(kk.split('|')[0]));
+        if (pk2 && !(S.stage[pk2.split('|')[0]] || {}).hoan) return `resume:${pk2.split('|')[0]}:win`;
+      }
       // cửa sổ khác mà bạn đã lưu mẫu (tab Trường) → 🤖 điền các ô đã tích + bấm các nút đã tích (mỗi lần cửa sổ mở một lần).
       // Bạn vừa bấm / gõ trên trang: bộ theo dõi chờ 3 giây (mọi màn hình)
       // (26/11) cửa sổ tác vụ của chặng cuối đang mở → hồ sơ ít nhất ở bước 4 (Trả hồ sơ: bước 5) – đặt tiến độ, 🤖 làm tiếp
@@ -14650,7 +15114,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       if (left0.length) {
         const wt = Math.ceil(((S.sweepNext || 0) - Date.now()) / 1000);
         listNote(
-          `🤖 Danh sách hồ sơ thụ lý: tìm TB ◐ (đã nhập nhưng chưa xong) – còn ${left0.length} TB trong lượt này: ${left0.slice(0, 8).map((y) => y.tb).join(', ')}${left0.length > 8 ? '…' : ''}${
+          `🤖 Danh sách hồ sơ thụ lý: tìm hồ sơ TB ◐ / TB ○ đã tiếp nhận – còn ${left0.length} TB trong lượt này: ${left0.slice(0, 8).map((y) => y.tb).join(', ')}${left0.length > 8 ? '…' : ''}${
             wt > 2 ? ` (lượt mới bắt đầu sau ~${Math.ceil(wt / 5) * 5} giây)` : ''
           }`
         );
@@ -14689,6 +15153,16 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
       }
       // hết một lượt chạy + soát (bạn yêu cầu 24/11) → xuất file Excel các TB lỗi và tình trạng lỗi (khi danh sách lỗi đổi, cách lần trước ≥ 10 phút)
       if (!ckN || listTabState() === 'other') autoErrExport();
+      // (27/11 – bạn: “Khi đã chạy hết lượt tất cả TB trong danh sách: chuyển toàn bộ TB còn ở Tạm hoãn về Chưa xong để có thể xử lý ở lượt sau. Chỉ
+      // thực hiện bước này khi đã duyệt hết danh sách. Việc tôi tắt tự động giữa chừng không được tính là kết thúc lượt”)
+      {
+        const nRel = releaseHolds();
+        if (nRel) {
+          roundReset(true);
+          listNote(`🤖 Đã duyệt hết lượt – chuyển ${nRel} TB Tạm hoãn về Chưa xong, lượt sau làm lại`);
+          return '';
+        }
+      }
       roundReset(true); // xong một lượt – lượt sau bắt đầu lại (vẫn nhớ các TB lượt vừa xong đã tích ✓)
       // lượt tìm xong (mọi TB đã tìm 1 lần, chưa thấy) / không còn TB phải tìm → còn TB chưa tiếp nhận thì sang màn hình Tiếp nhận hồ sơ
       // làm TB đó (bạn: “tiếp tục làm TB khác”); hết TB chưa tiếp nhận thì 🤖 quay lại Danh sách hồ sơ thụ lý tìm tiếp
@@ -14760,9 +15234,21 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     noteRecvUrl(); // nhớ địa chỉ màn hình Tiếp nhận hồ sơ (trống) – 🤖 tự sang đây tiếp nhận TB sau từ trang danh sách
     let tb = recvTB();
     if (AUTO() && tb && (S.stage[String(tb.tb)] || {}).tnClick && !(S.stage[String(tb.tb)] || {}).tn && !(S.stage[String(tb.tb)] || {}).hoan) {
-      // 🤖 chạy liên tục (24/11): ⏸ tạm hoãn TB này (KHÔNG tiếp nhận lại – hồ sơ có thể đã có, tránh trùng), làm TB sau; bạn kiểm tra trên VBDLIS
-      markStage(tb.tb, 'hoan', 'auto', { lyDo: 'đã bấm Lưu hồ sơ, chưa thấy “Lưu hồ sơ thành công” – kiểm tra trên VBDLIS (hồ sơ có thể đã có)' });
-      setEvt(`⏸ TB ${esc(tb.tb)} – ${esc(whoOf(tb))}: đã bấm Lưu hồ sơ mà chưa thấy “Lưu hồ sơ thành công” → <b>tạm hoãn</b> (không tiếp nhận lại), 🤖 làm TB sau.`, true);
+      // (27/11) đã bấm Lưu hồ sơ mà chưa thấy báo (bạn tắt 🤖 / trang tải lại): KHÔNG tiếp nhận lại (tránh trùng), KHÔNG tạm hoãn – 🤖 tìm hồ sơ
+      // số này ở Danh sách hồ sơ thụ lý: có → mở làm tiếp; chắc chắn không có → bỏ dấu, tiếp nhận lại. Con trỏ tiếp nhận sang TB chưa làm sau
+      redoSet(tb.tb, true);
+      const nx1 = nextTodo(true);
+      if (nx1 && String(nx1.tb) !== String(tb.tb)) {
+        setPtr(nx1.tb);
+        saveUi();
+        render();
+      }
+      log0(`🤖 TB ${tb.tb}: đã bấm Lưu hồ sơ mà chưa thấy báo – tìm hồ sơ ở Danh sách hồ sơ thụ lý (không tiếp nhận lại)`);
+      tb = nx1 && String(nx1.tb) !== String(tb.tb) ? nx1 : null;
+      if (!tb) {
+        const g1 = goListSig();
+        return g1 || '';
+      }
     }
     if (tb && (S.stage[String(tb.tb)] || {}).tnClick && !(S.stage[String(tb.tb)] || {}).hoan) {
       // đã bấm Lưu hồ sơ cho TB này mà chưa chắc đã lưu → chờ bạn (báo 1 lần)
@@ -15316,7 +15802,7 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
 
   // ---------- khởi động ----------
   (async () => {
-    const r = await store.get(['tbData', 'tbDone', 'tbCur', 'tbRecv', 'tbCurBy', 'tbTab', 'tbOpts', 'tbBox', 'tbStage', 'tbTpl', 'tbAutoTab', 'tbRecvUrl', 'tbListUrl', 'tbGoList']);
+    const r = await store.get(['tbData', 'tbDone', 'tbCur', 'tbRecv', 'tbCurBy', 'tbTab', 'tbOpts', 'tbBox', 'tbStage', 'tbTpl', 'tbAutoTab', 'tbRecvUrl', 'tbListUrl', 'tbGoList', 'tbResume']);
     // mẫu tab Trường: nhận ngay (trước các bước chờ – thay đổi từ tab khác đến sau đó không bị bản cũ đè); chuyển sang khóa bản 1.20
     S.tpl = r.tbTpl && typeof r.tbTpl === 'object' ? { ...r.tbTpl } : {};
     if (tplMigrateAll(S.tpl)) safeSet({ tbTpl: S.tpl });
@@ -15351,6 +15837,17 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     } catch (e) {}
     applyBox(r.tbBox);
     S.data = (r.tbData || []).sort(byTb);
+    {
+      // (27/11 – bạn: “xoá mấy cái này đi … chỉ xoá ở giao diện cho đỡ rối mắt”) ô đặt sẵn con trỏ ở nút Lưu, 3 ô “Tự động (bạn cho phép)” không còn trên
+      // giao diện → luôn theo mặc định (bật); giá trị TẮT cũ (nếu có) bỏ đi để chức năng tự động không bị kẹt tắt
+      const gone = ['enterLuu', 'tuLuuChu', 'tuHsq', 'tuQT', 'ctB4']; // ctB4: ô “Người nhận bước 4” bỏ 27/11 – dùng ô Chuyên viên
+      if (gone.some((k) => k in (S.opts || {}))) {
+        S.opts = { ...S.opts };
+        gone.forEach((k) => delete S.opts[k]);
+        safeSet({ tbOpts: S.opts });
+      }
+    }
+    S.resumeTb = r.tbResume || null; // (27/11) TB đang làm lúc bạn tắt 🤖 (bật lại làm tiếp TB này)
     safeRemove('tbFile'); // (26/11) bản sao dữ liệu cũ của thư mục data (thôi dùng từ 1.21.20) – dọn khỏi bộ nhớ tiện ích
     S.done = r.tbDone || {};
     doneBase = { ...S.done };
@@ -15413,6 +15910,9 @@ details>summary{cursor:pointer;color:#0f766e;margin:2px 0}
     if (!S.data.some((x) => String(x.tb) === String(S.recv)) && S.data.length) S.recv = String(S.cur);
     if (String(S.cur) === String(S.recv)) S.curBy = '';
     await loadScanQ();
+    try {
+      S.ldDays = (await store.get(LD_DAYS_KEY))[LD_DAYS_KEY] || {}; // (26/11) số hồ sơ lãnh đạo đã ký duyệt theo ngày
+    } catch (e) {}
     render();
     renderScanQ();
     sweepScanOrphans();
